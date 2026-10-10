@@ -1,0 +1,16 @@
+# ESP-IDF build output and generated configuration
+build/
+sdkconfig
+sdkconfig.old
+dependencies.lock
+managed_components/
+
+# Lab 6: generated broker and CA certificates (private keys!)
+labs/lab6_mqtt/broker/certs/
+labs/lab6_mqtt/*/main/certs/
+
+# Lab 7: Buildroot download/build tree and copied boot artifacts
+labs/lab7_linux_ota/.br/
+labs/lab7_linux_ota/artifacts/
+
+.DS_Store

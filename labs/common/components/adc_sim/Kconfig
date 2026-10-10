@@ -1,0 +1,25 @@
+menu "ADC signal source (Lab 4)"
+
+    config LAB_SIM_ADC
+        bool "Use simulated ADC (adc_sim) instead of the real adc_oneshot driver"
+        default y
+        help
+            When enabled (the default -- required for QEMU, which has no
+            analog signal to sample), this component compiles a synthetic
+            lab_adc_init()/lab_adc_read_raw() pair: a nominal 1.5 V input
+            mapped through a fixed 12-bit ADC transfer function that
+            deliberately carries a gain error (x1.03), an offset error
+            (+25 LSB) and Gaussian noise (sigma ~= 8 LSB, from a seeded PRNG
+            so the sequence is identical from one boot to the next) --
+            see adc_sim/README.md for the exact ground-truth numbers.
+            main/lab_adc_oneshot.c (the real driver, hardware only) is
+            compiled OUT in this case.
+
+            When disabled, this component's source file is empty (see its
+            "#if CONFIG_LAB_SIM_ADC" guard) and main/lab_adc_oneshot.c's real
+            adc_oneshot driver provides lab_adc_init()/lab_adc_read_raw()
+            instead, sampling ADC1 channel 0 (GPIO0) for real.
+
+            Same lab_adc.h API either way -- app_main() does not change.
+
+endmenu

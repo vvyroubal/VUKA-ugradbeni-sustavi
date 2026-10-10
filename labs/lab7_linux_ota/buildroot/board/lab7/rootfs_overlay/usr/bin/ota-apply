@@ -1,0 +1,63 @@
+#!/bin/sh
+# ota-apply — verify and install a signed A/B OTA bundle on the Lab 7 target.
+#
+# Usage:  ota-apply [bundle]        (bundle defaults to /dev/vdd)
+#
+# The bundle is a plain tar carrying three members:
+#     rootfs.ext4        the new root filesystem image
+#     rootfs.ext4.sig    an RSA-SHA256 signature of rootfs.ext4
+#     version            a human-readable version string
+# It may be handed to us as a regular file OR as a raw virtio-blk device
+# (tar stops at its end-of-archive marker, so trailing device padding is fine).
+#
+# Trust model (deliberately simple — this is a teaching artifact):
+#   * The trust anchor is the PUBLIC key baked into this rootfs at
+#     /etc/lab7/ota_pub.pem. We verify the image SIGNATURE against it; a bundle
+#     that does not verify is rejected and the system is left untouched. This is
+#     "sign the image, not the channel" — integrity travels with the artifact.
+#   * A/B slots: the runner attaches the ACTIVE slot as /dev/vda (our root) and
+#     the INACTIVE slot as /dev/vdb. We write the new image to /dev/vdb only, so
+#     a failed or half-written update can never corrupt the running system.
+#   * Boot selection lives in a 1-byte "boot env" at /dev/vdc ('a' or 'b'),
+#     standing in for a bootloader's slot-selection environment. Marking the new
+#     slot active = writing the other letter there; the host runner reads it on
+#     the next boot. (A real device would let its bootloader read/rollback this.)
+set -eu
+
+PUB=/etc/lab7/ota_pub.pem
+SLOT_DEV=/dev/vdb          # runner guarantees: the INACTIVE slot's backing image
+BOOTENV=/dev/vdc          # runner guarantees: 1-byte boot-select env ('a'/'b')
+BUNDLE="${1:-/dev/vdd}"   # default: bundle attached as a raw virtio disk
+
+WORK="/tmp/ota.$$"
+mkdir -p "$WORK"
+trap 'rm -rf "$WORK"' EXIT
+
+tar -xf "$BUNDLE" -C "$WORK" 2>/dev/null \
+  || { echo "ota-apply: cannot read bundle '$BUNDLE'" >&2; exit 2; }
+
+IMG="$WORK/rootfs.ext4"; SIG="$WORK/rootfs.ext4.sig"; VER="$WORK/version"
+[ -f "$IMG" ] && [ -f "$SIG" ] \
+  || { echo "ota-apply: bundle is missing rootfs.ext4 or rootfs.ext4.sig" >&2; exit 2; }
+
+# --- verify BEFORE touching any slot ---
+if ! openssl dgst -sha256 -verify "$PUB" -signature "$SIG" "$IMG" >/dev/null 2>&1; then
+  echo "LAB7 OK tamper=rejected"
+  echo "ota-apply: signature verification FAILED — inactive slot left untouched" >&2
+  exit 1
+fi
+
+# --- compute the inactive slot's letter from the boot env, write, then flip ---
+cur=$(dd if="$BOOTENV" bs=1 count=1 2>/dev/null || true)
+case "$cur" in
+  a) next=b ;;
+  b) next=a ;;
+  *) echo "ota-apply: unexpected boot env '$cur' (want 'a'/'b')" >&2; exit 2 ;;
+esac
+
+echo "ota-apply: writing verified image to inactive slot ($SLOT_DEV)..."
+dd if="$IMG" of="$SLOT_DEV" bs=1M 2>/dev/null
+printf '%s' "$next" | dd of="$BOOTENV" bs=1 count=1 conv=notrunc 2>/dev/null
+sync
+
+echo "ota-apply: installed version $(cat "$VER" 2>/dev/null || echo '?'); next boot = slot $next"

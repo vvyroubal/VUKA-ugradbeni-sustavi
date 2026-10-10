@@ -1,0 +1,20 @@
+menu "BME280 sensor source (Lab 3)"
+
+    config LAB_SIM_BME280
+        bool "Use simulated BME280 (bme280_sim) instead of the real I2C driver"
+        default y
+        help
+            When enabled (the default -- required for QEMU, which has no I2C
+            BME280 device), this component compiles a synthetic bme280_init()/
+            bme280_read() pair: slow-sine temperature (20-25 degC), pressure
+            close to 1013 hPa, humidity close to 45%. main/bme280_i2c.c (the
+            real driver, hardware only) is compiled OUT in this case.
+
+            When disabled, this component's source file is empty (see its
+            "#if CONFIG_LAB_SIM_BME280" guard) and main/bme280_i2c.c's real
+            i2c_master driver provides bme280_init()/bme280_read() instead,
+            talking to an actual BME280 over I2C.
+
+            Same bme280.h API either way -- app_main() does not change.
+
+endmenu

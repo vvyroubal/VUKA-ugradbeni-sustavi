@@ -1,0 +1,14 @@
+CONFIG_IDF_TARGET="esp32c3"
+
+# Lab 5 is QEMU-complete by design: all three demos (see
+# main/Kconfig.projbuild) are pure FreeRTOS scheduling exercises plus one
+# bme280_sim read per pipeline sample -- no real I2C/ADC hardware is
+# involved. So, unlike lab3_bme280 / lab4_adc_pwm, there is no sdkconfig.hw
+# fragment here: this is the only sdkconfig layer this lab needs, on the
+# bench or under QEMU alike.
+CONFIG_LAB_SIM_BME280=y
+
+# Kconfig choice default (LAB5_DEMO_PIPELINE, see main/Kconfig.projbuild)
+# already selects the pipeline demo without needing to be listed here --
+# spelled out anyway so it is easy to find when switching demos by hand.
+# CONFIG_LAB5_DEMO_PIPELINE=y

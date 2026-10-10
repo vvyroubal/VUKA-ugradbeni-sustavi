@@ -1,0 +1,7 @@
+CONFIG_IDF_TARGET="esp32c3"
+
+# Sim ON by default so the starter boots and prints in QEMU with no changes
+# -- the lab's TODOs (in main/bme280_i2c.c) only matter once you switch to
+# the real-hardware build (unset this / build with a sdkconfig.hw fragment
+# like the solution's).
+CONFIG_LAB_SIM_BME280=y

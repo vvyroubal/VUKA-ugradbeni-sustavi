@@ -1,0 +1,47 @@
+# Lab 7 defconfig — RISC-V (riscv32) QEMU 'virt' embedded Linux target.
+#
+# Base: Buildroot's upstream qemu_riscv32_virt_defconfig (riscv32 core, OpenSBI
+# firmware, Linux 6.12.x, ext2/4 rootfs, DHCP on eth0). Lab 7 adds, on top of
+# that base:
+#   - ext4 rootfs variant           (rootfs.ext4 image, for the A/B OTA scheme)
+#   - openssl + CLI, dropbear        (signed-image verification + ssh, task 13)
+#   - a fixed root password          (deterministic console/ssh login)
+#   - the Lab 7 rootfs overlay        (/etc/lab7-release version marker)
+# host-qemu is dropped: the embedded-course container ships an upstream
+# qemu-system-riscv32 (qemu-system-misc) that provides the generic '-M virt'
+# board (the Espressif fork does not), so we do not spend build time
+# compiling Buildroot's own host qemu.
+
+# --- base: qemu_riscv32_virt_defconfig ---
+BR2_riscv=y
+BR2_RISCV_32=y
+BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_12=y
+BR2_GLOBAL_PATCH_DIR="board/qemu/patches"
+BR2_DOWNLOAD_FORCE_CHECK_HASHES=y
+BR2_SYSTEM_DHCP="eth0"
+BR2_ROOTFS_POST_IMAGE_SCRIPT="board/qemu/post-image.sh"
+BR2_ROOTFS_POST_SCRIPT_ARGS="$(BR2_DEFCONFIG)"
+BR2_LINUX_KERNEL=y
+BR2_LINUX_KERNEL_CUSTOM_VERSION=y
+BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.12.27"
+BR2_LINUX_KERNEL_DEFCONFIG="rv32"
+BR2_TARGET_ROOTFS_EXT2=y
+BR2_TARGET_OPENSBI=y
+BR2_TARGET_OPENSBI_CUSTOM_VERSION=y
+BR2_TARGET_OPENSBI_CUSTOM_VERSION_VALUE="1.6"
+BR2_TARGET_OPENSBI_PLAT="generic"
+
+# --- Lab 7 additions ---
+# ext4 rootfs (rootfs.ext4; rootfs.ext2 stays as a symlink)
+BR2_TARGET_ROOTFS_EXT2_4=y
+
+# fixed root password: deterministic console and ssh login
+BR2_TARGET_GENERIC_ROOT_PASSWD="root"
+
+# OTA verification tooling: openssl + openssl CLI, dropbear ssh
+BR2_PACKAGE_OPENSSL=y
+BR2_PACKAGE_LIBOPENSSL_BIN=y
+BR2_PACKAGE_DROPBEAR=y
+
+# Lab 7 rootfs overlay (/etc/lab7-release, later OTA helpers)
+BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_LAB7_PATH)/board/lab7/rootfs_overlay"

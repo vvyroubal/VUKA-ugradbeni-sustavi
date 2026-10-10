@@ -1,0 +1,9 @@
+CONFIG_IDF_TARGET="esp32c3"
+
+# Sim ON by default so the starter boots and prints in QEMU with no changes
+# -- this lab's TODOs (in main/main.c: histogram binning, calibration
+# formula, PWM duty sweep) apply the same way whichever ADC implementation
+# is linked in, and only need a real-hardware build (unset this / build
+# with a sdkconfig.hw fragment like the solution's) to exercise the real
+# adc_oneshot path.
+CONFIG_LAB_SIM_ADC=y

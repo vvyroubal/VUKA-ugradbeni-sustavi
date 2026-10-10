@@ -1,0 +1,8 @@
+# Shell scripts and everything the Linux container executes must keep LF line
+# endings even when the repository is cloned with Git for Windows; with CRLF
+# bash fails with "bad interpreter" / "$'\r': command not found".
+* text=auto eol=lf
+*.ps1 text eol=crlf
+# signal captures are kept byte-for-byte as recorded (CRLF)
+*.csv -text
+*.pem text eol=lf

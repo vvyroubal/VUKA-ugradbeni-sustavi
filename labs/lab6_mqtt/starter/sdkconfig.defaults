@@ -1,0 +1,15 @@
+CONFIG_IDF_TARGET="esp32c3"
+
+# Network bring-up under QEMU: emulated OpenCores Ethernet (open_eth) + DHCP via
+# protocol_examples_common's example_connect(). No Wi-Fi (QEMU has no Wi-Fi).
+CONFIG_EXAMPLE_CONNECT_WIFI=n
+CONFIG_EXAMPLE_CONNECT_ETHERNET=y
+CONFIG_EXAMPLE_USE_OPENETH=y
+CONFIG_EXAMPLE_CONNECT_IPV6=n
+
+# Telemetry source: synthetic BME280 (no I2C device under QEMU).
+CONFIG_LAB_SIM_BME280=y
+
+# esp-mqtt + TLS needs more than the default 1 MB app partition.
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y

@@ -1,0 +1,42 @@
+choice LAB5_DEMO
+    prompt "Lab 5 demo"
+    default LAB5_DEMO_PIPELINE
+    help
+        Selects which of the three Lab 5 FreeRTOS demos this firmware image
+        builds -- exactly one is ever compiled in (main/pipeline.c,
+        main/race.c and main/inversion.c are each wrapped in
+        "#if CONFIG_LAB5_DEMO_..." so only the selected file's app_main()
+        exists). Switch demos with `idf.py menuconfig` (or by hand-editing
+        sdkconfig) and rebuild. See the lab manual for what each one does
+        and how to read its output.
+
+    config LAB5_DEMO_PIPELINE
+        bool "Sensor -> processing -> logger pipeline (queues, priorities, stack HWM)"
+        help
+            Three tasks glued by two queues: a 10 Hz sensor task feeds an
+            8-sample moving-average processing task, which feeds a 1 Hz
+            logger task. Prints "LAB5 OK avg=<t.t>" once a second and, at
+            t~=30 s, each task's stack high-water mark ("LAB5 OK
+            hwm_<task>=<bytes>"). This is the default, and the only demo
+            exercised by qemu_smoke.sh.
+
+    config LAB5_DEMO_RACE
+        bool "Provoked race condition (unprotected counter, then mutex)"
+        help
+            Two equal-priority tasks each increment a shared counter 100000
+            times, first with no lock at all (prints "LAB5 OK
+            race_lost=<n>", n>0 -- the lost-update race), then again guarded
+            by a mutex (prints "LAB5 OK race_lost=0").
+
+    config LAB5_DEMO_INVERSION
+        bool "Measured priority inversion (binary semaphore vs. mutex)"
+        help
+            A low-priority task takes a lock and busy-holds it; a
+            medium-priority task (unrelated to the lock) hogs the CPU; a
+            high-priority task blocks trying to take the same lock. Its
+            blocking time is measured with esp_timer_get_time(), once with
+            a plain binary semaphore ("LAB5 OK inv_sem_us=<n>") and once
+            with a mutex, whose priority inheritance bounds the inversion
+            ("LAB5 OK inv_mux_us=<m>"). Expect n >> m.
+
+endchoice

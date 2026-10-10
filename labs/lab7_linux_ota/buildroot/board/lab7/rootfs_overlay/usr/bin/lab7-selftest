@@ -1,0 +1,14 @@
+#!/bin/sh
+# lab7-selftest — print the running system's OTA identity as a one-line marker.
+#
+# Reads the version marker written into this rootfs and echoes it in the compact
+# form the qemu smoke test greps for, e.g.  LAB7 OK version=2 slot=b
+# (major version only; slot letter lower-cased).
+set -eu
+
+. /etc/lab7-release 2>/dev/null \
+  || { echo "lab7-selftest: /etc/lab7-release not found" >&2; exit 1; }
+
+ver=${LAB7_VERSION%%.*}
+slot=$(printf '%s' "${LAB7_SLOT:-?}" | tr 'A-Z' 'a-z')
+echo "LAB7 OK version=$ver slot=$slot"

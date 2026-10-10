@@ -1,0 +1,16 @@
+menu "Lab 6 (MQTT/TLS)"
+
+    config LAB6_PLAINTEXT
+        bool "Use plain MQTT (no TLS) instead of MQTT over TLS"
+        default n
+        help
+            Default (n): connect with MQTT over TLS to mqtts://10.0.2.2:8883 and
+            verify the broker against the CA cert embedded from
+            main/certs/ca.crt (run broker/run_broker.sh first). This is the real
+            lab target.
+
+            When set (y): connect with plain MQTT to mqtt://10.0.2.2:1883 with no
+            certificate. Provided for the automated QEMU smoke test only; the
+            graded lab is the TLS path.
+
+endmenu

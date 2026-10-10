@@ -1,0 +1,9 @@
+# Real-hardware config fragment: layer this on top of sdkconfig.defaults to
+# build against the real i2c_master driver (main/bme280_i2c.c -- where this
+# lab's TODOs live) instead of bme280_sim, e.g.:
+#
+#   idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.hw" build
+#
+# Not used by qemu_smoke.sh (QEMU has no I2C BME280 device to talk to) --
+# this build config is for the bench/hardware path only.
+# CONFIG_LAB_SIM_BME280 is not set

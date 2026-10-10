@@ -1,0 +1,7 @@
+# Lab 7 BR2_EXTERNAL tree — no custom packages yet.
+#
+# The rootfs contents (version marker, later the OTA helper scripts) are
+# delivered through the rootfs overlay referenced by BR2_ROOTFS_OVERLAY in
+# configs/lab7_defconfig, so no package menu entries are needed here. This
+# file exists because Buildroot requires every BR2_EXTERNAL tree to provide a
+# Config.in (it is sourced into the top-level "External options" menu).

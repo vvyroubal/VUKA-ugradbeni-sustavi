@@ -1,0 +1,32 @@
+menu "Lab 4 two-point calibration constants"
+
+    config LAB4_CAL_GAIN_PPM
+        int "Calibration gain correction, in ppm (1000000 = x1.000)"
+        default 970874
+        help
+            Multiplicative correction applied to a raw ADC code (after the
+            offset correction below) to cancel out the ADC/sensor's known
+            gain error, expressed in parts per million so it can be an
+            integer Kconfig value: corrected = raw_after_offset * PPM/1e6.
+
+            The default, 970874 (= round(1e6 / 1.03)), exactly cancels
+            adc_sim's synthetic x1.03 gain error (see
+            labs/common/components/adc_sim/README.md) -- on the real
+            adc_oneshot path, re-derive this from two known reference
+            voltages (two-point calibration) instead of trusting the
+            default, which is sim-specific.
+
+    config LAB4_CAL_OFFSET
+        int "Calibration offset correction, in raw LSB"
+        default 25
+        help
+            Subtracted from the raw ADC code before the gain correction
+            above: corrected = (raw - OFFSET) * PPM/1e6.
+
+            The default, 25, exactly cancels adc_sim's synthetic +25 LSB
+            offset error (see labs/common/components/adc_sim/README.md) --
+            on the real adc_oneshot path, re-derive this from two known
+            reference voltages instead of trusting the default, which is
+            sim-specific.
+
+endmenu

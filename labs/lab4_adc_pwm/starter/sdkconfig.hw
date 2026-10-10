@@ -1,0 +1,9 @@
+# Real-hardware config fragment: layer this on top of sdkconfig.defaults to
+# build against the real adc_oneshot driver (main/lab_adc_oneshot.c) instead
+# of adc_sim, e.g.:
+#
+#   idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.hw" build
+#
+# Not used by qemu_smoke.sh (QEMU has no analog input device to sample) --
+# this build config is for the bench/hardware path only.
+# CONFIG_LAB_SIM_ADC is not set

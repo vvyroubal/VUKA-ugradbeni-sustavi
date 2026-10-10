@@ -1,0 +1,126 @@
+# Makefile.buildroot — reproducible Buildroot build for Lab 7 (RISC-V riscv32 virt).
+#
+# WHAT: fetches a pinned Buildroot LTS tarball, configures it with the Lab 7
+#       BR2_EXTERNAL tree + lab7_defconfig, builds, and copies the boot
+#       artifacts (Image, rootfs.ext4, fw_jump.bin) to ./artifacts/.
+#
+# WHERE: everything downloaded/built lives under ./.br/ (gitignored); the copied
+#        artifacts live under ./artifacts/ (gitignored). Nothing here is
+#        committed except this makefile and the buildroot/ external tree.
+#
+# HOW (run INSIDE the embedded-course container — it has the host deps):
+#     docker run --rm -v "$PWD:/work" -w /work embedded-course \
+#         bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all'
+#     # or, from labs/lab7_linux_ota/ :  make -f Makefile.buildroot all
+#
+# macOS caveat — Docker Desktop's bind mount (virtiofs) maps container-root to the
+# host user, so it is NOT real root: Buildroot extracts packages as root with tar
+# preserving the archive's ownership, then chmods them, and that chmod fails with
+# EPERM on the bind mount. Build on a Docker *named volume* instead (real root on
+# the VM's ext4), overriding BR_DIR so only ./artifacts/ lands back on the host:
+#     docker run --rm -v "$PWD:/work" -w /work -v lab7_br:/br embedded-course \
+#         bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
+#     # the lab7_br volume persists the toolchain/download cache across rebuilds.
+# Linux hosts (incl. CI) have a native bind mount + real root, so the default
+# BR_DIR=./.br invocation above works there unchanged.
+#
+# The full build takes ~30-60 min on first run (toolchain + kernel + rootfs).
+# Targets: fetch, extract, defconfig, build, artifacts, all (default), clean, distclean.
+
+# --- pinned Buildroot LTS release (2025.02.x line) ---
+BR_VERSION := 2025.02.9
+BR_TARBALL := buildroot-$(BR_VERSION).tar.xz
+BR_URL     := https://buildroot.org/downloads/$(BR_TARBALL)
+# sha256 of buildroot-2025.02.9.tar.xz (verify: shasum -a 256 <tarball>)
+BR_SHA256  := 7e83c4f2527041df69a214594c8301498a0a2db0f04ac82bf09dac120b71f02b
+
+# --- layout (all paths relative to this makefile's directory) ---
+HERE       := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+BR_DIR     := $(HERE)/.br
+BR_SRC     := $(BR_DIR)/buildroot-$(BR_VERSION)
+BR_OUTPUT  := $(BR_DIR)/output
+EXT_TREE   := $(HERE)/buildroot
+ARTIFACTS  := $(HERE)/artifacts
+
+BR_MAKE    := $(MAKE) -C $(BR_SRC) O=$(BR_OUTPUT) BR2_EXTERNAL=$(EXT_TREE)
+
+.PHONY: all fetch extract defconfig build artifacts rootfs clean distclean
+
+all: artifacts
+
+# --- 1. fetch the pinned tarball and verify its checksum ---
+$(BR_DIR)/$(BR_TARBALL):
+	@mkdir -p $(BR_DIR)
+	@echo "== fetching $(BR_TARBALL)"
+	wget -O $@ $(BR_URL)
+
+fetch: $(BR_DIR)/$(BR_TARBALL)
+	@echo "== verifying sha256 of $(BR_TARBALL)"
+	@echo "$(BR_SHA256)  $(BR_DIR)/$(BR_TARBALL)" | sha256sum -c -
+
+# --- 2. extract the source tree ---
+# rm -rf the target tree first: extracting over a partially-populated tree from
+# an interrupted earlier run makes GNU tar abort ("Cannot open: Operation not
+# supported") on the stale entries. Starting clean keeps this step idempotent.
+$(BR_SRC)/Makefile: fetch
+	@echo "== extracting $(BR_TARBALL)"
+	rm -rf $(BR_SRC)
+	tar -C $(BR_DIR) -xf $(BR_DIR)/$(BR_TARBALL)
+	@touch $(BR_SRC)/Makefile
+
+extract: $(BR_SRC)/Makefile
+
+# --- 3. apply lab7_defconfig into the out-of-tree output dir ---
+$(BR_OUTPUT)/.config: $(BR_SRC)/Makefile $(EXT_TREE)/configs/lab7_defconfig
+	@echo "== configuring lab7_defconfig (BR2_EXTERNAL=$(EXT_TREE))"
+	$(BR_MAKE) lab7_defconfig
+
+defconfig: $(BR_OUTPUT)/.config
+
+# --- 4. build (long) ---
+$(BR_OUTPUT)/images/Image: $(BR_OUTPUT)/.config
+	@echo "== building buildroot (this takes ~30-60 min on a clean tree)"
+	$(BR_MAKE)
+
+build: $(BR_OUTPUT)/images/Image
+
+# --- 5. copy boot artifacts out of the (gitignored) build tree ---
+artifacts: build
+	@mkdir -p $(ARTIFACTS)
+	@echo "== copying artifacts to $(ARTIFACTS)"
+	cp -f $(BR_OUTPUT)/images/Image        $(ARTIFACTS)/Image
+	cp -f $(BR_OUTPUT)/images/rootfs.ext4  $(ARTIFACTS)/rootfs.ext4
+	cp -f $(BR_OUTPUT)/images/fw_jump.bin  $(ARTIFACTS)/fw_jump.bin
+	@echo "== artifacts ready:" && ls -la $(ARTIFACTS)
+
+# --- overlay-only rebuild (fast) ---
+# Re-apply the rootfs overlay (ota-apply, lab7-selftest, ota_pub.pem, the
+# version marker) and regenerate the images WITHOUT recompiling packages. Use
+# after editing board/lab7/rootfs_overlay/.
+#
+# Buildroot does not track overlay-file changes, so we force a clean target
+# reassembly: delete every package's .stamp_target_installed AND the target dir,
+# then `make` re-runs only each package's install-to-target step (a copy from the
+# already-built staging — seconds, not the ~45 min of a clean build), and
+# target-finalize re-applies the overlay before regenerating the images. NB:
+# removing target/ alone is NOT enough — the stamps would skip the reinstall and
+# target-finalize would sed a half-populated tree (missing /etc/inittab).
+rootfs:
+	find $(BR_OUTPUT)/build -name '.stamp_target_installed' -delete
+	rm -rf $(BR_OUTPUT)/target $(BR_OUTPUT)/images/rootfs.ext4
+	$(BR_MAKE)
+	@mkdir -p $(ARTIFACTS)
+	@echo "== copying artifacts to $(ARTIFACTS)"
+	cp -f $(BR_OUTPUT)/images/Image        $(ARTIFACTS)/Image
+	cp -f $(BR_OUTPUT)/images/rootfs.ext4  $(ARTIFACTS)/rootfs.ext4
+	cp -f $(BR_OUTPUT)/images/fw_jump.bin  $(ARTIFACTS)/fw_jump.bin
+	@echo "== rootfs rebuilt:" && ls -la $(ARTIFACTS)
+
+# --- housekeeping ---
+# clean: drop the build output (keeps the extracted source + tarball).
+clean:
+	rm -rf $(BR_OUTPUT) $(ARTIFACTS)
+
+# distclean: remove everything under .br/ (tarball, source, output) and artifacts.
+distclean:
+	rm -rf $(BR_DIR) $(ARTIFACTS)

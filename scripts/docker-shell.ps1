@@ -8,11 +8,12 @@
 #
 # Second terminal: while a course container is running, running this script
 # again attaches to THAT container (needed for GDB in Lab 2). The container is
-# named urs-toolchain and publishes port 8883 (the Lab 6 MQTT broker).
+# named vuka-ugradbeni-sustavi and publishes port 8883 (the Lab 6 MQTT
+# broker).
 
 $Root = Split-Path -Parent $PSScriptRoot
 $Image = if ($env:URS_IMAGE) { $env:URS_IMAGE } else { "embedded-course" }
-$Name = if ($env:URS_CONTAINER) { $env:URS_CONTAINER } else { "urs-toolchain" }
+$Name = if ($env:URS_CONTAINER) { $env:URS_CONTAINER } else { "vuka-ugradbeni-sustavi" }
 $Cmd = if ($args.Count -gt 0) { $args } else { @("bash") }
 
 # `docker ... -q` prints an id or nothing; it never writes to stderr when the

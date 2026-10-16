@@ -64,8 +64,8 @@ Ubuntu (WSL2):
 
 ```sh
 cd ~
-git clone https://github.com/vvyroubal/urs-toolchain.git
-cd urs-toolchain
+git clone https://github.com/vvyroubal/VUKA-ugradbeni-sustavi.git
+cd VUKA-ugradbeni-sustavi
 ```
 
 **Samo za Docker iz PowerShella (bez WSL2):** u običnom PowerShellu najprije
@@ -74,7 +74,7 @@ PowerShell i izvedite ista tri retka.
 
 Datoteka `.gitattributes` čuva Linuxove završetke redaka u skriptama i kad
 repozitorij klonira Git za Windows. Sve naredbe u nastavku pišu se iz korijena
-repozitorija (`~/urs-toolchain`), osim ako piše drukčije.
+repozitorija (`~/VUKA-ugradbeni-sustavi`), osim ako piše drukčije.
 
 ## Put A: s Dockerom
 
@@ -109,7 +109,7 @@ repozitorija (`~/urs-toolchain`), osim ako piše drukčije.
    ```
    Uspjeh je zadnji redak `verify.sh: PASS -- toolchain, build and QEMU all work`.
 
-Što skripta `docker-shell` radi: pokreće kontejner imena `urs-toolchain`,
+Što skripta `docker-shell` radi: pokreće kontejner imena `vuka-ugradbeni-sustavi`,
 repozitorij je u njemu direktorij `/work`, okruženje ESP-IDF-a već je aktivno,
 a port 8883 (posrednik za LV6) objavljen je na računalu. Sve što izgradnja
 stvori ostaje u repozitoriju i nakon izlaska (`exit` ili Ctrl-D). Na Linuxu i
@@ -145,7 +145,7 @@ python3 $IDF_PATH/tools/idf_tools.py install qemu-riscv32
 . ~/esp-idf/export.sh
 
 # 5. provjera (iz korijena ovoga repozitorija)
-cd ~/urs-toolchain
+cd ~/VUKA-ugradbeni-sustavi
 bash scripts/verify.sh
 ```
 
@@ -171,7 +171,7 @@ git clone -b v5.5 --recursive https://github.com/espressif/esp-idf.git ~/esp-idf
 . ~/esp-idf/export.sh
 python3 $IDF_PATH/tools/idf_tools.py install qemu-riscv32
 . ~/esp-idf/export.sh
-cd ~/urs-toolchain
+cd ~/VUKA-ugradbeni-sustavi
 bash scripts/verify.sh
 ```
 
@@ -264,7 +264,7 @@ i povratak na QEMU.
 `idf.py build` i `bash ../../common/run_qemu_net.sh build`. Posrednik
 pokrenite u **terminalu računala** (Linux, macOS, WSL2 — ne u kontejneru, jer
 skripta poziva `docker`): `bash labs/lab6_mqtt/broker/run_broker.sh` iz
-korijena repozitorija; zaustavlja se s Ctrl-C. Ako kontejner `urs-toolchain`
+korijena repozitorija; zaustavlja se s Ctrl-C. Ako kontejner `vuka-ugradbeni-sustavi`
 radi, posrednik se pridružuje njegovoj mreži (QEMU ga u kontejneru vidi na
 `10.0.2.2:8883`, alati na računalu na `127.0.0.1:8883`); inače objavljuje
 port 8883 na računalu (put bez Dockera). Na Windowsu se LV6 radi u WSL2.

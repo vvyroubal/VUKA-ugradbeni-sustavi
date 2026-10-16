@@ -32,10 +32,11 @@ fi
 # Where QEMU runs decides where the broker must listen. QEMU's 10.0.2.2 is
 # the loopback of the machine QEMU runs on: with a native toolchain that is
 # this host (publish :8883 here); with the course container (started by
-# scripts/docker-shell.sh, named urs-toolchain, which publishes :8883 to the
-# host) it is that container -- so the broker joins the container's network
-# namespace instead, and host tools still reach it on 127.0.0.1:8883.
-COURSE="${URS_CONTAINER:-urs-toolchain}"
+# scripts/docker-shell.sh, named vuka-ugradbeni-sustavi, which publishes
+# :8883 to the host) it is that container -- so the broker joins the
+# container's network namespace instead, and host tools still reach it on
+# 127.0.0.1:8883.
+COURSE="${URS_CONTAINER:-vuka-ugradbeni-sustavi}"
 if [ -n "$(docker ps -q --filter "name=^/${COURSE}\$" 2>/dev/null)" ]; then
   NET=(--network "container:$COURSE")
   WHERE="inside the running '$COURSE' container's network"

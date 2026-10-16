@@ -65,8 +65,8 @@ terminal (WSL2):
 
 ```sh
 cd ~
-git clone https://github.com/vvyroubal/urs-toolchain.git
-cd urs-toolchain
+git clone https://github.com/vvyroubal/VUKA-ugradbeni-sustavi.git
+cd VUKA-ugradbeni-sustavi
 ```
 
 **Docker from PowerShell only (without WSL2):** in a regular PowerShell first
@@ -75,7 +75,7 @@ run the same three lines.
 
 The `.gitattributes` file keeps Linux line endings in the scripts even when
 the repository is cloned by Git for Windows. All commands below are typed in
-the repository root (`~/urs-toolchain`) unless stated otherwise.
+the repository root (`~/VUKA-ugradbeni-sustavi`) unless stated otherwise.
 
 ## Path A: with Docker
 
@@ -111,7 +111,7 @@ the repository root (`~/urs-toolchain`) unless stated otherwise.
    Success is the last line `verify.sh: PASS -- toolchain, build and QEMU all work`.
 
 What the `docker-shell` script does: it starts a container named
-`urs-toolchain`, the repository is its `/work` directory, the ESP-IDF
+`vuka-ugradbeni-sustavi`, the repository is its `/work` directory, the ESP-IDF
 environment is already active, and port 8883 (the Lab 6 broker) is published
 on the computer. Everything a build creates stays in the repository after you
 leave (`exit` or Ctrl-D). On Linux and in WSL2 the container runs as your own
@@ -147,7 +147,7 @@ python3 $IDF_PATH/tools/idf_tools.py install qemu-riscv32
 . ~/esp-idf/export.sh
 
 # 5. check (from the root of this repository)
-cd ~/urs-toolchain
+cd ~/VUKA-ugradbeni-sustavi
 bash scripts/verify.sh
 ```
 
@@ -173,7 +173,7 @@ git clone -b v5.5 --recursive https://github.com/espressif/esp-idf.git ~/esp-idf
 . ~/esp-idf/export.sh
 python3 $IDF_PATH/tools/idf_tools.py install qemu-riscv32
 . ~/esp-idf/export.sh
-cd ~/urs-toolchain
+cd ~/VUKA-ugradbeni-sustavi
 bash scripts/verify.sh
 ```
 
@@ -267,7 +267,7 @@ the computer or in the container shell), then `idf.py build` and
 `bash ../../common/run_qemu_net.sh build`. Start the broker in a **host
 terminal** (Linux, macOS, WSL2 — not in the container, because the script
 calls `docker`): `bash labs/lab6_mqtt/broker/run_broker.sh` from the
-repository root; Ctrl-C stops it. If the `urs-toolchain` container is
+repository root; Ctrl-C stops it. If the `vuka-ugradbeni-sustavi` container is
 running, the broker joins its network (QEMU in the container reaches it at
 `10.0.2.2:8883`, tools on the computer at `127.0.0.1:8883`); otherwise it
 publishes port 8883 on the computer (the path without Docker). On Windows,

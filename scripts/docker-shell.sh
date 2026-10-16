@@ -11,8 +11,9 @@
 #
 # Second terminal: while a course container is running, running this script
 # again attaches to THAT container (needed for GDB in Lab 2, and so the Lab 6
-# broker and QEMU share one network). The container is named urs-toolchain
-# and publishes port 8883 (the Lab 6 MQTT broker) to this computer.
+# broker and QEMU share one network). The container is named
+# vuka-ugradbeni-sustavi and publishes port 8883 (the Lab 6 MQTT broker) to
+# this computer.
 #
 # On Linux (and WSL2) the container runs as your own user, so files it
 # creates in the repository belong to you, not to root.
@@ -23,7 +24,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 IMAGE="${URS_IMAGE:-embedded-course}"
-NAME="${URS_CONTAINER:-urs-toolchain}"
+NAME="${URS_CONTAINER:-vuka-ugradbeni-sustavi}"
 
 if [ "$#" -eq 0 ]; then set -- bash; fi
 TTY=(); [ -t 0 ] && TTY=(-it)

@@ -12,7 +12,9 @@
 
 set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BUILD_DIR="${TMPDIR:-/tmp}/urs-verify-hello_world"
+# inside the repository (git-ignored build/), so the build log survives a
+# one-shot `docker-shell.sh bash scripts/verify.sh` run
+BUILD_DIR="$ROOT/build/verify-hello_world"
 fail() { echo "verify.sh: FAIL -- $*" >&2; exit 1; }
 
 echo "== 1/4 idf.py"
@@ -34,7 +36,11 @@ qemu-system-riscv32 -M help 2>/dev/null | grep -q esp32c3 \
 echo "   $(command -v qemu-system-riscv32)"
 
 echo "== 3/4 build hello_world for esp32c3 (first build takes a few minutes)"
+mkdir -p "$ROOT/build"
+# sdkconfig goes next to the build, not into ESP-IDF's own example
+# directory (read-only when the container runs as your user)
 idf.py -C "$IDF_PATH/examples/get-started/hello_world" -B "$BUILD_DIR" \
+    -D SDKCONFIG="$BUILD_DIR/sdkconfig" \
     set-target esp32c3 build >"$BUILD_DIR.log" 2>&1 \
   || { tail -20 "$BUILD_DIR.log" >&2; fail "build failed (full log: $BUILD_DIR.log)"; }
 

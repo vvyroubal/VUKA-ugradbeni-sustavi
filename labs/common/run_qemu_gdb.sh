@@ -6,9 +6,9 @@
 #
 # <build_dir> is an IDF project's `build/` directory (contains flash_args and
 # the app/bootloader/partition-table binaries produced by `idf.py build`) —
-# same merge logic as run_qemu.sh: reuse an existing <build_dir>/flash.bin, or
-# merge one from <build_dir>/flash_args via esptool.py (chip esp32c3, 4MB
-# flash image).
+# same merge logic as run_qemu.sh: (re)merge <build_dir>/flash.bin from
+# <build_dir>/flash_args via esptool.py (chip esp32c3, 4MB flash image) on
+# every run, so a rebuild is always what boots.
 #
 # Unlike run_qemu.sh, this is an INTERACTIVE tool with no timeout: QEMU is
 # started with `-s -S` (gdbstub on tcp::1234, CPU halted at reset) in the
@@ -17,9 +17,10 @@
 #
 #   riscv32-esp-elf-gdb <build_dir>/<project>.elf -ex 'target remote :1234'
 #
-# Run this in one terminal (inside the embedded-course Docker container),
-# then run the printed gdb command in another terminal attached to the same
-# container.
+# Run this in one terminal, then run the printed gdb command in a second
+# terminal on the same machine. With Docker, open the second terminal with
+# ./scripts/docker-shell.sh as well: while a course container is running it
+# attaches to that same container, so :1234 is reachable.
 #
 # Requires esptool.py and qemu-system-riscv32 on PATH (both are on PATH inside
 # the embedded-course Docker image after the IDF export environment is
@@ -46,6 +47,13 @@ fi
 FLASH_ARGS="$BUILD_DIR/flash_args"
 FLASH_BIN="$BUILD_DIR/flash.bin"
 LOG_FILE="$BUILD_DIR/qemu.log"
+
+# Always re-merge when the build's flash_args is there: `idf.py build` does
+# not remove an older flash.bin, and silently booting the previous image
+# after a rebuild is the most confusing failure a student can hit.
+if [ -f "$FLASH_ARGS" ]; then
+  rm -f "$FLASH_BIN"
+fi
 
 if [ ! -f "$FLASH_BIN" ]; then
   if [ ! -f "$FLASH_ARGS" ]; then
@@ -85,7 +93,8 @@ fi
 
 echo "==============================================================" >&2
 echo "run_qemu_gdb.sh: QEMU starting HALTED with gdbstub on :1234" >&2
-echo "In another shell inside this container, connect with:" >&2
+echo "In a second terminal, connect with the command below (Docker: run" >&2
+echo "./scripts/docker-shell.sh there too -- it attaches to this container):" >&2
 echo "==============================================================" >&2
 echo "riscv32-esp-elf-gdb $ELF_FILE -ex 'target remote :1234'"
 

@@ -49,9 +49,16 @@ rm -f "$CERT_DIR/server.csr" "$CERT_DIR/ca.srl"
 
 echo "== gen_certs.sh: distributing ca.crt to projects =="
 for proj in starter solution; do
+    [ -d "$LAB_DIR/$proj/main" ] || continue   # students have no solution/
     mkdir -p "$LAB_DIR/$proj/main/certs"
     cp "$CERT_DIR/ca.crt" "$LAB_DIR/$proj/main/certs/ca.crt"
     echo "  -> $proj/main/certs/ca.crt"
 done
+
+# The broker runs in a container as its own user (mosquitto, uid 1883), so
+# on a Linux host it cannot read a 0600 key owned by you. These are
+# throw-away demo certificates for a local lab broker -- never do this with
+# a real server key.
+chmod 644 "$CERT_DIR/server.key"
 
 echo "== gen_certs.sh: done. Certs in $CERT_DIR (not committed) =="

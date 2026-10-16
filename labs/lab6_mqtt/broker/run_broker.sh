@@ -29,9 +29,25 @@ if [ ! -f "$CERT_DIR/server.crt" ]; then
   exit 1
 fi
 
-echo "== run_broker.sh: starting $IMAGE with TLS on :8883 (Ctrl-C to stop) =="
-exec docker run --rm -it \
-  -p 8883:8883 \
+# Where QEMU runs decides where the broker must listen. QEMU's 10.0.2.2 is
+# the loopback of the machine QEMU runs on: with a native toolchain that is
+# this host (publish :8883 here); with the course container (started by
+# scripts/docker-shell.sh, named urs-toolchain, which publishes :8883 to the
+# host) it is that container -- so the broker joins the container's network
+# namespace instead, and host tools still reach it on 127.0.0.1:8883.
+COURSE="${URS_CONTAINER:-urs-toolchain}"
+if [ -n "$(docker ps -q --filter "name=^/${COURSE}\$" 2>/dev/null)" ]; then
+  NET=(--network "container:$COURSE")
+  WHERE="inside the running '$COURSE' container's network"
+else
+  NET=(-p 8883:8883)
+  WHERE="on this host"
+fi
+
+echo "== run_broker.sh: starting $IMAGE with TLS on :8883 $WHERE (Ctrl-C to stop) =="
+TTY=(); [ -t 0 ] && TTY=(-it)
+exec docker run --rm ${TTY[@]+"${TTY[@]}"} \
+  "${NET[@]}" \
   -v "$SCRIPT_DIR/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro" \
   -v "$CERT_DIR:/mosquitto/certs:ro" \
   "$IMAGE"

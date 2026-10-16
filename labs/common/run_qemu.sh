@@ -7,8 +7,9 @@
 # app/bootloader/partition-table binaries produced by `idf.py build`).
 #
 # Behaviour:
-#   - If <build_dir>/flash.bin does not already exist, it is merged from
-#     <build_dir>/flash_args via esptool.py (chip esp32c3, 4MB flash image).
+#   - <build_dir>/flash.bin is (re)merged from <build_dir>/flash_args via
+#     esptool.py (chip esp32c3, 4MB flash image) on every run, so the image
+#     that boots is always the latest build.
 #   - Boots `qemu-system-riscv32 -M esp32c3 -nographic` with that flash image
 #     attached as raw MTD, tee-ing serial output to <build_dir>/qemu.log.
 #   - QEMU is bounded by `timeout <timeout>`.
@@ -48,6 +49,13 @@ fi
 FLASH_ARGS="$BUILD_DIR/flash_args"
 FLASH_BIN="$BUILD_DIR/flash.bin"
 LOG_FILE="$BUILD_DIR/qemu.log"
+
+# Always re-merge when the build's flash_args is there: `idf.py build` does
+# not remove an older flash.bin, and silently booting the previous image
+# after a rebuild is the most confusing failure a student can hit.
+if [ -f "$FLASH_ARGS" ]; then
+  rm -f "$FLASH_BIN"
+fi
 
 if [ ! -f "$FLASH_BIN" ]; then
   if [ ! -f "$FLASH_ARGS" ]; then

@@ -44,6 +44,13 @@ FLASH_ARGS="$BUILD_DIR/flash_args"
 FLASH_BIN="$BUILD_DIR/flash.bin"
 LOG_FILE="$BUILD_DIR/qemu.log"
 
+# Always re-merge when the build's flash_args is there: `idf.py build` does
+# not remove an older flash.bin, and silently booting the previous image
+# after a rebuild is the most confusing failure a student can hit.
+if [ -f "$FLASH_ARGS" ]; then
+  rm -f "$FLASH_BIN"
+fi
+
 if [ ! -f "$FLASH_BIN" ]; then
   if [ ! -f "$FLASH_ARGS" ]; then
     echo "run_qemu_net.sh: no flash.bin and no flash_args in $BUILD_DIR" >&2

@@ -14,3 +14,5 @@ labs/lab7_linux_ota/.br/
 labs/lab7_linux_ota/artifacts/
 
 .DS_Store
+# separate board (sdkconfig.hw) build directories used in Labs 3-4
+build-*/

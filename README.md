@@ -30,18 +30,21 @@ može se izvesti i bez pločice, u emulatoru **QEMU**. Alatni lanac je
 | **Windows 10/11** | **WSL2** (Ubuntu), a u njemu upute za Linux: Docker (Docker Desktop) ili instalacija bez Dockera | u WSL2, instalacija bez Dockera + `usbipd` |
 | **macOS** | **Docker Desktop** | `esptool` s macOS-a ili instalacija bez Dockera |
 | **Linux** | **Docker** ili instalacija bez Dockera | Docker uz `URS_PORT` ili bez Dockera |
+| **Windows bez virtualizacije** | **put C**: ESP-IDF izravno u Windowsu (LV1–LV6) | izravno, `COM<n>` |
 
 Sve skripte kolegija pisane su za `bash` na Linuxu (u WSL2 ili u kontejneru);
-Git Bash i MSYS2 na Windowsu nisu podržani. Docker iz Windowsova PowerShella
+Git Bash i MSYS2 na Windowsu nisu podržani. Za računala na kojima WSL2 i
+Docker ne rade postoji put C (niže): ESP-IDF izravno u Windowsu, s naredbama
+`idf.py` umjesto skripti kolegija. Docker iz Windowsova PowerShella
 (`docker-shell.ps1`) dovoljan je za izgradnju i emulator u LV1–LV5 i za LV7,
 ali ne i za LV6 ni za pločicu.
 
-| | Docker (Linux, WSL2, macOS) | Docker iz PowerShella | Bez Dockera (Linux, WSL2, macOS) |
-|---|---|---|---|
-| Izgradnja i emulator, LV1–LV5 | da | da | da |
-| LV6 (MQTT preko TLS-a) | da | ne — upotrijebite WSL2 | da (posrednik ipak radi u Dockeru) |
-| LV7 (Buildroot, ugradbeni Linux) | da | da | Linux i WSL2 uz dodatne pakete; macOS preko Dockera |
-| Programiranje pločice | samo na Linuxu | ne | da |
+| | Docker (Linux, WSL2, macOS) | Docker iz PowerShella | Bez Dockera (Linux, WSL2, macOS) | Put C (Windows) |
+|---|---|---|---|---|
+| Izgradnja i emulator, LV1–LV5 | da | da | da | da |
+| LV6 (MQTT preko TLS-a) | da | ne — upotrijebite WSL2 | da (posrednik ipak radi u Dockeru) | da, uz Mosquitto za Windows |
+| LV7 (Buildroot, ugradbeni Linux) | da | da | Linux i WSL2 uz dodatne pakete; macOS preko Dockera | ne |
+| Programiranje pločice | samo na Linuxu | ne | da | da |
 
 Docker i instalacija bez Dockera mogu postojati usporedno. Kad isti projekt
 prebacujete s jedne izgradnje na drugu, najprije izvedite `idf.py fullclean`:
@@ -177,16 +180,72 @@ bash scripts/verify.sh
 
 `coreutils` donosi naredbu `gtimeout`, koju trebaju skripte za emulator.
 
-### Windows bez WSL2 (dodatno, nije obavezno)
+### Put C: Windows bez virtualizacije (bez WSL2 i Dockera)
 
-Službeni [ESP-IDF Tools Installer](https://dl.espressif.com/dl/esp-idf/) za
-**v5.5** instalira ESP-IDF izravno u Windows i dodaje prečac
-*ESP-IDF 5.5 PowerShell*. Koristan je samo za programiranje pločice
-naredbom `idf.py` izravno iz Windowsa (u tom prečacu, iz direktorija
-projekta: `idf.py build`, pa `idf.py -p COM<n> flash monitor`; projekt
-izgrađen u Dockeru najprije očistite s `idf.py fullclean`). Skripte kolegija (`run_qemu.sh`,
-`verify.sh`, posrednik za LV6) ondje se ne mogu pokrenuti — trebaju `bash` na
-Linuxu (WSL2 ili kontejner), a ESP-IDF ne podržava Git Bash.
+Za računala na kojima WSL2 i Docker ne rade jer procesor ne podržava
+virtualizaciju. Najprije provjerite nije li ona samo isključena u BIOS-u/UEFI-ju
+(*Intel VT-x* ili *AMD-V*) — ako se može uključiti, slijedite upute za WSL2.
+Emulatoru QEMU virtualizacija ne treba (čip oponaša programski), pa ovaj put
+pokriva LV1–LV6 i pločicu; LV7 (Buildroot) treba Linux, pa je izvedite na
+računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban je
+64-bitni Windows 10 ili 11.
+
+1. **Git for Windows** (<https://git-scm.com/download/win> ili
+   `winget install Git.Git`); donosi i *Git Bash*, potreban samo za
+   certifikate u LV6.
+2. Službeni [ESP-IDF Tools Installer](https://dl.espressif.com/dl/esp-idf/),
+   inačica **v5.5**. Instalacijski direktorij: zadani ili kratka putanja bez
+   razmaka, zagrada i dijakritičkih znakova (kraća od 90 znakova). Sve naredbe
+   `idf.py` pišu se u prečacu **ESP-IDF 5.5 PowerShell**.
+3. U tom prečacu instalirajte emulator, pa prečac zatvorite i otvorite ponovno:
+   ```powershell
+   python $env:IDF_PATH\tools\idf_tools.py install qemu-riscv32
+   ```
+4. Klonirajte repozitorij u putanju bez razmaka i dijakritičkih znakova
+   (korisnička mapa poput `C:\Users\Ivan Čović` ne odgovara ESP-IDF-u):
+   ```powershell
+   mkdir C:\vuka
+   cd C:\vuka
+   git clone https://github.com/vvyroubal/VUKA-ugradbeni-sustavi.git
+   cd VUKA-ugradbeni-sustavi
+   ```
+
+**Provjera** (umjesto `verify.sh`, koji treba `bash`), iz korijena repozitorija:
+```powershell
+cd labs\lab1_toolchain\starter
+idf.py set-target esp32c3
+idf.py qemu monitor
+```
+Naredba izgradi projekt, pokrene ga u emulatoru i prikaže ispis; instalacija je
+ispravna kad se pojavi `Ugradbeni racunalni sustavi -- Lab 1`. Izlaz: Ctrl-].
+
+**Naredbe iz priručnika vježbi** (u prečacu, iz istog direktorija projekta):
+
+| U priručniku | Na putu C |
+|---|---|
+| `bash ../../common/run_qemu.sh build` | `idf.py qemu monitor` — izgradi i pokrene najnoviju inačicu; ne završava sam, izlaz Ctrl-] |
+| `bash ../../common/run_qemu_net.sh build` (LV6) | `idf.py qemu monitor` — dodaje istu emuliranu mrežnu karticu |
+| `build/qemu.log` za predaju | u monitoru Ctrl-T pa Ctrl-L: ispis se sprema u datoteku u direktoriju projekta, do ponovnog Ctrl-T, Ctrl-L ili izlaza |
+| LV2: `run_qemu_gdb.sh` i `riscv32-esp-elf-gdb` | prvi prozor `idf.py qemu --gdb monitor`; drugi prozor (još jedan prečac, isti direktorij) `idf.py gdb`, pa iste naredbe GDB-a |
+| naredba prelomljena znakom `\` | upišite je u jednom retku |
+
+**LV6.** Certifikati u *Git Bashu*, u korijenu repozitorija (varijabla
+sprječava da Git Bash argumente poput `/C=HR/...` pretvori u Windowsove putanje):
+```sh
+cd /c/vuka/VUKA-ugradbeni-sustavi
+MSYS_NO_PATHCONV=1 bash labs/lab6_mqtt/broker/gen_certs.sh
+```
+Umjesto `run_broker.sh` (treba Docker) instalirajte
+[Mosquitto za Windows](https://mosquitto.org/download/) (64-bitni) i pokrenite
+ga u zasebnom prozoru PowerShella, iz korijena repozitorija (Ctrl-C ga zaustavlja):
+```powershell
+& "C:\Program Files\mosquitto\mosquitto.exe" -v -c labs\lab6_mqtt\broker\mosquitto-windows.conf
+```
+Emulator ga vidi na `10.0.2.2:8883`, alati na računalu na `127.0.0.1:8883`
+(`mosquitto_sub` i `mosquitto_pub` su u istom direktoriju). Ako Windows upita,
+dopustite pristup u privatnoj mreži.
+
+**Pločica:** `idf.py -p COM<n> flash monitor`, port iz Upravitelja uređaja.
 
 ## Provjera: `verify.sh`
 
@@ -317,7 +376,7 @@ idf.py -p <port> flash monitor      # izlaz iz monitora: Ctrl-]
 | Linux, Docker | `/dev/ttyACM0` | `URS_PORT=/dev/ttyACM0 ./scripts/docker-shell.sh` (novi kontejner: prethodni najprije zatvorite), pa u njemu `idf.py -p /dev/ttyACM0 flash monitor` |
 | WSL2 | `/dev/ttyACM0` | instalacija bez Dockera u WSL2, pločica proslijeđena alatom `usbipd` (niže) i grupa `dialout` |
 | macOS | `/dev/cu.usbmodem*` | `esptool` (niže) ili instalacija bez Dockera |
-| Windows, instalacijski program | `COM<n>` | Upravitelj uređaja → *USB Serial Device (COMn)* |
+| Windows, put C | `COM<n>` | Upravitelj uređaja → *USB Serial Device (COMn)* |
 | Docker Desktop (macOS, Windows) | — | USB uređaji ne prosljeđuju se u kontejner |
 
 **WSL2 i `usbipd`.** U PowerShellu pokrenutom kao administrator izvedite

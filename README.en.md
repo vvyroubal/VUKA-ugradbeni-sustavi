@@ -31,18 +31,21 @@ emulator. The toolchain is **ESP-IDF v5.5** (a newer v5.5.x is also fine).
 | **Windows 10/11** | **WSL2** (Ubuntu), and inside it the Linux instructions: Docker (Docker Desktop) or the installation without Docker | in WSL2, installation without Docker + `usbipd` |
 | **macOS** | **Docker Desktop** | `esptool` from macOS, or the installation without Docker |
 | **Linux** | **Docker** or the installation without Docker | Docker with `URS_PORT`, or without Docker |
+| **Windows without virtualization** | **path C**: ESP-IDF directly in Windows (Labs 1–6) | directly, `COM<n>` |
 
 All course scripts are written for `bash` on Linux (in WSL2 or in the
-container); Git Bash and MSYS2 on Windows are not supported. Docker from
+container); Git Bash and MSYS2 on Windows are not supported. For computers on
+which WSL2 and Docker do not work there is path C (below): ESP-IDF directly in
+Windows, with `idf.py` commands instead of the course scripts. Docker from
 Windows PowerShell (`docker-shell.ps1`) is enough for building and the
 emulator in Labs 1–5 and for Lab 7, but not for Lab 6 and not for the board.
 
-| | Docker (Linux, WSL2, macOS) | Docker from PowerShell | Without Docker (Linux, WSL2, macOS) |
-|---|---|---|---|
-| Building and the emulator, Labs 1–5 | yes | yes | yes |
-| Lab 6 (MQTT over TLS) | yes | no — use WSL2 | yes (the broker still runs in Docker) |
-| Lab 7 (Buildroot, embedded Linux) | yes | yes | Linux and WSL2 with extra packages; macOS via Docker |
-| Flashing the board | only on Linux | no | yes |
+| | Docker (Linux, WSL2, macOS) | Docker from PowerShell | Without Docker (Linux, WSL2, macOS) | Path C (Windows) |
+|---|---|---|---|---|
+| Building and the emulator, Labs 1–5 | yes | yes | yes | yes |
+| Lab 6 (MQTT over TLS) | yes | no — use WSL2 | yes (the broker still runs in Docker) | yes, with Mosquitto for Windows |
+| Lab 7 (Buildroot, embedded Linux) | yes | yes | Linux and WSL2 with extra packages; macOS via Docker | no |
+| Flashing the board | only on Linux | no | yes | yes |
 
 Docker and the installation without Docker can coexist. When you move the
 same project from one kind of build to the other, run `idf.py fullclean`
@@ -179,17 +182,73 @@ bash scripts/verify.sh
 
 `coreutils` provides the `gtimeout` command the emulator scripts need.
 
-### Windows without WSL2 (extra, optional)
+### Path C: Windows without virtualization (no WSL2, no Docker)
 
-The official [ESP-IDF Tools Installer](https://dl.espressif.com/dl/esp-idf/)
-for **v5.5** installs ESP-IDF directly into Windows and adds an
-*ESP-IDF 5.5 PowerShell* shortcut. It is useful only for flashing the board
-with `idf.py` directly from Windows (in that shortcut, from the project
-directory: `idf.py build`, then `idf.py -p COM<n> flash monitor`; clean a
-project built in Docker first with `idf.py fullclean`). The course scripts
-(`run_qemu.sh`, `verify.sh`, the Lab 6 broker) cannot run there — they need
-`bash` on Linux (WSL2 or the container), and ESP-IDF does not support Git
-Bash.
+For computers on which WSL2 and Docker do not work because the processor does
+not support virtualization. First check whether it is merely switched off in the
+BIOS/UEFI (*Intel VT-x* or *AMD-V*) — if it can be switched on, follow the WSL2
+instructions. The QEMU emulator does not need virtualization (it emulates the
+chip in software), so this path covers Labs 1–6 and the board; Lab 7 (Buildroot)
+needs Linux, so do it on a computer with WSL2, Docker or Linux (arrange it with
+the instructor). A 64-bit Windows 10 or 11 is required.
+
+1. **Git for Windows** (<https://git-scm.com/download/win> or
+   `winget install Git.Git`); it also brings *Git Bash*, needed only for the
+   Lab 6 certificates.
+2. The official [ESP-IDF Tools Installer](https://dl.espressif.com/dl/esp-idf/),
+   version **v5.5**. Installation directory: the default, or a short path
+   without spaces, parentheses or diacritics (shorter than 90 characters). Every
+   `idf.py` command is typed in the **ESP-IDF 5.5 PowerShell** shortcut.
+3. In that shortcut install the emulator, then close the shortcut and open it again:
+   ```powershell
+   python $env:IDF_PATH\tools\idf_tools.py install qemu-riscv32
+   ```
+4. Clone the repository into a path without spaces or diacritics (a user folder
+   like `C:\Users\Ivan Čović` does not suit ESP-IDF):
+   ```powershell
+   mkdir C:\vuka
+   cd C:\vuka
+   git clone https://github.com/vvyroubal/VUKA-ugradbeni-sustavi.git
+   cd VUKA-ugradbeni-sustavi
+   ```
+
+**Checking** (instead of `verify.sh`, which needs `bash`), from the repository root:
+```powershell
+cd labs\lab1_toolchain\starter
+idf.py set-target esp32c3
+idf.py qemu monitor
+```
+The command builds the project, runs it in the emulator and shows the output;
+the installation works when `Ugradbeni racunalni sustavi -- Lab 1` appears.
+Leave with Ctrl-].
+
+**Commands from the lab manuals** (in the shortcut, from the same project directory):
+
+| In the manual | On path C |
+|---|---|
+| `bash ../../common/run_qemu.sh build` | `idf.py qemu monitor` — builds and runs the latest version; it does not end by itself, leave with Ctrl-] |
+| `bash ../../common/run_qemu_net.sh build` (Lab 6) | `idf.py qemu monitor` — adds the same emulated network card |
+| `build/qemu.log` for submission | in the monitor Ctrl-T then Ctrl-L: the output is saved to a file in the project directory until the next Ctrl-T, Ctrl-L or exit |
+| Lab 2: `run_qemu_gdb.sh` and `riscv32-esp-elf-gdb` | first window `idf.py qemu --gdb monitor`; second window (another shortcut, same directory) `idf.py gdb`, then the same GDB commands |
+| a command continued with `\` | type it on one line |
+
+**Lab 6.** Certificates in *Git Bash*, at the repository root (the variable
+stops Git Bash from turning arguments such as `/C=HR/...` into Windows paths):
+```sh
+cd /c/vuka/VUKA-ugradbeni-sustavi
+MSYS_NO_PATHCONV=1 bash labs/lab6_mqtt/broker/gen_certs.sh
+```
+Instead of `run_broker.sh` (it needs Docker) install
+[Mosquitto for Windows](https://mosquitto.org/download/) (64-bit) and run it in a
+separate PowerShell window, from the repository root (Ctrl-C stops it):
+```powershell
+& "C:\Program Files\mosquitto\mosquitto.exe" -v -c labs\lab6_mqtt\broker\mosquitto-windows.conf
+```
+The emulator reaches it at `10.0.2.2:8883`, tools on the computer at
+`127.0.0.1:8883` (`mosquitto_sub` and `mosquitto_pub` are in the same directory).
+If Windows asks, allow access on private networks.
+
+**The board:** `idf.py -p COM<n> flash monitor`, with the port from Device Manager.
 
 ## Checking: `verify.sh`
 
@@ -322,7 +381,7 @@ idf.py -p <port> flash monitor      # leave the monitor: Ctrl-]
 | Linux, Docker | `/dev/ttyACM0` | `URS_PORT=/dev/ttyACM0 ./scripts/docker-shell.sh` (a new container: leave the previous one first), then in it `idf.py -p /dev/ttyACM0 flash monitor` |
 | WSL2 | `/dev/ttyACM0` | installation without Docker in WSL2, board forwarded with `usbipd` (below) and the `dialout` group |
 | macOS | `/dev/cu.usbmodem*` | `esptool` (below) or the installation without Docker |
-| Windows, installer | `COM<n>` | Device Manager → *USB Serial Device (COMn)* |
+| Windows, path C | `COM<n>` | Device Manager → *USB Serial Device (COMn)* |
 | Docker Desktop (macOS, Windows) | — | USB devices are not passed into the container |
 
 **WSL2 and `usbipd`.** In PowerShell started as administrator run

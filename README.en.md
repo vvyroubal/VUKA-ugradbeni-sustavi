@@ -13,9 +13,9 @@ explanations.
 | Path | Contents |
 |---|---|
 | `Dockerfile` | development image: ESP-IDF v5.5, Espressif's QEMU, the Lab 7 tools |
-| `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (shell in the container), `verify.sh` (installation check) |
+| `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (shell in the container), `verify.sh` / `verify.ps1` (installation check) |
 | `labs/labN_*/starter/` | starter projects for Labs 1–6 |
-| `labs/common/` | emulator scripts (`run_qemu*.sh`) and shared components |
+| `labs/common/` | emulator scripts (`run_qemu*.sh`, for path C `run_qemu*.ps1`) and shared components |
 | `labs/lab6_mqtt/broker/` | MQTT broker and certificates for Lab 6 |
 | `labs/lab7_linux_ota/` | Buildroot configuration and OTA tools for Lab 7 |
 
@@ -34,8 +34,8 @@ The instructions offer three paths:
   or on macOS; more steps, but it sees the board directly. Paths A and B can
   coexist.
 - **Path C — Windows without virtualization**: for computers on which WSL2 and
-  Docker do not work; ESP-IDF is installed directly in Windows, and `idf.py`
-  commands replace the course scripts.
+  Docker do not work; ESP-IDF is installed directly in Windows, and the course
+  scripts run in PowerShell versions of the same name (`.ps1`).
 
 The course scripts are written for `bash` on Linux (directly, in WSL2 or in the
 container); Git Bash and MSYS2 on Windows are not supported.
@@ -231,8 +231,8 @@ needs Linux, so do it on a computer with WSL2, Docker or Linux (arrange it with
 the instructor). A 64-bit Windows 10 or 11 is required.
 
 1. **Git for Windows** (<https://git-scm.com/download/win> or
-   `winget install Git.Git`); it also brings *Git Bash*, needed only for the
-   Lab 6 certificates.
+   `winget install Git.Git`); it also brings `openssl`, which the
+   `gen_certs.ps1` script uses for the Lab 6 certificates.
 2. The official [ESP-IDF Tools Installer](https://dl.espressif.com/dl/esp-idf/),
    version **v5.5** (on the page: *ESP-IDF v5.5.x Offline Installer*). Installation directory: the default, or a short path
    without spaces, parentheses or diacritics (shorter than 90 characters). Every
@@ -254,44 +254,49 @@ the instructor). A 64-bit Windows 10 or 11 is required.
    is not signed, so at the *Windows protected your PC* warning choose
    *More info* → *Run anyway*.
 
-**Checking** (instead of `verify.sh`, which needs `bash`). The shortcut opens in
-the ESP-IDF directory, so first change into the repository (every time you open
-the shortcut):
+**The course scripts on Windows.** Every course script has a PowerShell
+version **of the same name with the `.ps1` extension**, with the same arguments
+and the same behaviour (the emulator stops by itself after the given time,
+Ctrl-A then X stops it earlier, and the output is also saved to
+`build/qemu.log`). They are run in the *ESP-IDF 5.5 PowerShell* shortcut, which
+allows running scripts. The shortcut opens in the ESP-IDF directory, so every
+time you open it, first change into the repository.
+
+**Checking**, with the PowerShell version of `verify.sh`:
 ```powershell
 cd C:\vuka\VUKA-ugradbeni-sustavi
+./scripts/verify.ps1
+```
+The last line is what matters, `verify.ps1: PASS -- toolchain, build and QEMU
+all work`. The first run of Lab 1 then looks like this:
+```powershell
 cd labs\lab1_toolchain\starter
 idf.py set-target esp32c3
-idf.py qemu monitor
+idf.py build
+../../common/run_qemu.ps1 build
 ```
-The command builds the project, runs it in the emulator and shows the output;
-the installation works when `Ugradbeni racunalni sustavi -- Lab 1` appears.
-Leave with Ctrl-].
 
-**Commands from the lab manuals** (in the shortcut, from the same project directory):
+**Commands from the lab manuals:** leave out `bash` and replace the `.sh`
+extension with `.ps1`, from the same directory:
 
 | In the manual | On path C |
 |---|---|
-| `bash ../../common/run_qemu.sh build` | `idf.py qemu monitor` — builds and runs the latest version; it does not end by itself, leave with Ctrl-] |
-| `bash ../../common/run_qemu_net.sh build` (Lab 6) | `idf.py qemu monitor` — adds the same emulated network card |
-| `build/qemu.log` for submission | `idf.py qemu \| Tee-Object build\qemu.log` — the output goes to the screen and into the file from the very start; Ctrl-C stops it |
-| Lab 2: `run_qemu_gdb.sh` and `riscv32-esp-elf-gdb` | first window `idf.py qemu --gdb monitor`; second window (another shortcut, same directory) `idf.py gdb` — GDB connects by itself (no `target remote`) and first stops in `app_main`; the message `unknown command: 'reset'` is harmless. Then the same GDB commands |
+| `bash ../../common/run_qemu.sh build` | `../../common/run_qemu.ps1 build` |
+| `bash ../../common/run_qemu_net.sh build` | `../../common/run_qemu_net.ps1 build` |
+| `bash ../../common/run_qemu_gdb.sh build` | `../../common/run_qemu_gdb.ps1 build`; GDB in a second shortcut window, with the command the script prints |
+| `bash ../broker/gen_certs.sh` | `../broker/gen_certs.ps1` |
+| `bash ../broker/run_broker.sh` | `../broker/run_broker.ps1` (in a separate shortcut window; the broker is Mosquitto for Windows) |
+| `bash scripts/verify.sh` | `./scripts/verify.ps1` |
 | a command continued with `\` | type it on one line |
 
-**Lab 6.** Certificates in *Git Bash*, at the repository root:
-```sh
-cd /c/vuka/VUKA-ugradbeni-sustavi
-bash labs/lab6_mqtt/broker/gen_certs.sh
-```
-Instead of `run_broker.sh` (it needs Docker) run Mosquitto for Windows
-(installation, step 5) in a separate PowerShell window, from the repository
-root (Ctrl-C stops it):
-```powershell
-& "C:\Program Files\mosquitto\mosquitto.exe" -v -c labs\lab6_mqtt\broker\mosquitto-windows.conf
-```
-The emulator reaches it at `10.0.2.2:8883`, tools on the computer at
-`127.0.0.1:8883`. If Windows asks, allow access on private networks.
-`mosquitto_sub` and `mosquitto_pub` are in the same directory, so the Lab 6
-manual's command, from `labs\lab6_mqtt\starter`, reads:
+For a quick try, ESP-IDF's own `idf.py qemu monitor` works too (it builds,
+runs and shows the output; leave with Ctrl-]).
+
+**Lab 6:** the emulator reaches the broker (`run_broker.ps1`) at
+`10.0.2.2:8883`, tools on the computer at `127.0.0.1:8883`. If Windows asks,
+allow access on private networks. `mosquitto_sub` and `mosquitto_pub` are in
+`C:\Program Files\mosquitto`, so the Lab 6 manual's command, from
+`labs\lab6_mqtt\starter`, reads:
 ```powershell
 & "C:\Program Files\mosquitto\mosquitto_sub.exe" -h 127.0.0.1 -p 8883 --cafile ../broker/certs/ca.crt -t "vuka/sensors/#" -v
 ```
@@ -503,6 +508,9 @@ Then, in the project's build directory (e.g. `labs/lab1_toolchain/starter/build`
   `sudo chown -R $USER .` in the repository root.
 - **`ModuleNotFoundError` when running `idf.py`** — another Python
   environment (venv or conda) is active; deactivate it before `export.sh`.
+- **Windows, path C: `running scripts is disabled on this system`** — the
+  `.ps1` script was started in a regular PowerShell; run it in the
+  *ESP-IDF 5.5 PowerShell* shortcut, which allows running scripts.
 - **Windows, path C: `Python was not found; run without arguments to install
   from the Microsoft Store`, or `idf.py` is not recognized** — the command was
   typed in a regular PowerShell; open the *ESP-IDF 5.5 PowerShell* shortcut. If

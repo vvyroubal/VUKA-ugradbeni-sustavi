@@ -12,9 +12,9 @@ na stranicama kolegija.
 | Put | Sadržaj |
 |---|---|
 | `Dockerfile` | razvojna slika: ESP-IDF v5.5, Espressifov QEMU, alati za LV7 |
-| `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (ljuska u kontejneru), `verify.sh` (provjera instalacije) |
+| `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (ljuska u kontejneru), `verify.sh` / `verify.ps1` (provjera instalacije) |
 | `labs/labN_*/starter/` | polazni projekti vježbi LV1–LV6 |
-| `labs/common/` | skripte za emulator (`run_qemu*.sh`) i zajedničke komponente |
+| `labs/common/` | skripte za emulator (`run_qemu*.sh`, za put C `run_qemu*.ps1`) i zajedničke komponente |
 | `labs/lab6_mqtt/broker/` | MQTT posrednik i certifikati za LV6 |
 | `labs/lab7_linux_ota/` | Buildroot konfiguracija i OTA alati za LV7 |
 
@@ -33,8 +33,8 @@ Upute nude tri puta:
   macOS; više koraka, ali izravno vidi pločicu. Putovi A i B mogu postojati
   usporedno.
 - **Put C — Windows bez virtualizacije**: za računala na kojima WSL2 i Docker
-  ne rade; ESP-IDF se instalira izravno u Windows, a skripte kolegija zamjenjuju
-  naredbe `idf.py`.
+  ne rade; ESP-IDF se instalira izravno u Windows, a skripte kolegija pokreću se
+  u PowerShell inačicama istog imena (`.ps1`).
 
 Skripte kolegija pisane su za `bash` na Linuxu (izravno, u WSL2 ili u
 kontejneru); Git Bash i MSYS2 na Windowsu nisu podržani.
@@ -228,8 +228,8 @@ računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban j
 64-bitni Windows 10 ili 11.
 
 1. **Git for Windows** (<https://git-scm.com/download/win> ili
-   `winget install Git.Git`); donosi i *Git Bash*, potreban samo za
-   certifikate u LV6.
+   `winget install Git.Git`); donosi i `openssl`, koji za certifikate u LV6
+   koristi skripta `gen_certs.ps1`.
 2. Službeni [ESP-IDF Tools Installer](https://dl.espressif.com/dl/esp-idf/),
    inačica **v5.5** (na stranici: *ESP-IDF v5.5.x Offline Installer*). Instalacijski direktorij: zadani ili kratka putanja bez
    razmaka, zagrada i dijakritičkih znakova (kraća od 90 znakova). Sve naredbe
@@ -251,43 +251,48 @@ računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban j
    nije potpisan, pa na upozorenje *Windows protected your PC* odaberite
    *More info* → *Run anyway*.
 
-**Provjera** (umjesto `verify.sh`, koji treba `bash`). Prečac se otvara u
-direktoriju ESP-IDF-a, pa najprije prijeđite u repozitorij (pri svakom
-otvaranju prečaca):
+**Skripte kolegija na Windowsu.** Za svaku skriptu kolegija postoji PowerShell
+inačica **istog imena s nastavkom `.ps1`**, s istim argumentima i istim
+ponašanjem (emulator se sam zaustavlja nakon zadanog vremena, Ctrl-A pa X ga
+zaustavlja ranije, a ispis se sprema i u `build/qemu.log`). Pokreću se u
+prečacu *ESP-IDF 5.5 PowerShell*, koji dopušta pokretanje skripti. Prečac se
+otvara u direktoriju ESP-IDF-a, pa pri svakom otvaranju najprije prijeđite u
+repozitorij.
+
+**Provjera**, PowerShell inačicom skripte `verify.sh`:
 ```powershell
 cd C:\vuka\VUKA-ugradbeni-sustavi
+./scripts/verify.ps1
+```
+Bitan je zadnji redak, `verify.ps1: PASS -- toolchain, build and QEMU all work`.
+Prvo pokretanje LV1 zatim izgleda ovako:
+```powershell
 cd labs\lab1_toolchain\starter
 idf.py set-target esp32c3
-idf.py qemu monitor
+idf.py build
+../../common/run_qemu.ps1 build
 ```
-Naredba izgradi projekt, pokrene ga u emulatoru i prikaže ispis; instalacija je
-ispravna kad se pojavi `Ugradbeni racunalni sustavi -- Lab 1`. Izlaz: Ctrl-].
 
-**Naredbe iz priručnika vježbi** (u prečacu, iz istog direktorija projekta):
+**Naredbe iz priručnika vježbi:** izostavite `bash` i nastavak `.sh` zamijenite
+s `.ps1`, iz istog direktorija:
 
 | U priručniku | Na putu C |
 |---|---|
-| `bash ../../common/run_qemu.sh build` | `idf.py qemu monitor` — izgradi i pokrene najnoviju inačicu; ne završava sam, izlaz Ctrl-] |
-| `bash ../../common/run_qemu_net.sh build` (LV6) | `idf.py qemu monitor` — dodaje istu emuliranu mrežnu karticu |
-| `build/qemu.log` za predaju | `idf.py qemu \| Tee-Object build\qemu.log` — ispis ide na zaslon i u datoteku od samog početka; zaustavlja se s Ctrl-C |
-| LV2: `run_qemu_gdb.sh` i `riscv32-esp-elf-gdb` | prvi prozor `idf.py qemu --gdb monitor`; drugi prozor (još jedan prečac, isti direktorij) `idf.py gdb` — GDB se sam spaja (bez `target remote`) i najprije stane u `app_main`; poruka `unknown command: 'reset'` je bezopasna. Zatim iste naredbe GDB-a |
+| `bash ../../common/run_qemu.sh build` | `../../common/run_qemu.ps1 build` |
+| `bash ../../common/run_qemu_net.sh build` | `../../common/run_qemu_net.ps1 build` |
+| `bash ../../common/run_qemu_gdb.sh build` | `../../common/run_qemu_gdb.ps1 build`; GDB u drugom prozoru prečaca, naredbom koju skripta ispiše |
+| `bash ../broker/gen_certs.sh` | `../broker/gen_certs.ps1` |
+| `bash ../broker/run_broker.sh` | `../broker/run_broker.ps1` (u zasebnom prozoru prečaca; posrednik je Mosquitto za Windows) |
+| `bash scripts/verify.sh` | `./scripts/verify.ps1` |
 | naredba prelomljena znakom `\` | upišite je u jednom retku |
 
-**LV6.** Certifikati u *Git Bashu*, u korijenu repozitorija:
-```sh
-cd /c/vuka/VUKA-ugradbeni-sustavi
-bash labs/lab6_mqtt/broker/gen_certs.sh
-```
-Umjesto `run_broker.sh` (treba Docker) pokrenite Mosquitto za Windows
-(instalacija, korak 5) u zasebnom prozoru PowerShella, iz korijena repozitorija
-(Ctrl-C ga zaustavlja):
-```powershell
-& "C:\Program Files\mosquitto\mosquitto.exe" -v -c labs\lab6_mqtt\broker\mosquitto-windows.conf
-```
-Emulator ga vidi na `10.0.2.2:8883`, alati na računalu na `127.0.0.1:8883`.
-Ako Windows upita, dopustite pristup u privatnoj mreži. `mosquitto_sub` i
-`mosquitto_pub` su u istom direktoriju, pa se naredba iz priručnika LV6, iz
-`labs\lab6_mqtt\starter`, piše ovako:
+Za brzo isprobavanje radi i ESP-IDF-ova naredba `idf.py qemu monitor` (izgradi,
+pokrene i prikaže ispis; izlaz Ctrl-]).
+
+**LV6:** posrednik (`run_broker.ps1`) emulator vidi na `10.0.2.2:8883`, alati na
+računalu na `127.0.0.1:8883`. Ako Windows upita, dopustite pristup u privatnoj
+mreži. `mosquitto_sub` i `mosquitto_pub` su u `C:\Program Files\mosquitto`, pa se
+naredba iz priručnika LV6, iz `labs\lab6_mqtt\starter`, piše ovako:
 ```powershell
 & "C:\Program Files\mosquitto\mosquitto_sub.exe" -h 127.0.0.1 -p 8883 --cafile ../broker/certs/ca.crt -t "vuka/sensors/#" -v
 ```
@@ -496,6 +501,9 @@ Ime porta pokazuje `ls /dev/cu.usbmodem*`.
   `sudo chown -R $USER .` u korijenu repozitorija.
 - **`ModuleNotFoundError` pri pokretanju `idf.py`** — aktivna je neka druga
   Python okolina (venv ili conda); deaktivirajte je prije `export.sh`.
+- **Windows, put C: `running scripts is disabled on this system`** — skripta
+  `.ps1` pokrenuta je u običnom PowerShellu; pokrenite je u prečacu
+  *ESP-IDF 5.5 PowerShell*, koji pokretanje skripti dopušta.
 - **Windows, put C: `Python was not found; run without arguments to install
   from the Microsoft Store` ili `idf.py` nije prepoznat** — naredba je upisana u
   običnom PowerShellu; otvorite prečac *ESP-IDF 5.5 PowerShell*. Ako nema ni

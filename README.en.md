@@ -80,6 +80,20 @@ the path it was configured for (inside the container that is `/work/...`).
 - **Path C** (no virtualization): has its own preparation, including getting
   the repository — follow the *Path C* section and skip the rest of this one.
 
+Before you start, install (Git and VS Code can also be installed without
+administrator rights):
+
+| Option | Install before you start | Administrator | Disk space |
+|---|---|---|---|
+| WSL2 (paths A and B) | WSL2 with Ubuntu (`wsl --install`); for path A, Docker Desktop; for the board, `usbipd` (`winget install usbipd` or [GitHub](https://github.com/dorssel/usbipd-win/releases)) | for `wsl --install` and `usbipd` | Ubuntu a few GB; path A about 8 GB, path B about 7 GB |
+| Docker from PowerShell (path A) | [Git for Windows](https://git-scm.com/download/win) (or `winget install Git.Git`) and [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows 10 22H2 or Windows 11 23H2, 8 GB of RAM, virtualization enabled) | once, when Docker Desktop first turns on WSL2 | about 8 GB plus Docker Desktop |
+| Path C | Git for Windows, the ESP-IDF Tools Installer v5.5, the QEMU emulator and, for Lab 6, Mosquitto for Windows (all in the *Path C* section) | for Mosquitto (it installs as a service) | about 8 GB, plus a 1.6 GB download and about 0.3 GB per lab |
+
+**Code editor:** [VS Code](https://code.visualstudio.com) is recommended, and
+any other will do. In WSL2, open the project from the Ubuntu terminal with
+`code .` at the repository root (VS Code then works directly on the files in
+Linux, with the *WSL* extension, which it offers by itself).
+
 **macOS.** If the `git` command does not exist, install it with
 `xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`.
 
@@ -231,6 +245,10 @@ the instructor). A 64-bit Windows 10 or 11 is required.
    git clone https://github.com/vvyroubal/VUKA-ugradbeni-sustavi.git
    cd VUKA-ugradbeni-sustavi
    ```
+5. For Lab 6: [Mosquitto for Windows](https://mosquitto.org/download/) (64-bit;
+   it needs an administrator because it installs as a service). The installer
+   is not signed, so at the *Windows protected your PC* warning choose
+   *More info* → *Run anyway*.
 
 **Checking** (instead of `verify.sh`, which needs `bash`), from the repository root:
 ```powershell
@@ -257,10 +275,9 @@ Leave with Ctrl-].
 cd /c/vuka/VUKA-ugradbeni-sustavi
 bash labs/lab6_mqtt/broker/gen_certs.sh
 ```
-Instead of `run_broker.sh` (it needs Docker) install
-[Mosquitto for Windows](https://mosquitto.org/download/) (64-bit; the installer
-is not signed, so at the *Windows protected your PC* warning choose *More info*
-→ *Run anyway*) and run it in a separate PowerShell window, from the repository root (Ctrl-C stops it):
+Instead of `run_broker.sh` (it needs Docker) run Mosquitto for Windows
+(installation, step 5) in a separate PowerShell window, from the repository
+root (Ctrl-C stops it):
 ```powershell
 & "C:\Program Files\mosquitto\mosquitto.exe" -v -c labs\lab6_mqtt\broker\mosquitto-windows.conf
 ```

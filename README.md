@@ -78,6 +78,20 @@ putanju za koju je konfiguriran (u kontejneru je to `/work/...`).
 - **Put C** (bez virtualizacije): ima vlastitu pripremu, zajedno s preuzimanjem
   repozitorija — slijedite odjeljak *Put C* i ostatak ovog odjeljka preskočite.
 
+Prije početka instalirajte (Git i VS Code mogu se instalirati i bez
+administratorskih prava):
+
+| Mogućnost | Instalirajte prije početka | Administrator | Prostor |
+|---|---|---|---|
+| WSL2 (putovi A i B) | WSL2 s Ubuntuom (`wsl --install`); za put A Docker Desktop; za pločicu `usbipd` (`winget install usbipd` ili [GitHub](https://github.com/dorssel/usbipd-win/releases)) | za `wsl --install` i `usbipd` | Ubuntu nekoliko GB; put A oko 8 GB, put B oko 7 GB |
+| Docker iz PowerShella (put A) | [Git for Windows](https://git-scm.com/download/win) (ili `winget install Git.Git`) i [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows 10 22H2 ili Windows 11 23H2, 8 GB RAM-a, uključena virtualizacija) | jednom, kad Docker Desktop prvi put uključuje WSL2 | oko 8 GB uz Docker Desktop |
+| Put C | Git for Windows, ESP-IDF Tools Installer v5.5, emulator QEMU i, za LV6, Mosquitto za Windows (sve u odjeljku *Put C*) | za Mosquitto (instalira se kao servis) | oko 8 GB, uz 1,6 GB preuzimanja i oko 0,3 GB po vježbi |
+
+**Uređivač koda:** preporučen je [VS Code](https://code.visualstudio.com), a
+odgovara i bilo koji drugi. U WSL2 projekt otvorite iz terminala Ubuntu
+naredbom `code .` u korijenu repozitorija (VS Code tada radi izravno nad
+datotekama u Linuxu, uz proširenje *WSL*, koje ponudi sam).
+
 **macOS.** Ako naredba `git` ne postoji, instalirajte je s
 `xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`.
 
@@ -228,6 +242,10 @@ računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban j
    git clone https://github.com/vvyroubal/VUKA-ugradbeni-sustavi.git
    cd VUKA-ugradbeni-sustavi
    ```
+5. Za LV6: [Mosquitto za Windows](https://mosquitto.org/download/) (64-bitni;
+   traži administratora jer se instalira kao servis). Instalacijski program
+   nije potpisan, pa na upozorenje *Windows protected your PC* odaberite
+   *More info* → *Run anyway*.
 
 **Provjera** (umjesto `verify.sh`, koji treba `bash`), iz korijena repozitorija:
 ```powershell
@@ -253,10 +271,9 @@ ispravna kad se pojavi `Ugradbeni racunalni sustavi -- Lab 1`. Izlaz: Ctrl-].
 cd /c/vuka/VUKA-ugradbeni-sustavi
 bash labs/lab6_mqtt/broker/gen_certs.sh
 ```
-Umjesto `run_broker.sh` (treba Docker) instalirajte
-[Mosquitto za Windows](https://mosquitto.org/download/) (64-bitni; instalacijski
-program nije potpisan, pa na upozorenje *Windows protected your PC* odaberite
-*More info* → *Run anyway*) i pokrenite ga u zasebnom prozoru PowerShella, iz korijena repozitorija (Ctrl-C ga zaustavlja):
+Umjesto `run_broker.sh` (treba Docker) pokrenite Mosquitto za Windows
+(instalacija, korak 5) u zasebnom prozoru PowerShella, iz korijena repozitorija
+(Ctrl-C ga zaustavlja):
 ```powershell
 & "C:\Program Files\mosquitto\mosquitto.exe" -v -c labs\lab6_mqtt\broker\mosquitto-windows.conf
 ```

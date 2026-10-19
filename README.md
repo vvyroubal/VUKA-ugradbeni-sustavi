@@ -25,31 +25,41 @@ može se izvesti i bez pločice, u emulatoru **QEMU**. Alatni lanac je
 
 ## Koji put odabrati
 
+Upute nude tri puta:
+
+- **Put A — s Dockerom**: alatni lanac dolazi gotov u slici, isti na
+  svim sustavima; najjednostavniji put.
+- **Put B — bez Dockera**: ESP-IDF se instalira izravno na Linux, u WSL2 ili na
+  macOS; više koraka, ali izravno vidi pločicu. Putovi A i B mogu postojati
+  usporedno.
+- **Put C — Windows bez virtualizacije**: za računala na kojima WSL2 i Docker
+  ne rade; ESP-IDF se instalira izravno u Windows, a skripte kolegija zamjenjuju
+  naredbe `idf.py`.
+
+Skripte kolegija pisane su za `bash` na Linuxu (izravno, u WSL2 ili u
+kontejneru); Git Bash i MSYS2 na Windowsu nisu podržani.
+
 | Sustav | Preporučeni put | Pločica preko USB-a |
 |---|---|---|
-| **Windows 10/11** | **WSL2** (Ubuntu), a u njemu upute za Linux: Docker (Docker Desktop) ili instalacija bez Dockera | u WSL2, instalacija bez Dockera + `usbipd` |
-| **macOS** | **Docker Desktop** | `esptool` s macOS-a ili instalacija bez Dockera |
-| **Linux** | **Docker** ili instalacija bez Dockera | Docker uz `URS_PORT` ili bez Dockera |
-| **Windows bez virtualizacije** | **put C**: ESP-IDF izravno u Windowsu (LV1–LV6) | izravno, `COM<n>` |
+| **Windows 10/11** | **WSL2** (Ubuntu), a u njemu upute za Linux: put A (Docker Desktop) ili put B | u WSL2, put B + `usbipd` |
+| **macOS** | **put A** (Docker Desktop) | `esptool` s macOS-a ili put B |
+| **Linux** | **put A** ili put B | put A uz `URS_PORT` ili put B |
+| **Windows bez virtualizacije** | **put C** (LV1–LV6) | izravno, `COM<n>` |
 
-Sve skripte kolegija pisane su za `bash` na Linuxu (u WSL2 ili u kontejneru);
-Git Bash i MSYS2 na Windowsu nisu podržani. Za računala na kojima WSL2 i
-Docker ne rade postoji put C (niže): ESP-IDF izravno u Windowsu, s naredbama
-`idf.py` umjesto skripti kolegija. Docker iz Windowsova PowerShella
-(`docker-shell.ps1`) dovoljan je za izgradnju i emulator u LV1–LV5 i za LV7,
-ali ne i za LV6 ni za pločicu.
+Na Windowsu se put A može izvesti i izravno iz PowerShella
+(`docker-shell.ps1`), bez WSL2: dovoljan je za izgradnju i emulator u LV1–LV5
+i za LV7, ali ne i za LV6 ni za pločicu. Što koji put pokriva:
 
-| | Docker (Linux, WSL2, macOS) | Docker iz PowerShella | Bez Dockera (Linux, WSL2, macOS) | Put C (Windows) |
+| | A: Docker (Linux, WSL2, macOS) | A: Docker (Windows, PowerShell) | B: bez Dockera (Linux, WSL2, macOS) | C: Windows bez virtualizacije |
 |---|---|---|---|---|
 | Izgradnja i emulator, LV1–LV5 | da | da | da | da |
 | LV6 (MQTT preko TLS-a) | da | ne — upotrijebite WSL2 | da (posrednik ipak radi u Dockeru) | da, uz Mosquitto za Windows |
 | LV7 (Buildroot, ugradbeni Linux) | da | da | Linux i WSL2 uz dodatne pakete; macOS preko Dockera | ne |
 | Programiranje pločice | samo na Linuxu | ne | da | da |
 
-Docker i instalacija bez Dockera mogu postojati usporedno. Kad isti projekt
-prebacujete s jedne izgradnje na drugu, najprije izvedite `idf.py fullclean`:
-direktorij `build/` pamti putanju za koju je konfiguriran (u kontejneru je to
-`/work/...`).
+Kad isti projekt prebacujete s izgradnje na putu A na izgradnju na putu B ili
+obrnuto, najprije izvedite `idf.py fullclean`: direktorij `build/` pamti
+putanju za koju je konfiguriran (u kontejneru je to `/work/...`).
 
 ## Korak 0: priprema računala i preuzimanje repozitorija
 
@@ -180,7 +190,7 @@ bash scripts/verify.sh
 
 `coreutils` donosi naredbu `gtimeout`, koju trebaju skripte za emulator.
 
-### Put C: Windows bez virtualizacije (bez WSL2 i Dockera)
+## Put C: Windows bez virtualizacije (bez WSL2 i Dockera)
 
 Za računala na kojima WSL2 i Docker ne rade jer procesor ne podržava
 virtualizaciju. Najprije provjerite nije li ona samo isključena u BIOS-u/UEFI-ju

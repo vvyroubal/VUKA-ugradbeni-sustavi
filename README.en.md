@@ -26,31 +26,42 @@ emulator. The toolchain is **ESP-IDF v5.5** (a newer v5.5.x is also fine).
 
 ## Which path to choose
 
+The instructions offer three paths:
+
+- **Path A — with Docker**: the toolchain comes ready-made in an image,
+  the same on every system; the simplest path.
+- **Path B — without Docker**: ESP-IDF is installed directly on Linux, in WSL2
+  or on macOS; more steps, but it sees the board directly. Paths A and B can
+  coexist.
+- **Path C — Windows without virtualization**: for computers on which WSL2 and
+  Docker do not work; ESP-IDF is installed directly in Windows, and `idf.py`
+  commands replace the course scripts.
+
+The course scripts are written for `bash` on Linux (directly, in WSL2 or in the
+container); Git Bash and MSYS2 on Windows are not supported.
+
 | System | Recommended path | Board over USB |
 |---|---|---|
-| **Windows 10/11** | **WSL2** (Ubuntu), and inside it the Linux instructions: Docker (Docker Desktop) or the installation without Docker | in WSL2, installation without Docker + `usbipd` |
-| **macOS** | **Docker Desktop** | `esptool` from macOS, or the installation without Docker |
-| **Linux** | **Docker** or the installation without Docker | Docker with `URS_PORT`, or without Docker |
-| **Windows without virtualization** | **path C**: ESP-IDF directly in Windows (Labs 1–6) | directly, `COM<n>` |
+| **Windows 10/11** | **WSL2** (Ubuntu), and inside it the Linux instructions: path A (Docker Desktop) or path B | in WSL2, path B + `usbipd` |
+| **macOS** | **path A** (Docker Desktop) | `esptool` from macOS, or path B |
+| **Linux** | **path A** or path B | path A with `URS_PORT`, or path B |
+| **Windows without virtualization** | **path C** (Labs 1–6) | directly, `COM<n>` |
 
-All course scripts are written for `bash` on Linux (in WSL2 or in the
-container); Git Bash and MSYS2 on Windows are not supported. For computers on
-which WSL2 and Docker do not work there is path C (below): ESP-IDF directly in
-Windows, with `idf.py` commands instead of the course scripts. Docker from
-Windows PowerShell (`docker-shell.ps1`) is enough for building and the
-emulator in Labs 1–5 and for Lab 7, but not for Lab 6 and not for the board.
+On Windows, path A can also be run straight from PowerShell
+(`docker-shell.ps1`), without WSL2: it is enough for building and the emulator
+in Labs 1–5 and for Lab 7, but not for Lab 6 and not for the board. What each
+path covers:
 
-| | Docker (Linux, WSL2, macOS) | Docker from PowerShell | Without Docker (Linux, WSL2, macOS) | Path C (Windows) |
+| | A: Docker (Linux, WSL2, macOS) | A: Docker (Windows, PowerShell) | B: without Docker (Linux, WSL2, macOS) | C: Windows without virtualization |
 |---|---|---|---|---|
 | Building and the emulator, Labs 1–5 | yes | yes | yes | yes |
 | Lab 6 (MQTT over TLS) | yes | no — use WSL2 | yes (the broker still runs in Docker) | yes, with Mosquitto for Windows |
 | Lab 7 (Buildroot, embedded Linux) | yes | yes | Linux and WSL2 with extra packages; macOS via Docker | no |
 | Flashing the board | only on Linux | no | yes | yes |
 
-Docker and the installation without Docker can coexist. When you move the
-same project from one kind of build to the other, run `idf.py fullclean`
-first: the `build/` directory remembers the path it was configured for
-(inside the container that is `/work/...`).
+When you move the same project from a path A build to a path B build or the
+other way round, run `idf.py fullclean` first: the `build/` directory remembers
+the path it was configured for (inside the container that is `/work/...`).
 
 ## Step 0: preparing the computer and getting the repository
 
@@ -182,7 +193,7 @@ bash scripts/verify.sh
 
 `coreutils` provides the `gtimeout` command the emulator scripts need.
 
-### Path C: Windows without virtualization (no WSL2, no Docker)
+## Path C: Windows without virtualization (no WSL2, no Docker)
 
 For computers on which WSL2 and Docker do not work because the processor does
 not support virtualization. First check whether it is merely switched off in the

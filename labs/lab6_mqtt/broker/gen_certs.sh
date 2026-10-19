@@ -19,6 +19,9 @@
 # .gitignore'd as well.
 #
 # Requires: openssl (host or the embedded-course container both have it).
+# Also runs in Git Bash on Windows (H1, path C), whose openssl.exe is a native
+# Windows program -- hence no process substitution below, and the MSYS
+# argument-conversion exception for the /C=... subjects.
 
 set -euo pipefail
 
@@ -26,6 +29,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LAB_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 CERT_DIR="$SCRIPT_DIR/certs"
 DAYS=3650
+
+# Git Bash rewrites arguments that look like POSIX paths before running a
+# native program; the certificate subjects start with "/C=" and must stay as
+# they are (file paths are still converted, as they should be).
+case "$(uname -s)" in
+    MINGW*|MSYS*) export MSYS2_ARG_CONV_EXCL="/C=" ;;
+esac
 
 mkdir -p "$CERT_DIR"
 
@@ -40,12 +50,13 @@ openssl genrsa -out "$CERT_DIR/server.key" 2048
 openssl req -new -key "$CERT_DIR/server.key" \
     -subj "/C=HR/O=VUKA/OU=Ugradbeni racunalni sustavi/CN=10.0.2.2" \
     -out "$CERT_DIR/server.csr"
+printf 'subjectAltName=IP:10.0.2.2,IP:127.0.0.1\n' > "$CERT_DIR/server.ext"
 openssl x509 -req -in "$CERT_DIR/server.csr" \
     -CA "$CERT_DIR/ca.crt" -CAkey "$CERT_DIR/ca.key" -CAcreateserial \
     -days "$DAYS" -sha256 \
-    -extfile <(printf 'subjectAltName=IP:10.0.2.2,IP:127.0.0.1\n') \
+    -extfile "$CERT_DIR/server.ext" \
     -out "$CERT_DIR/server.crt"
-rm -f "$CERT_DIR/server.csr" "$CERT_DIR/ca.srl"
+rm -f "$CERT_DIR/server.csr" "$CERT_DIR/server.ext" "$CERT_DIR/ca.srl"
 
 echo "== gen_certs.sh: distributing ca.crt to projects =="
 for proj in starter solution; do

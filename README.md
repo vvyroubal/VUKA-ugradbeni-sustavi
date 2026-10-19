@@ -204,7 +204,7 @@ računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban j
    `winget install Git.Git`); donosi i *Git Bash*, potreban samo za
    certifikate u LV6.
 2. Službeni [ESP-IDF Tools Installer](https://dl.espressif.com/dl/esp-idf/),
-   inačica **v5.5**. Instalacijski direktorij: zadani ili kratka putanja bez
+   inačica **v5.5** (na stranici: *ESP-IDF v5.5.x Offline Installer*). Instalacijski direktorij: zadani ili kratka putanja bez
    razmaka, zagrada i dijakritičkih znakova (kraća od 90 znakova). Sve naredbe
    `idf.py` pišu se u prečacu **ESP-IDF 5.5 PowerShell**.
 3. U tom prečacu instalirajte emulator, pa prečac zatvorite i otvorite ponovno:
@@ -235,19 +235,19 @@ ispravna kad se pojavi `Ugradbeni racunalni sustavi -- Lab 1`. Izlaz: Ctrl-].
 |---|---|
 | `bash ../../common/run_qemu.sh build` | `idf.py qemu monitor` — izgradi i pokrene najnoviju inačicu; ne završava sam, izlaz Ctrl-] |
 | `bash ../../common/run_qemu_net.sh build` (LV6) | `idf.py qemu monitor` — dodaje istu emuliranu mrežnu karticu |
-| `build/qemu.log` za predaju | u monitoru Ctrl-T pa Ctrl-L: ispis se sprema u datoteku u direktoriju projekta, do ponovnog Ctrl-T, Ctrl-L ili izlaza |
-| LV2: `run_qemu_gdb.sh` i `riscv32-esp-elf-gdb` | prvi prozor `idf.py qemu --gdb monitor`; drugi prozor (još jedan prečac, isti direktorij) `idf.py gdb`, pa iste naredbe GDB-a |
+| `build/qemu.log` za predaju | `idf.py qemu \| Tee-Object build\qemu.log` — ispis ide na zaslon i u datoteku od samog početka; zaustavlja se s Ctrl-C |
+| LV2: `run_qemu_gdb.sh` i `riscv32-esp-elf-gdb` | prvi prozor `idf.py qemu --gdb monitor`; drugi prozor (još jedan prečac, isti direktorij) `idf.py gdb` — GDB se sam spaja (bez `target remote`) i najprije stane u `app_main`; poruka `unknown command: 'reset'` je bezopasna. Zatim iste naredbe GDB-a |
 | naredba prelomljena znakom `\` | upišite je u jednom retku |
 
-**LV6.** Certifikati u *Git Bashu*, u korijenu repozitorija (varijabla
-sprječava da Git Bash argumente poput `/C=HR/...` pretvori u Windowsove putanje):
+**LV6.** Certifikati u *Git Bashu*, u korijenu repozitorija:
 ```sh
 cd /c/vuka/VUKA-ugradbeni-sustavi
-MSYS_NO_PATHCONV=1 bash labs/lab6_mqtt/broker/gen_certs.sh
+bash labs/lab6_mqtt/broker/gen_certs.sh
 ```
 Umjesto `run_broker.sh` (treba Docker) instalirajte
-[Mosquitto za Windows](https://mosquitto.org/download/) (64-bitni) i pokrenite
-ga u zasebnom prozoru PowerShella, iz korijena repozitorija (Ctrl-C ga zaustavlja):
+[Mosquitto za Windows](https://mosquitto.org/download/) (64-bitni; instalacijski
+program nije potpisan, pa na upozorenje *Windows protected your PC* odaberite
+*More info* → *Run anyway*) i pokrenite ga u zasebnom prozoru PowerShella, iz korijena repozitorija (Ctrl-C ga zaustavlja):
 ```powershell
 & "C:\Program Files\mosquitto\mosquitto.exe" -v -c labs\lab6_mqtt\broker\mosquitto-windows.conf
 ```

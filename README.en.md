@@ -207,7 +207,7 @@ the instructor). A 64-bit Windows 10 or 11 is required.
    `winget install Git.Git`); it also brings *Git Bash*, needed only for the
    Lab 6 certificates.
 2. The official [ESP-IDF Tools Installer](https://dl.espressif.com/dl/esp-idf/),
-   version **v5.5**. Installation directory: the default, or a short path
+   version **v5.5** (on the page: *ESP-IDF v5.5.x Offline Installer*). Installation directory: the default, or a short path
    without spaces, parentheses or diacritics (shorter than 90 characters). Every
    `idf.py` command is typed in the **ESP-IDF 5.5 PowerShell** shortcut.
 3. In that shortcut install the emulator, then close the shortcut and open it again:
@@ -239,19 +239,19 @@ Leave with Ctrl-].
 |---|---|
 | `bash ../../common/run_qemu.sh build` | `idf.py qemu monitor` — builds and runs the latest version; it does not end by itself, leave with Ctrl-] |
 | `bash ../../common/run_qemu_net.sh build` (Lab 6) | `idf.py qemu monitor` — adds the same emulated network card |
-| `build/qemu.log` for submission | in the monitor Ctrl-T then Ctrl-L: the output is saved to a file in the project directory until the next Ctrl-T, Ctrl-L or exit |
-| Lab 2: `run_qemu_gdb.sh` and `riscv32-esp-elf-gdb` | first window `idf.py qemu --gdb monitor`; second window (another shortcut, same directory) `idf.py gdb`, then the same GDB commands |
+| `build/qemu.log` for submission | `idf.py qemu \| Tee-Object build\qemu.log` — the output goes to the screen and into the file from the very start; Ctrl-C stops it |
+| Lab 2: `run_qemu_gdb.sh` and `riscv32-esp-elf-gdb` | first window `idf.py qemu --gdb monitor`; second window (another shortcut, same directory) `idf.py gdb` — GDB connects by itself (no `target remote`) and first stops in `app_main`; the message `unknown command: 'reset'` is harmless. Then the same GDB commands |
 | a command continued with `\` | type it on one line |
 
-**Lab 6.** Certificates in *Git Bash*, at the repository root (the variable
-stops Git Bash from turning arguments such as `/C=HR/...` into Windows paths):
+**Lab 6.** Certificates in *Git Bash*, at the repository root:
 ```sh
 cd /c/vuka/VUKA-ugradbeni-sustavi
-MSYS_NO_PATHCONV=1 bash labs/lab6_mqtt/broker/gen_certs.sh
+bash labs/lab6_mqtt/broker/gen_certs.sh
 ```
 Instead of `run_broker.sh` (it needs Docker) install
-[Mosquitto for Windows](https://mosquitto.org/download/) (64-bit) and run it in a
-separate PowerShell window, from the repository root (Ctrl-C stops it):
+[Mosquitto for Windows](https://mosquitto.org/download/) (64-bit; the installer
+is not signed, so at the *Windows protected your PC* warning choose *More info*
+→ *Run anyway*) and run it in a separate PowerShell window, from the repository root (Ctrl-C stops it):
 ```powershell
 & "C:\Program Files\mosquitto\mosquitto.exe" -v -c labs\lab6_mqtt\broker\mosquitto-windows.conf
 ```

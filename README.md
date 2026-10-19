@@ -63,11 +63,20 @@ putanju za koju je konfiguriran (u kontejneru je to `/work/...`).
 
 ## Korak 0: priprema računala i preuzimanje repozitorija
 
-**Windows (WSL2).** U PowerShellu pokrenutom kao administrator izvedite
-`wsl --install`, ponovno pokrenite računalo, otvorite aplikaciju **Ubuntu** i
-zadajte korisničko ime i lozinku za Linux. Sve daljnje naredbe pišu se u
-terminalu Ubuntu, a repozitorij klonirajte u Linuxov datotečni sustav (`~/`),
-nikako u `/mnt/c/...`.
+**Windows** ima tri mogućnosti (vidi „Koji put odabrati”):
+
+- **WSL2** (preporučeno; putovi A i B kao na Linuxu): u PowerShellu pokrenutom
+  kao administrator izvedite `wsl --install`, ponovno pokrenite računalo,
+  otvorite aplikaciju **Ubuntu** i zadajte korisničko ime i lozinku za Linux.
+  Sve daljnje naredbe pišu se u terminalu Ubuntu, a repozitorij klonirajte u
+  Linuxov datotečni sustav (`~/`), nikako u `/mnt/c/...`. Ako virtualizacija
+  nije uključena, uključite je u BIOS-u/UEFI-ju (*Intel VT-x*, *AMD-V*); ako je
+  procesor ne podržava, odaberite put C.
+- **Docker iz PowerShella** (put A bez WSL2): Git za Windows
+  (`winget install Git.Git`) i Docker Desktop (put A, niže); repozitorij se
+  klonira u PowerShellu (niže).
+- **Put C** (bez virtualizacije): ima vlastitu pripremu, zajedno s preuzimanjem
+  repozitorija — slijedite odjeljak *Put C* i ostatak ovog odjeljka preskočite.
 
 **macOS.** Ako naredba `git` ne postoji, instalirajte je s
 `xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`.

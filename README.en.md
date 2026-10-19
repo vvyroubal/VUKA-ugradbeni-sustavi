@@ -65,11 +65,20 @@ the path it was configured for (inside the container that is `/work/...`).
 
 ## Step 0: preparing the computer and getting the repository
 
-**Windows (WSL2).** In PowerShell started as administrator run
-`wsl --install`, restart the computer, open the **Ubuntu** app and choose a
-Linux user name and password. Every further command is typed in the Ubuntu
-terminal, and the repository is cloned into the Linux file system (`~/`),
-never into `/mnt/c/...`.
+**Windows** has three options (see "Which path to choose"):
+
+- **WSL2** (recommended; paths A and B as on Linux): in PowerShell started as
+  administrator run `wsl --install`, restart the computer, open the **Ubuntu**
+  app and choose a Linux user name and password. Every further command is typed
+  in the Ubuntu terminal, and the repository is cloned into the Linux file
+  system (`~/`), never into `/mnt/c/...`. If virtualization is not enabled,
+  enable it in the BIOS/UEFI (*Intel VT-x*, *AMD-V*); if the processor does not
+  support it, choose path C.
+- **Docker from PowerShell** (path A without WSL2): Git for Windows
+  (`winget install Git.Git`) and Docker Desktop (path A, below); the repository
+  is cloned in PowerShell (below).
+- **Path C** (no virtualization): has its own preparation, including getting
+  the repository — follow the *Path C* section and skip the rest of this one.
 
 **macOS.** If the `git` command does not exist, install it with
 `xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`.

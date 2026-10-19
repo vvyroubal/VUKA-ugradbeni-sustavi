@@ -48,7 +48,7 @@ container); Git Bash and MSYS2 on Windows are not supported.
 | **Windows without virtualization** | **path C** (Labs 1–6) | directly, `COM<n>` |
 
 On Windows, path A can also be run straight from PowerShell
-(`docker-shell.ps1`), without WSL2: it is enough for building and the emulator
+(`docker-shell.ps1`), without Ubuntu in WSL2: it is enough for building and the emulator
 in Labs 1–5 and for Lab 7, but not for Lab 6 and not for the board. What each
 path covers:
 
@@ -74,7 +74,7 @@ the path it was configured for (inside the container that is `/work/...`).
   system (`~/`), never into `/mnt/c/...`. If virtualization is not enabled,
   enable it in the BIOS/UEFI (*Intel VT-x*, *AMD-V*); if the processor does not
   support it, choose path C.
-- **Docker from PowerShell** (path A without WSL2): Git for Windows
+- **Docker from PowerShell** (path A without Ubuntu in WSL2): Git for Windows
   (`winget install Git.Git`) and Docker Desktop (path A, below); the repository
   is cloned in PowerShell (below).
 - **Path C** (no virtualization): has its own preparation, including getting
@@ -95,7 +95,10 @@ any other will do. In WSL2, open the project from the Ubuntu terminal with
 Linux, with the *WSL* extension, which it offers by itself).
 
 **macOS.** If the `git` command does not exist, install it with
-`xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`.
+`xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`
+(Fedora: `sudo dnf install git`, Arch: `sudo pacman -S git`; the path B packages
+for those distributions are listed in the [ESP-IDF documentation](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32c3/get-started/linux-macos-setup.html),
+and path A is the simplest choice there).
 
 Get the course repository in a terminal (Linux, macOS) or in the Ubuntu
 terminal (WSL2):
@@ -106,7 +109,7 @@ git clone https://github.com/vvyroubal/VUKA-ugradbeni-sustavi.git
 cd VUKA-ugradbeni-sustavi
 ```
 
-**Docker from PowerShell only (without WSL2):** in a regular PowerShell first
+**Docker from PowerShell only (without Ubuntu in WSL2):** in a regular PowerShell first
 install Git with `winget install Git.Git`, then open a **new** PowerShell and
 run the same three lines.
 
@@ -118,8 +121,9 @@ the repository root (`~/VUKA-ugradbeni-sustavi`) unless stated otherwise.
 
 1. Install Docker:
    - **Windows:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-     with the WSL2 backend (the default). In Docker Desktop enable
-     *Settings → Resources → WSL integration* for **Ubuntu**.
+     with the WSL2 backend (the default). If you work in WSL2, enable
+     *Settings → Resources → WSL integration* for **Ubuntu** in Docker Desktop
+     (Docker from PowerShell does not need this step).
    - **macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop/).
    - **Linux:** Docker Engine following the [official instructions](https://docs.docker.com/engine/install/),
      then add your user to the `docker` group and log out and back in (or
@@ -250,8 +254,11 @@ the instructor). A 64-bit Windows 10 or 11 is required.
    is not signed, so at the *Windows protected your PC* warning choose
    *More info* → *Run anyway*.
 
-**Checking** (instead of `verify.sh`, which needs `bash`), from the repository root:
+**Checking** (instead of `verify.sh`, which needs `bash`). The shortcut opens in
+the ESP-IDF directory, so first change into the repository (every time you open
+the shortcut):
 ```powershell
+cd C:\vuka\VUKA-ugradbeni-sustavi
 cd labs\lab1_toolchain\starter
 idf.py set-target esp32c3
 idf.py qemu monitor
@@ -282,8 +289,12 @@ root (Ctrl-C stops it):
 & "C:\Program Files\mosquitto\mosquitto.exe" -v -c labs\lab6_mqtt\broker\mosquitto-windows.conf
 ```
 The emulator reaches it at `10.0.2.2:8883`, tools on the computer at
-`127.0.0.1:8883` (`mosquitto_sub` and `mosquitto_pub` are in the same directory).
-If Windows asks, allow access on private networks.
+`127.0.0.1:8883`. If Windows asks, allow access on private networks.
+`mosquitto_sub` and `mosquitto_pub` are in the same directory, so the Lab 6
+manual's command, from `labs\lab6_mqtt\starter`, reads:
+```powershell
+& "C:\Program Files\mosquitto\mosquitto_sub.exe" -h 127.0.0.1 -p 8883 --cafile ../broker/certs/ca.crt -t "vuka/sensors/#" -v
+```
 
 **The board:** `idf.py -p COM<n> flash monitor`, with the port from Device Manager.
 
@@ -366,8 +377,9 @@ calls `docker`): `bash labs/lab6_mqtt/broker/run_broker.sh` from the
 repository root; Ctrl-C stops it. If the `vuka-ugradbeni-sustavi` container is
 running, the broker joins its network (QEMU in the container reaches it at
 `10.0.2.2:8883`, tools on the computer at `127.0.0.1:8883`); otherwise it
-publishes port 8883 on the computer (the path without Docker). On Windows,
-Lab 6 is done in WSL2.
+publishes port 8883 on the computer (the path without Docker). With Docker
+from PowerShell, Lab 6 is not possible (the scripts need `bash`): do it in WSL2
+or on path C.
 
 **Lab 7.** Buildroot is built in the course container, in a **host terminal**
 at the repository root.
@@ -419,7 +431,20 @@ idf.py -p <port> flash monitor      # leave the monitor: Ctrl-]
 | WSL2 | `/dev/ttyACM0` | installation without Docker in WSL2, board forwarded with `usbipd` (below) and the `dialout` group |
 | macOS | `/dev/cu.usbmodem*` | `esptool` (below) or the installation without Docker |
 | Windows, path C | `COM<n>` | Device Manager → *USB Serial Device (COMn)* |
+| Windows, Docker from PowerShell | `COM<n>` | `esptool` from Windows (below) |
 | Docker Desktop (macOS, Windows) | — | USB devices are not passed into the container |
+
+**Windows, Docker from PowerShell.** The container does not see USB, so the
+program built in the container is written with `esptool` from Windows. Install
+the ESP-IDF Tools Installer (path C, step 2) and, in the *ESP-IDF 5.5 PowerShell*
+shortcut, in the project's build directory (e.g.
+`labs\lab1_toolchain\starter\build`), run (replace `COM5` with your port; the
+quotes around `@flash_args` are needed, because PowerShell interprets `@`
+itself):
+```powershell
+python -m esptool --chip esp32c3 -p COM5 write_flash "@flash_args"
+python -m serial.tools.miniterm COM5 115200      # quit: Ctrl-]
+```
 
 **WSL2 and `usbipd`.** In PowerShell started as administrator run
 `winget install usbipd`, then close the window and open a **new** PowerShell
@@ -478,6 +503,11 @@ Then, in the project's build directory (e.g. `labs/lab1_toolchain/starter/build`
   `sudo chown -R $USER .` in the repository root.
 - **`ModuleNotFoundError` when running `idf.py`** — another Python
   environment (venv or conda) is active; deactivate it before `export.sh`.
+- **Windows, path C: `Python was not found; run without arguments to install
+  from the Microsoft Store`, or `idf.py` is not recognized** — the command was
+  typed in a regular PowerShell; open the *ESP-IDF 5.5 PowerShell* shortcut. If
+  `qemu-system-riscv32` is missing as well, the shortcut was not reopened after
+  installing QEMU.
 - **WSL2: no `/dev/ttyACM0`** — `usbipd attach` is not running, or the board
   is on another cable/port; in PowerShell check `usbipd list` (state
   *Attached*).

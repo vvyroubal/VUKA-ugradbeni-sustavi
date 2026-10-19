@@ -47,7 +47,7 @@ kontejneru); Git Bash i MSYS2 na Windowsu nisu podržani.
 | **Windows bez virtualizacije** | **put C** (LV1–LV6) | izravno, `COM<n>` |
 
 Na Windowsu se put A može izvesti i izravno iz PowerShella
-(`docker-shell.ps1`), bez WSL2: dovoljan je za izgradnju i emulator u LV1–LV5
+(`docker-shell.ps1`), bez Ubuntua u WSL2: dovoljan je za izgradnju i emulator u LV1–LV5
 i za LV7, ali ne i za LV6 ni za pločicu. Što koji put pokriva:
 
 | | A: Docker (Linux, WSL2, macOS) | A: Docker (Windows, PowerShell) | B: bez Dockera (Linux, WSL2, macOS) | C: Windows bez virtualizacije |
@@ -72,7 +72,7 @@ putanju za koju je konfiguriran (u kontejneru je to `/work/...`).
   Linuxov datotečni sustav (`~/`), nikako u `/mnt/c/...`. Ako virtualizacija
   nije uključena, uključite je u BIOS-u/UEFI-ju (*Intel VT-x*, *AMD-V*); ako je
   procesor ne podržava, odaberite put C.
-- **Docker iz PowerShella** (put A bez WSL2): Git za Windows
+- **Docker iz PowerShella** (put A bez Ubuntua u WSL2): Git za Windows
   (`winget install Git.Git`) i Docker Desktop (put A, niže); repozitorij se
   klonira u PowerShellu (niže).
 - **Put C** (bez virtualizacije): ima vlastitu pripremu, zajedno s preuzimanjem
@@ -93,7 +93,10 @@ naredbom `code .` u korijenu repozitorija (VS Code tada radi izravno nad
 datotekama u Linuxu, uz proširenje *WSL*, koje ponudi sam).
 
 **macOS.** Ako naredba `git` ne postoji, instalirajte je s
-`xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`.
+`xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`
+(Fedora: `sudo dnf install git`, Arch: `sudo pacman -S git`; pakete za put B na
+tim distribucijama navodi [dokumentacija ESP-IDF-a](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32c3/get-started/linux-macos-setup.html),
+a najjednostavniji je ondje put A).
 
 Repozitorij kolegija preuzmite u terminalu (Linux, macOS) odnosno terminalu
 Ubuntu (WSL2):
@@ -104,7 +107,7 @@ git clone https://github.com/vvyroubal/VUKA-ugradbeni-sustavi.git
 cd VUKA-ugradbeni-sustavi
 ```
 
-**Samo za Docker iz PowerShella (bez WSL2):** u običnom PowerShellu najprije
+**Samo za Docker iz PowerShella (bez Ubuntua u WSL2):** u običnom PowerShellu najprije
 instalirajte Git naredbom `winget install Git.Git`, zatim otvorite **novi**
 PowerShell i izvedite ista tri retka.
 
@@ -116,8 +119,9 @@ repozitorija (`~/VUKA-ugradbeni-sustavi`), osim ako piše drukčije.
 
 1. Instalirajte Docker:
    - **Windows:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-     s WSL2 pozadinom (zadano). U Docker Desktopu uključite
-     *Settings → Resources → WSL integration* za **Ubuntu**.
+     s WSL2 pozadinom (zadano). Radite li u WSL2, u Docker Desktopu uključite
+     *Settings → Resources → WSL integration* za **Ubuntu** (za Docker iz
+     PowerShella taj korak ne treba).
    - **macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop/).
    - **Linux:** Docker Engine prema [službenim uputama](https://docs.docker.com/engine/install/),
      a zatim dodajte korisnika u grupu `docker` i odjavite se pa ponovno
@@ -247,8 +251,11 @@ računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban j
    nije potpisan, pa na upozorenje *Windows protected your PC* odaberite
    *More info* → *Run anyway*.
 
-**Provjera** (umjesto `verify.sh`, koji treba `bash`), iz korijena repozitorija:
+**Provjera** (umjesto `verify.sh`, koji treba `bash`). Prečac se otvara u
+direktoriju ESP-IDF-a, pa najprije prijeđite u repozitorij (pri svakom
+otvaranju prečaca):
 ```powershell
+cd C:\vuka\VUKA-ugradbeni-sustavi
 cd labs\lab1_toolchain\starter
 idf.py set-target esp32c3
 idf.py qemu monitor
@@ -277,9 +284,13 @@ Umjesto `run_broker.sh` (treba Docker) pokrenite Mosquitto za Windows
 ```powershell
 & "C:\Program Files\mosquitto\mosquitto.exe" -v -c labs\lab6_mqtt\broker\mosquitto-windows.conf
 ```
-Emulator ga vidi na `10.0.2.2:8883`, alati na računalu na `127.0.0.1:8883`
-(`mosquitto_sub` i `mosquitto_pub` su u istom direktoriju). Ako Windows upita,
-dopustite pristup u privatnoj mreži.
+Emulator ga vidi na `10.0.2.2:8883`, alati na računalu na `127.0.0.1:8883`.
+Ako Windows upita, dopustite pristup u privatnoj mreži. `mosquitto_sub` i
+`mosquitto_pub` su u istom direktoriju, pa se naredba iz priručnika LV6, iz
+`labs\lab6_mqtt\starter`, piše ovako:
+```powershell
+& "C:\Program Files\mosquitto\mosquitto_sub.exe" -h 127.0.0.1 -p 8883 --cafile ../broker/certs/ca.crt -t "vuka/sensors/#" -v
+```
 
 **Pločica:** `idf.py -p COM<n> flash monitor`, port iz Upravitelja uređaja.
 
@@ -362,7 +373,8 @@ skripta poziva `docker`): `bash labs/lab6_mqtt/broker/run_broker.sh` iz
 korijena repozitorija; zaustavlja se s Ctrl-C. Ako kontejner `vuka-ugradbeni-sustavi`
 radi, posrednik se pridružuje njegovoj mreži (QEMU ga u kontejneru vidi na
 `10.0.2.2:8883`, alati na računalu na `127.0.0.1:8883`); inače objavljuje
-port 8883 na računalu (put bez Dockera). Na Windowsu se LV6 radi u WSL2.
+port 8883 na računalu (put bez Dockera). S Dockerom iz PowerShella LV6 nije
+moguć (skripte trebaju `bash`): radite je u WSL2 ili na putu C.
 
 **LV7.** Buildroot se gradi u kontejneru tečaja, u **terminalu računala** iz
 korijena repozitorija.
@@ -413,7 +425,19 @@ idf.py -p <port> flash monitor      # izlaz iz monitora: Ctrl-]
 | WSL2 | `/dev/ttyACM0` | instalacija bez Dockera u WSL2, pločica proslijeđena alatom `usbipd` (niže) i grupa `dialout` |
 | macOS | `/dev/cu.usbmodem*` | `esptool` (niže) ili instalacija bez Dockera |
 | Windows, put C | `COM<n>` | Upravitelj uređaja → *USB Serial Device (COMn)* |
+| Windows, Docker iz PowerShella | `COM<n>` | `esptool` iz Windowsa (niže) |
 | Docker Desktop (macOS, Windows) | — | USB uređaji ne prosljeđuju se u kontejner |
+
+**Windows, Docker iz PowerShella.** Kontejner ne vidi USB, pa se program
+izgrađen u kontejneru upisuje alatom `esptool` iz Windowsa. Instalirajte
+ESP-IDF Tools Installer (put C, korak 2) i u prečacu *ESP-IDF 5.5 PowerShell*,
+u direktoriju izgradnje projekta (npr. `labs\lab1_toolchain\starter\build`),
+izvedite (`COM5` zamijenite svojim portom; navodnici oko `@flash_args` su
+nužni, jer PowerShell znak `@` inače tumači sam):
+```powershell
+python -m esptool --chip esp32c3 -p COM5 write_flash "@flash_args"
+python -m serial.tools.miniterm COM5 115200      # izlaz: Ctrl-]
+```
 
 **WSL2 i `usbipd`.** U PowerShellu pokrenutom kao administrator izvedite
 `winget install usbipd`, zatim zatvorite prozor i otvorite **novi**
@@ -472,6 +496,10 @@ Ime porta pokazuje `ls /dev/cu.usbmodem*`.
   `sudo chown -R $USER .` u korijenu repozitorija.
 - **`ModuleNotFoundError` pri pokretanju `idf.py`** — aktivna je neka druga
   Python okolina (venv ili conda); deaktivirajte je prije `export.sh`.
+- **Windows, put C: `Python was not found; run without arguments to install
+  from the Microsoft Store` ili `idf.py` nije prepoznat** — naredba je upisana u
+  običnom PowerShellu; otvorite prečac *ESP-IDF 5.5 PowerShell*. Ako nema ni
+  `qemu-system-riscv32`, prečac nakon instalacije QEMU-a nije ponovno otvoren.
 - **WSL2: nema `/dev/ttyACM0`** — `usbipd attach` nije pokrenut ili je
   pločica preko drugog kabela/priključka; u PowerShellu provjerite
   `usbipd list` (stanje *Attached*).

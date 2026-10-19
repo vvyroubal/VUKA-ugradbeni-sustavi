@@ -8,7 +8,14 @@
 #        artifacts live under ./artifacts/ (gitignored). Nothing here is
 #        committed except this makefile and the buildroot/ external tree.
 #
-# HOW (run INSIDE the embedded-course container — it has the host deps):
+# HOW (run INSIDE the embedded-course container — it has the host deps).
+# Students on Linux/WSL2, from the root of their course repository, through
+# the course shell, which runs as the host user so .br/ and artifacts/ stay
+# theirs:
+#     ./scripts/docker-shell.sh make -C labs/lab7_linux_ota -f Makefile.buildroot all
+# A plain `docker run` without --user builds as root: tar then keeps the
+# owners stored in the package archives, and a user without sudo can no
+# longer delete .br/. Instructor repository and CI (root is fine there):
 #     docker run --rm -v "$PWD:/work" -w /work embedded-course \
 #         bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all'
 #     # or, from labs/lab7_linux_ota/ :  make -f Makefile.buildroot all
@@ -21,8 +28,8 @@
 #     docker run --rm -v "$PWD:/work" -w /work -v lab7_br:/br embedded-course \
 #         bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
 #     # the lab7_br volume persists the toolchain/download cache across rebuilds.
-# Linux hosts (incl. CI) have a native bind mount + real root, so the default
-# BR_DIR=./.br invocation above works there unchanged.
+# Linux hosts (incl. CI) have a native bind mount, so the default BR_DIR=./.br
+# invocations above work there unchanged.
 #
 # The full build takes ~30-60 min on first run (toolchain + kernel + rootfs).
 # Targets: fetch, extract, defconfig, build, artifacts, all (default), clean, distclean.

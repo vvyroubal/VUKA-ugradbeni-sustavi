@@ -269,14 +269,19 @@ radi, posrednik se pridružuje njegovoj mreži (QEMU ga u kontejneru vidi na
 `10.0.2.2:8883`, alati na računalu na `127.0.0.1:8883`); inače objavljuje
 port 8883 na računalu (put bez Dockera). Na Windowsu se LV6 radi u WSL2.
 
-**LV7.** Buildroot se gradi naredbom u **terminalu računala**, iz korijena
-repozitorija (naredba sama pokreće kontejner; ne izvodi se u ljusci
-`docker-shell`).
+**LV7.** Buildroot se gradi u kontejneru tečaja, u **terminalu računala** iz
+korijena repozitorija.
 
-Linux i WSL2:
+Linux i WSL2 — istom skriptom kao ostale vježbe; kontejner radi pod vašim
+korisnikom, pa datoteke izgradnje pripadaju vama (izravan `docker run` bez
+`--user` gradio bi kao root i ostavio datoteke koje ne možete obrisati bez
+`sudo`):
 ```sh
-docker run --rm -v "$PWD:/work" -w /work embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all'
+./scripts/docker-shell.sh make -C labs/lab7_linux_ota -f Makefile.buildroot all
 ```
+
+Na macOS-u i Windowsu naredba sama pokreće kontejner (ne izvodi se u ljusci
+`docker-shell`).
 
 macOS (Docker Desktop) — izgradnja na imenovanom volumenu `lab7_br`:
 ```sh

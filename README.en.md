@@ -273,14 +273,19 @@ running, the broker joins its network (QEMU in the container reaches it at
 publishes port 8883 on the computer (the path without Docker). On Windows,
 Lab 6 is done in WSL2.
 
-**Lab 7.** Buildroot is built with a command typed in a **host terminal**, in
-the repository root (the command starts the container itself; it is not run
-in the `docker-shell` shell).
+**Lab 7.** Buildroot is built in the course container, in a **host terminal**
+at the repository root.
 
-Linux and WSL2:
+Linux and WSL2 — with the same script as the other labs; the container runs
+as your own user, so the build files belong to you (a plain `docker run`
+without `--user` would build as root and leave files you cannot delete
+without `sudo`):
 ```sh
-docker run --rm -v "$PWD:/work" -w /work embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all'
+./scripts/docker-shell.sh make -C labs/lab7_linux_ota -f Makefile.buildroot all
 ```
+
+On macOS and Windows the command starts the container itself (it is not run
+in the `docker-shell` shell).
 
 macOS (Docker Desktop) — building on the named volume `lab7_br`:
 ```sh

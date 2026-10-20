@@ -10,7 +10,7 @@ with or without Docker. These are condensed instructions; handout **H1**
 (Installing the Toolchain) on the course pages describes the same steps with
 explanations.
 
-| Path | Contents |
+| File or directory | Contents |
 |---|---|
 | `Dockerfile` | development image: ESP-IDF v5.5, Espressif's QEMU, the Lab 7 tools |
 | `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (shell in the container), `verify.sh` / `verify.ps1` (installation check), `vscode-task.*` and `idf-shell.ps1` (for VS Code) |
@@ -39,7 +39,8 @@ The instructions offer three paths:
   scripts run in PowerShell versions of the same name (`.ps1`).
 
 The course scripts are written for `bash` on Linux (directly, in WSL2 or in the
-container); Git Bash and MSYS2 on Windows are not supported.
+container), and path C has PowerShell versions of them; Git Bash and MSYS2 on
+Windows are not supported.
 
 | System | Recommended path | Board over USB |
 |---|---|---|
@@ -50,19 +51,15 @@ container); Git Bash and MSYS2 on Windows are not supported.
 
 On Windows, path A can also be run straight from PowerShell
 (`docker-shell.ps1`), without Ubuntu in WSL2: it is enough for building and the emulator
-in Labs 1–5 and for Lab 7, but not for Lab 6 and not for the board. What each
-path covers:
+in Labs 1–5 and for Lab 7, but not for Lab 6; the board is then flashed with
+`esptool` from Windows. What each path covers:
 
 | | A: Docker (Linux, WSL2, macOS) | A: Docker (Windows, PowerShell) | B: without Docker (Linux, WSL2, macOS) | C: Windows without virtualization |
 |---|---|---|---|---|
 | Building and the emulator, Labs 1–5 | yes | yes | yes | yes |
 | Lab 6 (MQTT over TLS) | yes | no — use WSL2 | yes (the broker still runs in Docker) | yes, with Mosquitto for Windows |
 | Lab 7 (Buildroot, embedded Linux) | yes | yes | Linux and WSL2 with extra packages; macOS via Docker | no |
-| Flashing the board | only on Linux | no | yes | yes |
-
-When you move the same project from a path A build to a path B build or the
-other way round, run `idf.py fullclean` first: the `build/` directory remembers
-the path it was configured for (inside the container that is `/work/...`).
+| Flashing the board | on Linux; on macOS `esptool` from the computer | `esptool` from Windows | yes | yes |
 
 ## Step 0: preparing the computer and getting the repository
 
@@ -78,8 +75,9 @@ the path it was configured for (inside the container that is `/work/...`).
 - **Docker from PowerShell** (path A without Ubuntu in WSL2): Git for Windows
   (`winget install Git.Git`) and Docker Desktop (path A, below); the repository
   is cloned in PowerShell (below).
-- **Path C** (no virtualization): has its own preparation, including getting
-  the repository — follow the *Path C* section and skip the rest of this one.
+- **Path C** (no virtualization): the installation and getting the repository
+  are in the *Path C* section; from this section only the prerequisites table
+  and the code editor apply to it.
 
 Before you start, install (Git and VS Code can also be installed without
 administrator rights):
@@ -91,10 +89,8 @@ administrator rights):
 | Path C | Git for Windows, the ESP-IDF Tools Installer v5.5, the QEMU emulator and, for Lab 6, Mosquitto for Windows (all in the *Path C* section) | for Mosquitto (it installs as a service) | about 8 GB, plus a 1.6 GB download and about 0.3 GB per lab |
 
 **Code editor:** [VS Code](https://code.visualstudio.com) is recommended, and
-any other will do. In WSL2, open the project from the Ubuntu terminal with
-`code .` at the repository root (VS Code then works directly on the files in
-Linux, with the *WSL* extension, which it offers by itself). Tasks and the rest
-are described in the *Working in VS Code* section.
+any other will do. How to open and use the repository in VS Code is described
+in the *Working in VS Code* section.
 
 **macOS.** If the `git` command does not exist, install it with
 `xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`
@@ -323,6 +319,9 @@ allow access on private networks. `mosquitto_sub` and `mosquitto_pub` are in
 
 ## Checking: `verify.sh`
 
+This section and the next apply to paths A and B; on path C, checking and
+working on the labs are described in the *Path C* section.
+
 `bash scripts/verify.sh` (from the repository root, with the environment
 active; in the container it always is) checks `idf.py` and version v5.5,
 Espressif's `qemu-system-riscv32`, builds the `hello_world` example and boots
@@ -336,9 +335,9 @@ verify.sh: PASS -- toolchain, build and QEMU all work
 
 ## Working on a lab
 
-Docker: first `./scripts/docker-shell.sh` from the repository root — all
-following commands run in that shell (under `/work`). Without Docker:
-`. ~/esp-idf/export.sh`. Example for Lab 1:
+Path A: first `./scripts/docker-shell.sh` from the repository root
+(`docker-shell.ps1` in PowerShell) — all following commands run in that shell
+(under `/work`). Path B: `. ~/esp-idf/export.sh`. Example for Lab 1:
 
 ```sh
 cd labs/lab1_toolchain/starter
@@ -351,6 +350,10 @@ bash ../../common/run_qemu.sh build        # emulator, 30 s
 already set the target chip in `sdkconfig.defaults`, and it is remembered in
 `sdkconfig`); running it again regenerates `sdkconfig` and discards changes
 made in `menuconfig`.
+
+When you move the same project from a path A build to a path B build or the
+other way round, run `idf.py fullclean` first: the `build/` directory remembers
+the path it was configured for (inside the container that is `/work/...`).
 
 `run_qemu.sh <build_dir> [timeout=30]` re-merges `flash.bin` on every run, so
 the latest build always boots. The emulator ends by itself after the
@@ -404,8 +407,8 @@ publishes port 8883 on the computer (the path without Docker). With Docker
 from PowerShell, Lab 6 is not possible (the scripts need `bash`): do it in WSL2
 or on path C.
 
-**Lab 7.** Buildroot is built in the course container, in a **host terminal**
-at the repository root.
+**Lab 7.** Buildroot is simplest to build in the course container, in a
+**host terminal** at the repository root.
 
 Linux and WSL2 — with the same script as the other labs; the container runs
 as your own user, so the build files belong to you (a plain `docker run`
@@ -436,8 +439,8 @@ and then `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
 
 The repository contains VS Code settings (`.vscode/`): recommended extensions,
 tasks and code-completion settings. Open the **repository root** (*File → Open
-Folder*; in WSL2 `code .` from the Ubuntu terminal, on path C
-`C:\vuka\VUKA-ugradbeni-sustavi`). When asked whether you trust the authors
+Folder*; in WSL2 `code .` from the Ubuntu terminal, with the *WSL*
+extension; on path C `C:\vuka\VUKA-ugradbeni-sustavi`). When asked whether you trust the authors
 of the folder, answer *Yes, I trust the authors* — in *Restricted Mode* the
 tasks do not run. VS Code then offers the *C/C++*, *WSL* (needed on Windows
 only) and *Dev Containers* (for path A) extensions; you can decline the

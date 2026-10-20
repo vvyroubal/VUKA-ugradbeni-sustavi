@@ -9,7 +9,7 @@ macOS-u ili Windowsu, s Dockerom ili bez njega. Ovo su sažete upute; iste
 korake, s objašnjenjima, opisuje priručnik **H1** (Instalacija alatnog lanca)
 na stranicama kolegija.
 
-| Put | Sadržaj |
+| Datoteka ili direktorij | Sadržaj |
 |---|---|
 | `Dockerfile` | razvojna slika: ESP-IDF v5.5, Espressifov QEMU, alati za LV7 |
 | `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (ljuska u kontejneru), `verify.sh` / `verify.ps1` (provjera instalacije), `vscode-task.*` i `idf-shell.ps1` (za VS Code) |
@@ -38,7 +38,8 @@ Upute nude tri puta:
   u PowerShell inačicama istog imena (`.ps1`).
 
 Skripte kolegija pisane su za `bash` na Linuxu (izravno, u WSL2 ili u
-kontejneru); Git Bash i MSYS2 na Windowsu nisu podržani.
+kontejneru), a za put C postoje njihove PowerShell inačice; Git Bash i MSYS2 na
+Windowsu nisu podržani.
 
 | Sustav | Preporučeni put | Pločica preko USB-a |
 |---|---|---|
@@ -49,18 +50,15 @@ kontejneru); Git Bash i MSYS2 na Windowsu nisu podržani.
 
 Na Windowsu se put A može izvesti i izravno iz PowerShella
 (`docker-shell.ps1`), bez Ubuntua u WSL2: dovoljan je za izgradnju i emulator u LV1–LV5
-i za LV7, ali ne i za LV6 ni za pločicu. Što koji put pokriva:
+i za LV7, ali ne i za LV6; pločica se tada programira alatom `esptool` iz
+Windowsa. Što koji put pokriva:
 
 | | A: Docker (Linux, WSL2, macOS) | A: Docker (Windows, PowerShell) | B: bez Dockera (Linux, WSL2, macOS) | C: Windows bez virtualizacije |
 |---|---|---|---|---|
 | Izgradnja i emulator, LV1–LV5 | da | da | da | da |
 | LV6 (MQTT preko TLS-a) | da | ne — upotrijebite WSL2 | da (posrednik ipak radi u Dockeru) | da, uz Mosquitto za Windows |
 | LV7 (Buildroot, ugradbeni Linux) | da | da | Linux i WSL2 uz dodatne pakete; macOS preko Dockera | ne |
-| Programiranje pločice | samo na Linuxu | ne | da | da |
-
-Kad isti projekt prebacujete s izgradnje na putu A na izgradnju na putu B ili
-obrnuto, najprije izvedite `idf.py fullclean`: direktorij `build/` pamti
-putanju za koju je konfiguriran (u kontejneru je to `/work/...`).
+| Programiranje pločice | na Linuxu; na macOS-u `esptool` s računala | `esptool` iz Windowsa | da | da |
 
 ## Korak 0: priprema računala i preuzimanje repozitorija
 
@@ -76,8 +74,9 @@ putanju za koju je konfiguriran (u kontejneru je to `/work/...`).
 - **Docker iz PowerShella** (put A bez Ubuntua u WSL2): Git za Windows
   (`winget install Git.Git`) i Docker Desktop (put A, niže); repozitorij se
   klonira u PowerShellu (niže).
-- **Put C** (bez virtualizacije): ima vlastitu pripremu, zajedno s preuzimanjem
-  repozitorija — slijedite odjeljak *Put C* i ostatak ovog odjeljka preskočite.
+- **Put C** (bez virtualizacije): instalaciju i preuzimanje repozitorija opisuje
+  odjeljak *Put C*; od ovog odjeljka za njega vrijede samo tablica preduvjeta i
+  uređivač koda.
 
 Prije početka instalirajte (Git i VS Code mogu se instalirati i bez
 administratorskih prava):
@@ -89,9 +88,7 @@ administratorskih prava):
 | Put C | Git for Windows, ESP-IDF Tools Installer v5.5, emulator QEMU i, za LV6, Mosquitto za Windows (sve u odjeljku *Put C*) | za Mosquitto (instalira se kao servis) | oko 8 GB, uz 1,6 GB preuzimanja i oko 0,3 GB po vježbi |
 
 **Uređivač koda:** preporučen je [VS Code](https://code.visualstudio.com), a
-odgovara i bilo koji drugi. U WSL2 projekt otvorite iz terminala Ubuntu
-naredbom `code .` u korijenu repozitorija (VS Code tada radi izravno nad
-datotekama u Linuxu, uz proširenje *WSL*, koje ponudi sam). Zadatke i ostalo
+odgovara i bilo koji drugi. Kako se repozitorij otvara i koristi u VS Codeu,
 opisuje odjeljak *Rad u VS Codeu*.
 
 **macOS.** Ako naredba `git` ne postoji, instalirajte je s
@@ -275,11 +272,11 @@ idf.py build
 ../../common/run_qemu.ps1 build
 ```
 
-**Naredbe iz priručnika vježbi** pisane su za bash, kao na putevima A i B. Na
+**Naredbe iz priručnika vježbi** pisane su za bash, kao na putovima A i B. Na
 putu C pokrećete PowerShell inačice istog imena: izostavite `bash`, nastavak
 `.sh` zamijenite s `.ps1` i naredbu pokrenite iz istog direktorija.
 
-*Putevi A i B — Linux, macOS, WSL2 i kontejner (bash):*
+*Putovi A i B — Linux, macOS, WSL2 i kontejner (bash):*
 
 | Naredba | Što radi |
 |---|---|
@@ -318,6 +315,9 @@ naredba iz priručnika LV6, iz `labs\lab6_mqtt\starter`, piše ovako:
 
 ## Provjera: `verify.sh`
 
+Ovaj i sljedeći odjeljak vrijede za putove A i B; na putu C provjeru i rad na
+vježbama opisuje odjeljak *Put C*.
+
 `bash scripts/verify.sh` (iz korijena repozitorija, s aktivnim okruženjem;
 u kontejneru je uvijek aktivno) provjerava `idf.py` i verziju v5.5,
 Espressifov `qemu-system-riscv32`, izgrađuje primjer `hello_world` i pokreće
@@ -331,9 +331,9 @@ verify.sh: PASS -- toolchain, build and QEMU all work
 
 ## Rad na vježbi
 
-Docker: najprije `./scripts/docker-shell.sh` iz korijena repozitorija — sve
-sljedeće naredbe izvode se u toj ljusci (pod `/work`). Bez Dockera:
-`. ~/esp-idf/export.sh`. Primjer za LV1:
+Put A: najprije `./scripts/docker-shell.sh` iz korijena repozitorija (u
+PowerShellu `docker-shell.ps1`) — sve sljedeće naredbe izvode se u toj ljusci
+(pod `/work`). Put B: `. ~/esp-idf/export.sh`. Primjer za LV1:
 
 ```sh
 cd labs/lab1_toolchain/starter
@@ -346,6 +346,10 @@ bash ../../common/run_qemu.sh build        # emulator, 30 s
 ciljni čip već postavljaju u `sdkconfig.defaults`, a on se pamti u
 `sdkconfig`); ponovno pokretanje iznova stvara `sdkconfig` i briše promjene
 napravljene u `menuconfig`.
+
+Kad isti projekt prebacujete s izgradnje na putu A na izgradnju na putu B ili
+obrnuto, najprije izvedite `idf.py fullclean`: direktorij `build/` pamti
+putanju za koju je konfiguriran (u kontejneru je to `/work/...`).
 
 `run_qemu.sh <build_dir> [timeout=30]` pri svakom pokretanju iznova spaja
 `flash.bin`, pa se uvijek pokreće zadnja izgradnja. Emulator sam završava
@@ -398,8 +402,8 @@ radi, posrednik se pridružuje njegovoj mreži (QEMU ga u kontejneru vidi na
 port 8883 na računalu (put bez Dockera). S Dockerom iz PowerShella LV6 nije
 moguć (skripte trebaju `bash`): radite je u WSL2 ili na putu C.
 
-**LV7.** Buildroot se gradi u kontejneru tečaja, u **terminalu računala** iz
-korijena repozitorija.
+**LV7.** Buildroot je najjednostavnije graditi u kontejneru tečaja, u
+**terminalu računala** iz korijena repozitorija.
 
 Linux i WSL2 — istom skriptom kao ostale vježbe; kontejner radi pod vašim
 korisnikom, pa datoteke izgradnje pripadaju vama (izravan `docker run` bez
@@ -430,8 +434,8 @@ a zatim `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
 
 Repozitorij sadrži postavke za VS Code (`.vscode/`): preporučena proširenja,
 zadatke i postavke za dovršavanje koda. Otvorite **korijen repozitorija**
-(*File → Open Folder*; u WSL2 `code .` iz terminala Ubuntu, na putu C
-`C:\vuka\VUKA-ugradbeni-sustavi`). Na pitanje vjerujete li autorima mape
+(*File → Open Folder*; u WSL2 `code .` iz terminala Ubuntu, uz proširenje
+*WSL*; na putu C `C:\vuka\VUKA-ugradbeni-sustavi`). Na pitanje vjerujete li autorima mape
 odgovorite *Yes, I trust the authors* — u ograničenom načinu (*Restricted
 Mode*) zadaci ne rade. VS Code zatim ponudi proširenja *C/C++*, *WSL* (treba
 samo na Windowsu) i *Dev Containers* (za put A); ponudu paketa *C/C++ Extension

@@ -1,0 +1,25 @@
+{
+  "files.watcherExclude": {
+    "**/build/**": true,
+    "**/build-*/**": true,
+    "**/.br/**": true
+  },
+  "search.exclude": {
+    "**/build": true,
+    "**/build-*": true,
+    "**/.br": true
+  },
+  "terminal.integrated.profiles.windows": {
+    "ESP-IDF 5.5 PowerShell": {
+      "path": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoExit",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts\\idf-shell.ps1"
+      ]
+    }
+  }
+}

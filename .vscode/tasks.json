@@ -1,0 +1,168 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Izgradnja i QEMU / Build and run in QEMU",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "build-qemu",
+        "${input:lab}"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "build-qemu",
+          "${input:lab}"
+        ]
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Izgradnja / Build",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "build",
+        "${input:lab}"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "build",
+          "${input:lab}"
+        ]
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "QEMU (zadnja izgradnja / latest build)",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "qemu",
+        "${input:lab}"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "qemu",
+          "${input:lab}"
+        ]
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "menuconfig",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "menuconfig",
+        "${input:lab}"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "menuconfig",
+          "${input:lab}"
+        ]
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "idf.py reconfigure",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "reconfigure",
+        "${input:lab}"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "reconfigure",
+          "${input:lab}"
+        ]
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "idf.py fullclean",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "fullclean",
+        "${input:lab}"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "fullclean",
+          "${input:lab}"
+        ]
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "lab",
+      "type": "pickString",
+      "description": "Vjezba / Lab",
+      "options": [
+        "labs/lab1_toolchain/starter",
+        "labs/lab2_gpio_irq/starter",
+        "labs/lab3_bme280/starter",
+        "labs/lab4_adc_pwm/starter",
+        "labs/lab5_rtos/starter",
+        "labs/lab6_mqtt/starter"
+      ],
+      "default": "labs/lab1_toolchain/starter"
+    }
+  ]
+}

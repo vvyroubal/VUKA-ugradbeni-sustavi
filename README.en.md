@@ -13,7 +13,8 @@ explanations.
 | Path | Contents |
 |---|---|
 | `Dockerfile` | development image: ESP-IDF v5.5, Espressif's QEMU, the Lab 7 tools |
-| `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (shell in the container), `verify.sh` / `verify.ps1` (installation check) |
+| `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (shell in the container), `verify.sh` / `verify.ps1` (installation check), `vscode-task.*` and `idf-shell.ps1` (for VS Code) |
+| `.vscode/` | VS Code settings, tasks and recommended extensions |
 | `labs/labN_*/starter/` | starter projects for Labs 1–6 |
 | `labs/common/` | emulator scripts (`run_qemu*.sh`, for path C `run_qemu*.ps1`) and shared components |
 | `labs/lab6_mqtt/broker/` | MQTT broker and certificates for Lab 6 |
@@ -92,7 +93,8 @@ administrator rights):
 **Code editor:** [VS Code](https://code.visualstudio.com) is recommended, and
 any other will do. In WSL2, open the project from the Ubuntu terminal with
 `code .` at the repository root (VS Code then works directly on the files in
-Linux, with the *WSL* extension, which it offers by itself).
+Linux, with the *WSL* extension, which it offers by itself). Tasks and the rest
+are described in the *Working in VS Code* section.
 
 **macOS.** If the `git` command does not exist, install it with
 `xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`
@@ -413,6 +415,43 @@ docker run --rm -v "${PWD}:/work" -w /work -v lab7_br:/br embedded-course bash -
 Without Docker (Linux and WSL2 only) you also need the packages
 `sudo apt-get install -y make gcc g++ patch cpio unzip rsync bc file wget qemu-system-misc`,
 and then `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
+
+## Working in VS Code
+
+The repository contains VS Code settings (`.vscode/`): recommended extensions,
+tasks and code-completion settings. Open the **repository root** (*File → Open
+Folder*; in WSL2 `code .` from the Ubuntu terminal, on path C
+`C:\vuka\VUKA-ugradbeni-sustavi`). VS Code offers the *C/C++*, *WSL* and
+*Dev Containers* extensions. Espressif's *ESP-IDF* extension is not needed; do
+not install it — it sets up its own, different ESP-IDF.
+
+**Tasks** (*Terminal → Run Task…*, Ctrl-Shift-B to build and run), after which
+you choose the lab:
+
+| Task | What it does |
+|---|---|
+| Build and run in QEMU (Ctrl-Shift-B) | `idf.py build`, then `run_qemu.sh` (Lab 6: `run_qemu_net.sh`) |
+| Build | `idf.py build` |
+| QEMU | runs the latest build in the emulator |
+| menuconfig | `idf.py menuconfig` |
+| idf.py reconfigure | after a new `Kconfig.projbuild` (Labs 1 and 4) |
+| idf.py fullclean | when the same project moves between Docker and the build without it |
+
+The tasks find the environment by themselves (the `scripts/vscode-task.sh`
+script, `.ps1` on Windows): an active ESP-IDF, `~/esp-idf` (path B), the
+installation on Windows (path C), and if there is no ESP-IDF, the course
+container (path A). On path A a task attaches to a container that is already
+running, so run tasks one at a time.
+
+**Terminal:** on path A `./scripts/docker-shell.sh`, on path B
+`. ~/esp-idf/export.sh`; on path C the **ESP-IDF 5.5 PowerShell** profile (the
+arrow next to `+` in the terminal panel).
+
+**Code completion (IntelliSense)** reads the lab's `build/compile_commands.json`,
+so it works after the first build. On path A the paths come from the container
+(`/work/...`): run `./scripts/docker-shell.sh`, then F1 → *Dev Containers:
+Attach to Running Container…* → `vuka-ugradbeni-sustavi` and open the `/work`
+folder.
 
 ## Flashing the board
 

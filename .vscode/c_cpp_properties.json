@@ -1,0 +1,17 @@
+{
+  "configurations": [
+    {
+      "name": "ESP-IDF (vjezbe / labs)",
+      "compileCommands": [
+        "${workspaceFolder}/labs/lab1_toolchain/starter/build/compile_commands.json",
+        "${workspaceFolder}/labs/lab2_gpio_irq/starter/build/compile_commands.json",
+        "${workspaceFolder}/labs/lab3_bme280/starter/build/compile_commands.json",
+        "${workspaceFolder}/labs/lab4_adc_pwm/starter/build/compile_commands.json",
+        "${workspaceFolder}/labs/lab5_rtos/starter/build/compile_commands.json",
+        "${workspaceFolder}/labs/lab6_mqtt/starter/build/compile_commands.json"
+      ],
+      "cStandard": "gnu17"
+    }
+  ],
+  "version": 4
+}

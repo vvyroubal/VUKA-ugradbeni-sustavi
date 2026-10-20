@@ -12,7 +12,8 @@ na stranicama kolegija.
 | Put | Sadržaj |
 |---|---|
 | `Dockerfile` | razvojna slika: ESP-IDF v5.5, Espressifov QEMU, alati za LV7 |
-| `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (ljuska u kontejneru), `verify.sh` / `verify.ps1` (provjera instalacije) |
+| `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (ljuska u kontejneru), `verify.sh` / `verify.ps1` (provjera instalacije), `vscode-task.*` i `idf-shell.ps1` (za VS Code) |
+| `.vscode/` | postavke, zadaci i preporučena proširenja za VS Code |
 | `labs/labN_*/starter/` | polazni projekti vježbi LV1–LV6 |
 | `labs/common/` | skripte za emulator (`run_qemu*.sh`, za put C `run_qemu*.ps1`) i zajedničke komponente |
 | `labs/lab6_mqtt/broker/` | MQTT posrednik i certifikati za LV6 |
@@ -90,7 +91,8 @@ administratorskih prava):
 **Uređivač koda:** preporučen je [VS Code](https://code.visualstudio.com), a
 odgovara i bilo koji drugi. U WSL2 projekt otvorite iz terminala Ubuntu
 naredbom `code .` u korijenu repozitorija (VS Code tada radi izravno nad
-datotekama u Linuxu, uz proširenje *WSL*, koje ponudi sam).
+datotekama u Linuxu, uz proširenje *WSL*, koje ponudi sam). Zadatke i ostalo
+opisuje odjeljak *Rad u VS Codeu*.
 
 **macOS.** Ako naredba `git` ne postoji, instalirajte je s
 `xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`
@@ -408,6 +410,41 @@ docker run --rm -v "${PWD}:/work" -w /work -v lab7_br:/br embedded-course bash -
 Bez Dockera (samo Linux i WSL2) potrebni su još paketi
 `sudo apt-get install -y make gcc g++ patch cpio unzip rsync bc file wget qemu-system-misc`,
 a zatim `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
+
+## Rad u VS Codeu
+
+Repozitorij sadrži postavke za VS Code (`.vscode/`): preporučena proširenja,
+zadatke i postavke za dovršavanje koda. Otvorite **korijen repozitorija**
+(*File → Open Folder*; u WSL2 `code .` iz terminala Ubuntu, na putu C
+`C:\vuka\VUKA-ugradbeni-sustavi`). VS Code ponudi proširenja *C/C++*, *WSL* i
+*Dev Containers*. Espressifovo proširenje *ESP-IDF* nije potrebno i ne
+instalirajte ga — ono postavlja vlastiti, drukčiji ESP-IDF.
+
+**Zadaci** (*Terminal → Run Task…*, Ctrl-Shift-B za izgradnju i pokretanje),
+nakon kojih se bira vježba:
+
+| Zadatak | Što radi |
+|---|---|
+| Izgradnja i QEMU (Ctrl-Shift-B) | `idf.py build`, zatim `run_qemu.sh` (LV6: `run_qemu_net.sh`) |
+| Izgradnja | `idf.py build` |
+| QEMU | pokreće zadnju izgradnju u emulatoru |
+| menuconfig | `idf.py menuconfig` |
+| idf.py reconfigure | nakon novog `Kconfig.projbuild` (LV1, LV4) |
+| idf.py fullclean | kad isti projekt prelazi s Dockera na izgradnju bez njega ili obrnuto |
+
+Zadaci sami nalaze okruženje (skripta `scripts/vscode-task.sh`, na Windowsu
+`.ps1`): aktivan ESP-IDF, `~/esp-idf` (put B), instalaciju na Windowsu (put C),
+a ako ESP-IDF-a nema, kontejner tečaja (put A). Na putu A zadatak se spaja na
+kontejner koji već radi, pa zadatke pokrećite jedan po jedan.
+
+**Terminal:** na putu A `./scripts/docker-shell.sh`, na putu B
+`. ~/esp-idf/export.sh`; na putu C profil **ESP-IDF 5.5 PowerShell** (strelica
+uz `+` u ploči terminala).
+
+**Dovršavanje koda (IntelliSense)** čita `build/compile_commands.json` vježbe, pa
+radi nakon prve izgradnje. Na putu A putanje su iz kontejnera (`/work/...`):
+pokrenite `./scripts/docker-shell.sh`, zatim F1 → *Dev Containers: Attach to
+Running Container…* → `vuka-ugradbeni-sustavi` i otvorite mapu `/work`.
 
 ## Programiranje pločice
 

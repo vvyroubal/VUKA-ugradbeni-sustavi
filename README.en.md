@@ -421,8 +421,11 @@ and then `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
 The repository contains VS Code settings (`.vscode/`): recommended extensions,
 tasks and code-completion settings. Open the **repository root** (*File → Open
 Folder*; in WSL2 `code .` from the Ubuntu terminal, on path C
-`C:\vuka\VUKA-ugradbeni-sustavi`). VS Code offers the *C/C++*, *WSL* and
-*Dev Containers* extensions. Espressif's *ESP-IDF* extension is not needed; do
+`C:\vuka\VUKA-ugradbeni-sustavi`). When asked whether you trust the authors
+of the folder, answer *Yes, I trust the authors* — in *Restricted Mode* the
+tasks do not run. VS Code then offers the *C/C++*, *WSL* (needed on Windows
+only) and *Dev Containers* (for path A) extensions; you can decline the
+*C/C++ Extension Pack* offer. Espressif's *ESP-IDF* extension is not needed; do
 not install it — it sets up its own, different ESP-IDF.
 
 **Tasks** (*Terminal → Run Task…*, Ctrl-Shift-B to build and run), after which
@@ -448,7 +451,8 @@ running, so run tasks one at a time.
 arrow next to `+` in the terminal panel).
 
 **Code completion (IntelliSense)** reads the lab's `build/compile_commands.json`,
-so it works after the first build. On path A the paths come from the container
+so it works after the first build (until then *Problems* shows *Cannot find …
+compile_commands.json* for labs not yet built). On path A the paths come from the container
 (`/work/...`): run `./scripts/docker-shell.sh`, then F1 → *Dev Containers:
 Attach to Running Container…* → `vuka-ugradbeni-sustavi` and open the `/work`
 folder.

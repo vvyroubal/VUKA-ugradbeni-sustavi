@@ -416,8 +416,11 @@ a zatim `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
 Repozitorij sadrži postavke za VS Code (`.vscode/`): preporučena proširenja,
 zadatke i postavke za dovršavanje koda. Otvorite **korijen repozitorija**
 (*File → Open Folder*; u WSL2 `code .` iz terminala Ubuntu, na putu C
-`C:\vuka\VUKA-ugradbeni-sustavi`). VS Code ponudi proširenja *C/C++*, *WSL* i
-*Dev Containers*. Espressifovo proširenje *ESP-IDF* nije potrebno i ne
+`C:\vuka\VUKA-ugradbeni-sustavi`). Na pitanje vjerujete li autorima mape
+odgovorite *Yes, I trust the authors* — u ograničenom načinu (*Restricted
+Mode*) zadaci ne rade. VS Code zatim ponudi proširenja *C/C++*, *WSL* (treba
+samo na Windowsu) i *Dev Containers* (za put A); ponudu paketa *C/C++ Extension
+Pack* možete odbiti. Espressifovo proširenje *ESP-IDF* nije potrebno i ne
 instalirajte ga — ono postavlja vlastiti, drukčiji ESP-IDF.
 
 **Zadaci** (*Terminal → Run Task…*, Ctrl-Shift-B za izgradnju i pokretanje),
@@ -442,7 +445,8 @@ kontejner koji već radi, pa zadatke pokrećite jedan po jedan.
 uz `+` u ploči terminala).
 
 **Dovršavanje koda (IntelliSense)** čita `build/compile_commands.json` vježbe, pa
-radi nakon prve izgradnje. Na putu A putanje su iz kontejnera (`/work/...`):
+radi nakon prve izgradnje (do tada *Problems* za neizgrađene vježbe javlja
+*Cannot find … compile_commands.json*). Na putu A putanje su iz kontejnera (`/work/...`):
 pokrenite `./scripts/docker-shell.sh`, zatim F1 → *Dev Containers: Attach to
 Running Container…* → `vuka-ugradbeni-sustavi` i otvorite mapu `/work`.
 

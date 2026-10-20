@@ -130,7 +130,8 @@ QEMU_ARGS+=(
 
 echo "== booting Lab 7 riscv32 virt image [$MODE] via $QEMU_BIN (login: root/root; Ctrl-A X to quit QEMU)"
 if [ "$TIMEOUT" -gt 0 ] 2>/dev/null; then
-  exec timeout "$TIMEOUT" "$QEMU_BIN" "${QEMU_ARGS[@]}"
+  # --foreground: see labs/common/run_qemu.sh (QEMU stops on SIGTTOU otherwise)
+  exec timeout --foreground "$TIMEOUT" "$QEMU_BIN" "${QEMU_ARGS[@]}"
 else
   exec "$QEMU_BIN" "${QEMU_ARGS[@]}"
 fi

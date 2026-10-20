@@ -96,7 +96,11 @@ fi
 
 : > "$LOG_FILE"
 
-"$TIMEOUT_BIN" "$TIMEOUT" qemu-system-riscv32 -M esp32c3 -nographic \
+# --foreground: without it `timeout` moves QEMU into a background process
+# group, and when stdin is a terminal (an interactive shell, a VS Code task,
+# docker -it) QEMU's -nographic console set-up then stops it with SIGTTOU --
+# no output at all. QEMU starts no children, so nothing escapes the timeout.
+"$TIMEOUT_BIN" --foreground "$TIMEOUT" qemu-system-riscv32 -M esp32c3 -nographic \
     -drive file="$FLASH_BIN",if=mtd,format=raw 2>&1 | tee "$LOG_FILE"
 QEMU_STATUS="${PIPESTATUS[0]}"
 

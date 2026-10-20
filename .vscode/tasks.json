@@ -153,7 +153,7 @@
     {
       "id": "lab",
       "type": "pickString",
-      "description": "Vjezba / Lab",
+      "description": "Vježba / Lab",
       "options": [
         "labs/lab1_toolchain/starter",
         "labs/lab2_gpio_irq/starter",

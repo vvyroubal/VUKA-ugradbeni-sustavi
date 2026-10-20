@@ -1,7 +1,7 @@
 {
   "configurations": [
     {
-      "name": "ESP-IDF (vjezbe / labs)",
+      "name": "ESP-IDF (vježbe / labs)",
       "compileCommands": [
         "${workspaceFolder}/labs/lab1_toolchain/starter/build/compile_commands.json",
         "${workspaceFolder}/labs/lab2_gpio_irq/starter/build/compile_commands.json",

@@ -275,18 +275,33 @@ idf.py build
 ../../common/run_qemu.ps1 build
 ```
 
-**Naredbe iz priručnika vježbi:** izostavite `bash` i nastavak `.sh` zamijenite
-s `.ps1`, iz istog direktorija:
+**Naredbe iz priručnika vježbi** pisane su za bash, kao na putevima A i B. Na
+putu C pokrećete PowerShell inačice istog imena: izostavite `bash`, nastavak
+`.sh` zamijenite s `.ps1` i naredbu pokrenite iz istog direktorija.
 
-| U priručniku | Na putu C |
+*Putevi A i B — Linux, macOS, WSL2 i kontejner (bash):*
+
+| Naredba | Što radi |
 |---|---|
-| `bash ../../common/run_qemu.sh build` | `../../common/run_qemu.ps1 build` |
-| `bash ../../common/run_qemu_net.sh build` | `../../common/run_qemu_net.ps1 build` |
-| `bash ../../common/run_qemu_gdb.sh build` | `../../common/run_qemu_gdb.ps1 build`; GDB u drugom prozoru prečaca, naredbom koju skripta ispiše |
-| `bash ../broker/gen_certs.sh` | `../broker/gen_certs.ps1` |
-| `bash ../broker/run_broker.sh` | `../broker/run_broker.ps1` (u zasebnom prozoru prečaca; posrednik je Mosquitto za Windows) |
-| `bash scripts/verify.sh` | `./scripts/verify.ps1` |
-| naredba prelomljena znakom `\` | upišite je u jednom retku |
+| `bash ../../common/run_qemu.sh build` | pokreće izgradnju u emulatoru |
+| `bash ../../common/run_qemu_net.sh build` | isto, s mrežnom karticom (LV6) |
+| `bash ../../common/run_qemu_gdb.sh build` | emulator čeka GDB na portu 1234 (LV2) |
+| `bash ../broker/gen_certs.sh` | izrađuje TLS certifikate posrednika (LV6) |
+| `bash ../broker/run_broker.sh` | pokreće MQTT posrednik (LV6) |
+| `bash scripts/verify.sh` | provjerava alatni lanac, izgradnju i QEMU |
+
+*Put C — Windows, prečac ESP-IDF 5.5 PowerShell:*
+
+| Naredba | Što radi |
+|---|---|
+| `../../common/run_qemu.ps1 build` | pokreće izgradnju u emulatoru |
+| `../../common/run_qemu_net.ps1 build` | isto, s mrežnom karticom (LV6) |
+| `../../common/run_qemu_gdb.ps1 build` | emulator čeka GDB (LV2); GDB pokrenite u drugom prozoru prečaca, naredbom koju skripta ispiše |
+| `../broker/gen_certs.ps1` | izrađuje TLS certifikate posrednika (LV6) |
+| `../broker/run_broker.ps1` | pokreće posrednik Mosquitto za Windows (LV6), u zasebnom prozoru prečaca |
+| `./scripts/verify.ps1` | provjerava alatni lanac, izgradnju i QEMU |
+
+Naredbu koju priručnik prelama znakom `\` na putu C upišite u jednom retku.
 
 Za brzo isprobavanje radi i ESP-IDF-ova naredba `idf.py qemu monitor` (izgradi,
 pokrene i prikaže ispis; izlaz Ctrl-]).

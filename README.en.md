@@ -278,18 +278,34 @@ idf.py build
 ../../common/run_qemu.ps1 build
 ```
 
-**Commands from the lab manuals:** leave out `bash` and replace the `.sh`
-extension with `.ps1`, from the same directory:
+**Commands from the lab manuals** are written for bash, as on paths A and B.
+On path C you run the PowerShell versions of the same name: leave out `bash`,
+replace the `.sh` extension with `.ps1` and run the command from the same
+directory.
 
-| In the manual | On path C |
+*Paths A and B — Linux, macOS, WSL2 and the container (bash):*
+
+| Command | What it does |
 |---|---|
-| `bash ../../common/run_qemu.sh build` | `../../common/run_qemu.ps1 build` |
-| `bash ../../common/run_qemu_net.sh build` | `../../common/run_qemu_net.ps1 build` |
-| `bash ../../common/run_qemu_gdb.sh build` | `../../common/run_qemu_gdb.ps1 build`; GDB in a second shortcut window, with the command the script prints |
-| `bash ../broker/gen_certs.sh` | `../broker/gen_certs.ps1` |
-| `bash ../broker/run_broker.sh` | `../broker/run_broker.ps1` (in a separate shortcut window; the broker is Mosquitto for Windows) |
-| `bash scripts/verify.sh` | `./scripts/verify.ps1` |
-| a command continued with `\` | type it on one line |
+| `bash ../../common/run_qemu.sh build` | runs the build in the emulator |
+| `bash ../../common/run_qemu_net.sh build` | the same, with a network card (Lab 6) |
+| `bash ../../common/run_qemu_gdb.sh build` | the emulator waits for GDB on port 1234 (Lab 2) |
+| `bash ../broker/gen_certs.sh` | creates the broker's TLS certificates (Lab 6) |
+| `bash ../broker/run_broker.sh` | starts the MQTT broker (Lab 6) |
+| `bash scripts/verify.sh` | checks the toolchain, the build and QEMU |
+
+*Path C — Windows, the ESP-IDF 5.5 PowerShell shortcut:*
+
+| Command | What it does |
+|---|---|
+| `../../common/run_qemu.ps1 build` | runs the build in the emulator |
+| `../../common/run_qemu_net.ps1 build` | the same, with a network card (Lab 6) |
+| `../../common/run_qemu_gdb.ps1 build` | the emulator waits for GDB (Lab 2); start GDB in a second shortcut window, with the command the script prints |
+| `../broker/gen_certs.ps1` | creates the broker's TLS certificates (Lab 6) |
+| `../broker/run_broker.ps1` | starts the Mosquitto for Windows broker (Lab 6), in a separate shortcut window |
+| `./scripts/verify.ps1` | checks the toolchain, the build and QEMU |
+
+On path C, type a command that the manual continues with `\` on one line.
 
 For a quick try, ESP-IDF's own `idf.py qemu monitor` works too (it builds,
 runs and shows the output; leave with Ctrl-]).

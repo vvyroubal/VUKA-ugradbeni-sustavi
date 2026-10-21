@@ -60,7 +60,17 @@ Windowsa. Što koji put pokriva:
 | LV7 (Buildroot, ugradbeni Linux) | da | da | Linux i WSL2 uz dodatne pakete; macOS preko Dockera | ne |
 | Programiranje pločice | na Linuxu; na macOS-u `esptool` s računala | `esptool` iz Windowsa | da | da |
 
+**Redoslijed:** na svakom putu najprije Korak 0, zatim odjeljak svojega puta
+(A, B ili C), pa *Provjera* i *Rad na vježbi*; za put C provjera i prvo
+pokretanje opisani su u odjeljku *Put C*. *Rad u VS Codeu* i *Programiranje
+pločice* dolaze na red kad okruženje radi.
+
 ## Korak 0: priprema računala i preuzimanje repozitorija
+
+**Uređivač koda** trebate na svim sustavima, jer vježbe traže izmjene izvornog
+koda: preporučen je [VS Code](https://code.visualstudio.com), a odgovara i bilo
+koji drugi. Kako se repozitorij otvara i koristi u VS Codeu, opisuje odjeljak
+*Rad u VS Codeu*. Ostatak pripreme ovisi o sustavu.
 
 **Windows** ima tri mogućnosti (vidi „Koji put odabrati”):
 
@@ -79,7 +89,8 @@ Windowsa. Što koji put pokriva:
   uređivač koda.
 
 Prije početka instalirajte (Git i VS Code mogu se instalirati i bez
-administratorskih prava):
+administratorskih prava; `winget` pri prvom pokretanju traži da prihvaćanje
+uvjeta potvrdite slovom `Y`):
 
 | Mogućnost | Instalirajte prije početka | Administrator | Prostor |
 |---|---|---|---|
@@ -87,11 +98,8 @@ administratorskih prava):
 | Docker iz PowerShella (put A) | [Git for Windows](https://git-scm.com/download/win) (ili `winget install Git.Git`) i [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows 10 22H2 ili Windows 11 23H2, 8 GB RAM-a, uključena virtualizacija) | jednom, kad Docker Desktop prvi put uključuje WSL2 | oko 8 GB uz Docker Desktop |
 | Put C | Git for Windows, ESP-IDF Tools Installer v5.5, emulator QEMU i, za LV6, Mosquitto za Windows (sve u odjeljku *Put C*) | za Mosquitto (instalira se kao servis) | oko 8 GB, uz 1,6 GB preuzimanja i oko 0,3 GB po vježbi |
 
-**Uređivač koda:** preporučen je [VS Code](https://code.visualstudio.com), a
-odgovara i bilo koji drugi. Kako se repozitorij otvara i koristi u VS Codeu,
-opisuje odjeljak *Rad u VS Codeu*.
-
-**macOS.** Ako naredba `git` ne postoji, instalirajte je s
+**macOS.** U Terminalu upišite `git --version`; ako naredba ne postoji,
+instalirajte je s
 `xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`
 (Fedora: `sudo dnf install git`, Arch: `sudo pacman -S git`; pakete za put B na
 tim distribucijama navodi [dokumentacija ESP-IDF-a](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32c3/get-started/linux-macos-setup.html),
@@ -118,7 +126,9 @@ repozitorija (`~/VUKA-ugradbeni-sustavi`), osim ako piše drukčije.
 
 1. Instalirajte Docker:
    - **Windows:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-     s WSL2 pozadinom (zadano). Radite li u WSL2, u Docker Desktopu uključite
+     s WSL2 pozadinom (zadano); instalacijski program na kraju traži odjavu
+     ili ponovno pokretanje računala — učinite to. Radite li u WSL2, u Docker
+     Desktopu uključite
      *Settings → Resources → WSL integration* za **Ubuntu** (za Docker iz
      PowerShella taj korak ne treba).
    - **macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop/).
@@ -129,7 +139,10 @@ repozitorija (`~/VUKA-ugradbeni-sustavi`), osim ako piše drukčije.
      sudo usermod -aG docker $USER
      ```
 
-   Na Windowsu i macOS-u **Docker Desktop mora biti pokrenut** dok radite.
+   Pri prvom pokretanju Docker Desktop traži prihvaćanje uvjeta korištenja i
+   nudi prijavu na Docker račun; prijava nije potrebna (*Continue without
+   signing in*). Na Windowsu i macOS-u **Docker Desktop mora biti pokrenut**
+   dok radite.
    Provjera: `docker run --rm hello-world` ispisuje `Hello from Docker!`.
 2. Otvorite ljusku u kontejneru. Prvo pokretanje gradi sliku
    `embedded-course`: traje **15–30 min** i zauzima **oko 8 GB**.
@@ -231,7 +244,8 @@ računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban j
    koristi skripta `gen_certs.ps1`.
 2. Službeni [ESP-IDF Tools Installer](https://dl.espressif.com/dl/esp-idf/),
    inačica **v5.5** (na stranici: *ESP-IDF v5.5.x Offline Installer*). Instalacijski direktorij: zadani ili kratka putanja bez
-   razmaka, zagrada i dijakritičkih znakova (kraća od 90 znakova). Sve naredbe
+   razmaka, zagrada i dijakritičkih znakova (kraća od 90 znakova); na ostalim
+   stranicama ostavite zadane postavke. Sve naredbe
    `idf.py` pišu se u prečacu **ESP-IDF 5.5 PowerShell**.
 3. U tom prečacu instalirajte emulator, pa prečac zatvorite i otvorite ponovno:
    ```powershell
@@ -434,8 +448,8 @@ a zatim `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
 
 Repozitorij sadrži postavke za VS Code (`.vscode/`): preporučena proširenja,
 zadatke i postavke za dovršavanje koda. Otvorite **korijen repozitorija**
-(*File → Open Folder*; u WSL2 `code .` iz terminala Ubuntu, uz proširenje
-*WSL*; na putu C `C:\vuka\VUKA-ugradbeni-sustavi`). Na pitanje vjerujete li autorima mape
+(*File → Open Folder*; u WSL2 `code .` iz terminala Ubuntu — VS Code je
+instaliran na Windowsu, a proširenje *WSL* spaja ga s Ubuntuom; na putu C `C:\vuka\VUKA-ugradbeni-sustavi`). Na pitanje vjerujete li autorima mape
 odgovorite *Yes, I trust the authors* — u ograničenom načinu (*Restricted
 Mode*) zadaci ne rade. VS Code zatim ponudi proširenja *C/C++*, *WSL* (treba
 samo na Windowsu) i *Dev Containers* (za put A); ponudu paketa *C/C++ Extension

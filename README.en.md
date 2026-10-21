@@ -61,7 +61,18 @@ in Labs 1–5 and for Lab 7, but not for Lab 6; the board is then flashed with
 | Lab 7 (Buildroot, embedded Linux) | yes | yes | Linux and WSL2 with extra packages; macOS via Docker | no |
 | Flashing the board | on Linux; on macOS `esptool` from the computer | `esptool` from Windows | yes | yes |
 
+**Order:** on every path, first Step 0, then the section of your path (A, B or
+C), then *Checking* and *Working on a lab*; for path C the check and the first
+run are described in the *Path C* section. *Working in VS Code* and
+*Flashing the board* come once the environment works.
+
 ## Step 0: preparing the computer and getting the repository
+
+You need a **code editor** on every system, because the labs ask you to change
+source code: [VS Code](https://code.visualstudio.com) is recommended, and any
+other will do. How to open and use the repository in VS Code is described in
+the *Working in VS Code* section. The rest of the preparation depends on the
+system.
 
 **Windows** has three options (see "Which path to choose"):
 
@@ -80,7 +91,8 @@ in Labs 1–5 and for Lab 7, but not for Lab 6; the board is then flashed with
   and the code editor apply to it.
 
 Before you start, install (Git and VS Code can also be installed without
-administrator rights):
+administrator rights; on its first run `winget` asks you to accept its terms —
+answer `Y`):
 
 | Option | Install before you start | Administrator | Disk space |
 |---|---|---|---|
@@ -88,11 +100,8 @@ administrator rights):
 | Docker from PowerShell (path A) | [Git for Windows](https://git-scm.com/download/win) (or `winget install Git.Git`) and [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows 10 22H2 or Windows 11 23H2, 8 GB of RAM, virtualization enabled) | once, when Docker Desktop first turns on WSL2 | about 8 GB plus Docker Desktop |
 | Path C | Git for Windows, the ESP-IDF Tools Installer v5.5, the QEMU emulator and, for Lab 6, Mosquitto for Windows (all in the *Path C* section) | for Mosquitto (it installs as a service) | about 8 GB, plus a 1.6 GB download and about 0.3 GB per lab |
 
-**Code editor:** [VS Code](https://code.visualstudio.com) is recommended, and
-any other will do. How to open and use the repository in VS Code is described
-in the *Working in VS Code* section.
-
-**macOS.** If the `git` command does not exist, install it with
+**macOS.** Type `git --version` in Terminal; if the command does not exist,
+install it with
 `xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`
 (Fedora: `sudo dnf install git`, Arch: `sudo pacman -S git`; the path B packages
 for those distributions are listed in the [ESP-IDF documentation](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32c3/get-started/linux-macos-setup.html),
@@ -119,7 +128,8 @@ the repository root (`~/VUKA-ugradbeni-sustavi`) unless stated otherwise.
 
 1. Install Docker:
    - **Windows:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-     with the WSL2 backend (the default). If you work in WSL2, enable
+     with the WSL2 backend (the default); the installer ends by asking you to
+     log out or restart the computer — do so. If you work in WSL2, enable
      *Settings → Resources → WSL integration* for **Ubuntu** in Docker Desktop
      (Docker from PowerShell does not need this step).
    - **macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop/).
@@ -130,7 +140,10 @@ the repository root (`~/VUKA-ugradbeni-sustavi`) unless stated otherwise.
      sudo usermod -aG docker $USER
      ```
 
-   On Windows and macOS **Docker Desktop must be running** while you work.
+   On its first start Docker Desktop asks you to accept the terms of use and
+   offers a Docker account sign-in; signing in is not needed (*Continue
+   without signing in*). On Windows and macOS **Docker Desktop must be
+   running** while you work.
    Check: `docker run --rm hello-world` prints `Hello from Docker!`.
 2. Open a shell in the container. The first run builds the `embedded-course`
    image: it takes **15–30 min** and uses **about 8 GB**.
@@ -233,7 +246,8 @@ the instructor). A 64-bit Windows 10 or 11 is required.
    `gen_certs.ps1` script uses for the Lab 6 certificates.
 2. The official [ESP-IDF Tools Installer](https://dl.espressif.com/dl/esp-idf/),
    version **v5.5** (on the page: *ESP-IDF v5.5.x Offline Installer*). Installation directory: the default, or a short path
-   without spaces, parentheses or diacritics (shorter than 90 characters). Every
+   without spaces, parentheses or diacritics (shorter than 90 characters);
+   leave the defaults on the installer's other pages. Every
    `idf.py` command is typed in the **ESP-IDF 5.5 PowerShell** shortcut.
 3. In that shortcut install the emulator, then close the shortcut and open it again:
    ```powershell
@@ -439,8 +453,8 @@ and then `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
 
 The repository contains VS Code settings (`.vscode/`): recommended extensions,
 tasks and code-completion settings. Open the **repository root** (*File → Open
-Folder*; in WSL2 `code .` from the Ubuntu terminal, with the *WSL*
-extension; on path C `C:\vuka\VUKA-ugradbeni-sustavi`). When asked whether you trust the authors
+Folder*; in WSL2 `code .` from the Ubuntu terminal — VS Code is installed on
+Windows, and the *WSL* extension connects it to Ubuntu; on path C `C:\vuka\VUKA-ugradbeni-sustavi`). When asked whether you trust the authors
 of the folder, answer *Yes, I trust the authors* — in *Restricted Mode* the
 tasks do not run. VS Code then offers the *C/C++*, *WSL* (needed on Windows
 only) and *Dev Containers* (for path A) extensions; you can decline the

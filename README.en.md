@@ -501,9 +501,18 @@ installed **in the container** or **in WSL**: in the *Extensions* view
 *C/C++*. Espressif's *ESP-IDF* extension is not needed; do not install it: it
 sets up its own, different ESP-IDF.
 
+**Shortcuts on macOS.** The VS Code shortcuts in these instructions are given
+for Windows and Linux. On macOS press **Cmd** instead of **Ctrl** (Cmd-Shift-B,
+Cmd-Shift-D, Cmd-Shift-Y, Cmd-Shift-M, Cmd-Shift-X), and Cmd-Shift-P opens the
+command palette (F1). On a Mac keyboard the function keys (F5, Shift-F5, F10,
+F11) also need the **fn** key (e.g. fn-F5), unless *System Settings → Keyboard
+→ Keyboard Shortcuts… → Function Keys → Use F1, F2, etc. keys as standard
+function keys* is on. In the terminal and the emulator Ctrl stays Ctrl: QEMU
+stops with Ctrl-A, then X on macOS too, and the monitor with Ctrl-].
+
 **Running a lab:**
 
-1. Press **Ctrl-Shift-B** (the *Build and run in QEMU* task) and choose the lab
+1. Press **Ctrl-Shift-B** (macOS: Cmd-Shift-B; the *Build and run in QEMU* task) and choose the lab
    from the list, e.g. `labs/lab1_toolchain/starter`.
 2. A task tab opens in the *Terminal* panel. It shows the build, then the
    program's output from the emulator. A lab's first build takes a few minutes;
@@ -590,9 +599,9 @@ tasks then report
    The command in a terminal, from the lab directory, does the same:
    `bash ../../common/run_qemu_gdb.sh build` (paths A and B) or
    `../../common/run_qemu_gdb.ps1 build` (path C).
-4. **Attach the debugger:** open the *Run and Debug* view (Ctrl-Shift-D),
+4. **Attach the debugger:** open the *Run and Debug* view (Ctrl-Shift-D; macOS: Cmd-Shift-D),
    choose **GDB: attach to the waiting QEMU** in the drop-down at the top,
-   press **F5** and choose the program of the **same** lab from the list, e.g.
+   press **F5** (macOS: fn-F5) and choose the program of the **same** lab from the list, e.g.
    `labs/lab1_toolchain/starter/build/lab1.elf`. GDB connects to port 1234,
    the emulator starts and the program stops at the breakpoint.
 

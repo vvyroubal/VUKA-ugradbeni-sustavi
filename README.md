@@ -494,9 +494,18 @@ kontejneru** odnosno **u WSL-u**: u pregledu *Extensions* (Ctrl-Shift-X) za
 Espressifovo proširenje *ESP-IDF* nije potrebno i ne instalirajte ga: ono
 postavlja vlastiti, drukčiji ESP-IDF.
 
+**Prečaci na macOS-u.** Prečaci VS Codea u ovim uputama navedeni su za Windows
+i Linux. Na macOS-u umjesto **Ctrl** pritišćete **Cmd** (Cmd-Shift-B,
+Cmd-Shift-D, Cmd-Shift-Y, Cmd-Shift-M, Cmd-Shift-X), a izbornik naredbi (F1)
+otvara Cmd-Shift-P. Funkcijske tipke (F5, Shift-F5, F10, F11) na Macovoj
+tipkovnici traže i tipku **fn** (npr. fn-F5), osim ako je uključeno *System
+Settings → Keyboard → Keyboard Shortcuts… → Function Keys → Use F1, F2, etc.
+keys as standard function keys*. U terminalu i emulatoru Ctrl ostaje Ctrl:
+QEMU se i na macOS-u zaustavlja s Ctrl-A, zatim X, a monitor s Ctrl-].
+
 **Pokretanje vježbe:**
 
-1. Pritisnite **Ctrl-Shift-B** (zadatak *Izgradnja i QEMU*) i s popisa
+1. Pritisnite **Ctrl-Shift-B** (macOS: Cmd-Shift-B; zadatak *Izgradnja i QEMU*) i s popisa
    odaberite vježbu, npr. `labs/lab1_toolchain/starter`.
 2. U ploči *Terminal* otvara se kartica zadatka. U njoj teče izgradnja, a
    zatim ispis programa iz emulatora. Prva izgradnja vježbe traje nekoliko
@@ -581,9 +590,9 @@ na računalu, a QEMU u kontejneru), pa zadaci za GDB tada javljaju
    radi naredba u terminalu, iz direktorija vježbe:
    `bash ../../common/run_qemu_gdb.sh build` (putovi A i B) odnosno
    `../../common/run_qemu_gdb.ps1 build` (put C).
-4. **Spojite debugger:** otvorite pregled *Run and Debug* (Ctrl-Shift-D), u
+4. **Spojite debugger:** otvorite pregled *Run and Debug* (Ctrl-Shift-D; macOS: Cmd-Shift-D), u
    padajućem izborniku na vrhu odaberite **GDB: spoji se na QEMU koji čeka**,
-   pritisnite **F5** i s popisa odaberite program **iste** vježbe, npr.
+   pritisnite **F5** (macOS: fn-F5) i s popisa odaberite program **iste** vježbe, npr.
    `labs/lab1_toolchain/starter/build/lab1.elf`. GDB se spoji na port 1234,
    emulator krene i program stane na prijelomnoj točki.
 

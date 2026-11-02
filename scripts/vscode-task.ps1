@@ -8,6 +8,7 @@
 #            | reconfigure | fullclean
 #            (gdb: the latest build in QEMU, halted, waiting for a debugger
 #            on :1234; build-gdb: build first -- .vscode/launch.json)
+#   or:      ... vscode-task.ps1 lab7   (Lab 7: Buildroot in the course container)
 #   project: lab project relative to the repository root,
 #            e.g. labs/lab1_toolchain/starter
 #
@@ -22,6 +23,20 @@ param(
 )
 
 $Root = Split-Path -Parent $PSScriptRoot
+
+# Lab 7 (Buildroot) needs Linux: on Windows only in the course container, in
+# the lab7_br volume at /br (the Windows bind mount is not case-sensitive).
+if ($Action -eq "lab7") {
+    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+        [Console]::Error.WriteLine("vscode-task.ps1: Lab 7 needs Linux -- Docker or WSL2 (README, LV7); path C cannot build it")
+        exit 1
+    }
+    $mk = "make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br"
+    Write-Host "== $mk   (course container)"
+    Set-Location $Root
+    & (Join-Path $PSScriptRoot "docker-shell.ps1") bash -c $mk
+    exit $LASTEXITCODE
+}
 $actions = @("build", "qemu", "build-qemu", "gdb", "build-gdb", "menuconfig", "reconfigure", "fullclean")
 if (-not $Project -or $actions -notcontains $Action) {
     [Console]::Error.WriteLine("Usage: vscode-task.ps1 <build|qemu|build-qemu|gdb|build-gdb|menuconfig|reconfigure|fullclean> <project>")

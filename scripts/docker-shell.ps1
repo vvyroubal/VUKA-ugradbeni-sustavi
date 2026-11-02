@@ -9,7 +9,8 @@
 # Second terminal: while a course container is running, running this script
 # again attaches to THAT container (needed for GDB in Lab 2). The container is
 # named vuka-ugradbeni-sustavi and publishes port 8883 (the Lab 6 MQTT
-# broker).
+# broker). The named volume lab7_br is mounted at /br, where Lab 7 builds
+# Buildroot (the Windows bind mount is slow and not case-sensitive).
 
 $Root = Split-Path -Parent $PSScriptRoot
 $Image = if ($env:URS_IMAGE) { $env:URS_IMAGE } else { "embedded-course" }
@@ -33,5 +34,5 @@ if (-not $have) {
 }
 
 docker run --rm -it --name $Name -p 8883:8883 -v "${Root}:/work" -w /work `
-    -e IDF_GIT_SAFE_DIR=/work $Image @Cmd
+    -v lab7_br:/br -e IDF_GIT_SAFE_DIR=/work $Image @Cmd
 exit $LASTEXITCODE

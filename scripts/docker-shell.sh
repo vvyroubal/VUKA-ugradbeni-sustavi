@@ -13,7 +13,9 @@
 # again attaches to THAT container (needed for GDB in Lab 2, and so the Lab 6
 # broker and QEMU share one network). The container is named
 # vuka-ugradbeni-sustavi and publishes port 8883 (the Lab 6 MQTT broker) to
-# this computer.
+# this computer. The named volume lab7_br is mounted at /br: Lab 7 builds
+# Buildroot there on macOS and Windows hosts, whose bind mounts are slow and
+# not case-sensitive (Linux hosts build in labs/lab7_linux_ota/.br).
 #
 # On Linux (and WSL2) the container runs as your own user, so files it
 # creates in the repository belong to you, not to root.
@@ -46,7 +48,7 @@ if [ -z "$(docker images -q "$IMAGE")" ]; then
   docker build -t "$IMAGE" "$ROOT"
 fi
 
-ARGS=(--rm --name "$NAME" -p 8883:8883 -v "$ROOT:/work" -w /work
+ARGS=(--rm --name "$NAME" -p 8883:8883 -v "$ROOT:/work" -w /work -v lab7_br:/br
       -e IDF_GIT_SAFE_DIR=/work)
 ARGS+=(${USER_ARGS[@]+"${USER_ARGS[@]}"} ${TTY[@]+"${TTY[@]}"})
 if [ -n "${URS_PORT:-}" ]; then

@@ -9,6 +9,8 @@
 #            | reconfigure | fullclean
 #            (gdb: the latest build in QEMU, halted, waiting for a debugger
 #            on :1234; build-gdb: build first -- .vscode/launch.json)
+#   or:      bash scripts/vscode-task.sh lab7
+#            (Lab 7: Buildroot build, 30-60 min the first time)
 #   project: lab project relative to the repository root,
 #            e.g. labs/lab1_toolchain/starter
 #
@@ -26,6 +28,47 @@ usage() {
   echo "Usage: bash scripts/vscode-task.sh <build|qemu|build-qemu|gdb|build-gdb|menuconfig|reconfigure|fullclean> <project>" >&2
   exit 1
 }
+# Lab 7 is a Buildroot (Linux) build, not an ESP-IDF project. Where it runs:
+#   - VS Code attached to the course container: in the container, in
+#     /br (the lab7_br volume) when /work is a macOS/Windows bind mount,
+#     which is not case-sensitive; otherwise in labs/lab7_linux_ota/.br;
+#   - a Linux host with the course image: through scripts/docker-shell.sh,
+#     as the README shows; without it, natively (path B, extra packages);
+#   - a macOS host: in the course container, in /br.
+if [ "${1:-}" = lab7 ]; then
+  MK="make -C labs/lab7_linux_ota -f Makefile.buildroot all"
+  cd "$ROOT"
+  if [ -f /.dockerenv ]; then
+    probe="$(mktemp "$ROOT/.case-probe-XXXXXX")"
+    upper="$(dirname "$probe")/$(basename "$probe" | tr '[:lower:]' '[:upper:]')"
+    insensitive=""; [ -e "$upper" ] && insensitive=1
+    rm -f "$probe"
+    if [ -n "$insensitive" ]; then
+      if [ ! -d /br ]; then
+        echo "vscode-task.sh: /br is missing -- exit the docker-shell.sh terminal, start it again and reattach VS Code" >&2
+        exit 1
+      fi
+      MK="$MK BR_DIR=/br"
+    fi
+    echo "== $MK   (course container)"
+    exec bash -c "$MK"
+  fi
+  if [ "$(uname -s)" = Linux ]; then
+    if command -v docker >/dev/null 2>&1 && [ -n "$(docker images -q "${URS_IMAGE:-embedded-course}" 2>/dev/null)" ]; then
+      echo "== $MK   (course container)"
+      exec ./scripts/docker-shell.sh $MK
+    fi
+    echo "== $MK"
+    exec bash -c "$MK"
+  fi
+  if command -v docker >/dev/null 2>&1; then
+    echo "== $MK BR_DIR=/br   (course container)"
+    exec ./scripts/docker-shell.sh bash -c "$MK BR_DIR=/br"
+  fi
+  echo "vscode-task.sh: Lab 7 needs Linux -- Docker or WSL2 (README, LV7)" >&2
+  exit 1
+fi
+
 [ "$#" -eq 2 ] || usage
 ACTION="$1"
 PROJ="${2%/}"

@@ -2,6 +2,22 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "LV1: GDB u QEMU-u / GDB in QEMU",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/labs/lab1_toolchain/starter/build/lab1.elf",
+      "cwd": "${workspaceFolder}/labs/lab1_toolchain/starter",
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/scripts/gdb.sh",
+      "miDebuggerServerAddress": "localhost:1234",
+      "stopAtConnect": false,
+      "externalConsole": false,
+      "preLaunchTask": "LV1: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "windows": {
+        "miDebuggerPath": "${workspaceFolder}\\scripts\\gdb.cmd"
+      }
+    },
+    {
       "name": "LV2: GDB u QEMU-u / GDB in QEMU",
       "type": "cppdbg",
       "request": "launch",
@@ -14,7 +30,70 @@
       "externalConsole": false,
       "preLaunchTask": "LV2: izgradnja i QEMU za GDB / build and QEMU for GDB",
       "windows": {
-        "program": "${workspaceFolder}\\labs\\lab2_gpio_irq\\starter\\build\\lab2.elf",
+        "miDebuggerPath": "${workspaceFolder}\\scripts\\gdb.cmd"
+      }
+    },
+    {
+      "name": "LV3: GDB u QEMU-u / GDB in QEMU",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/labs/lab3_bme280/starter/build/lab3.elf",
+      "cwd": "${workspaceFolder}/labs/lab3_bme280/starter",
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/scripts/gdb.sh",
+      "miDebuggerServerAddress": "localhost:1234",
+      "stopAtConnect": false,
+      "externalConsole": false,
+      "preLaunchTask": "LV3: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "windows": {
+        "miDebuggerPath": "${workspaceFolder}\\scripts\\gdb.cmd"
+      }
+    },
+    {
+      "name": "LV4: GDB u QEMU-u / GDB in QEMU",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/labs/lab4_adc_pwm/starter/build/lab4.elf",
+      "cwd": "${workspaceFolder}/labs/lab4_adc_pwm/starter",
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/scripts/gdb.sh",
+      "miDebuggerServerAddress": "localhost:1234",
+      "stopAtConnect": false,
+      "externalConsole": false,
+      "preLaunchTask": "LV4: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "windows": {
+        "miDebuggerPath": "${workspaceFolder}\\scripts\\gdb.cmd"
+      }
+    },
+    {
+      "name": "LV5: GDB u QEMU-u / GDB in QEMU",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/labs/lab5_rtos/starter/build/lab5.elf",
+      "cwd": "${workspaceFolder}/labs/lab5_rtos/starter",
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/scripts/gdb.sh",
+      "miDebuggerServerAddress": "localhost:1234",
+      "stopAtConnect": false,
+      "externalConsole": false,
+      "preLaunchTask": "LV5: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "windows": {
+        "miDebuggerPath": "${workspaceFolder}\\scripts\\gdb.cmd"
+      }
+    },
+    {
+      "name": "LV6: GDB u QEMU-u / GDB in QEMU",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/labs/lab6_mqtt/starter/build/lab6.elf",
+      "cwd": "${workspaceFolder}/labs/lab6_mqtt/starter",
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/scripts/gdb.sh",
+      "miDebuggerServerAddress": "localhost:1234",
+      "stopAtConnect": false,
+      "externalConsole": false,
+      "preLaunchTask": "LV6: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "windows": {
         "miDebuggerPath": "${workspaceFolder}\\scripts\\gdb.cmd"
       }
     },

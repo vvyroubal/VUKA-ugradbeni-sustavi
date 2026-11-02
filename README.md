@@ -13,7 +13,7 @@ na stranicama kolegija.
 |---|---|
 | `Dockerfile` | razvojna slika: ESP-IDF v5.5, Espressifov QEMU, alati za LV7 |
 | `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (ljuska u kontejneru), `verify.sh` / `verify.ps1` (provjera instalacije), `vscode-task.*`, `gdb.sh` / `gdb.cmd` i `idf-shell.ps1` (za VS Code) |
-| `.vscode/` | postavke, zadaci, konfiguracija debuggera (LV2) i preporučena proširenja za VS Code |
+| `.vscode/` | postavke, zadaci, konfiguracije debuggera (F5 za LV1–LV6) i preporučena proširenja za VS Code |
 | `labs/labN_*/starter/` | polazni projekti vježbi LV1–LV6 |
 | `labs/common/` | skripte za emulator (`run_qemu*.sh`, za put C `run_qemu*.ps1`) i zajedničke komponente |
 | `labs/lab6_mqtt/broker/` | MQTT posrednik i certifikati za LV6 |
@@ -431,7 +431,12 @@ port 8883 na računalu (put bez Dockera). S Dockerom iz PowerShella LV6 nije
 moguć (skripte trebaju `bash`): radite je u WSL2 ili na putu C.
 
 **LV7.** Buildroot je najjednostavnije graditi u kontejneru tečaja, u
-**terminalu računala** iz korijena repozitorija.
+**terminalu računala** iz korijena repozitorija. U VS Codeu isto radi zadatak
+*LV7: izgradnja Buildroota* (*Terminal → Run Task…*), koji put bira sam: u
+prozoru priključenom na kontejner gradi u njemu (na macOS-u i Windowsu na
+volumenu `lab7_br`, koji `docker-shell` montira na `/br`), a u običnom prozoru
+pokreće kontejner tečaja. Linux bez slike tečaja gradi izravno, uz pakete
+navedene niže. Na putu C LV7 nije moguć.
 
 Linux i WSL2 — istom skriptom kao ostale vježbe; kontejner radi pod vašim
 korisnikom, pa datoteke izgradnje pripadaju vama (izravan `docker run` bez
@@ -515,7 +520,8 @@ način:
 | idf.py reconfigure | nakon novog `Kconfig.projbuild` (LV1, LV4) |
 | idf.py fullclean | kad isti projekt prelazi s Dockera na izgradnju bez njega ili obrnuto |
 | QEMU za GDB, čeka debugger | zadnja izgradnja u emulatoru koji čeka GDB (odjeljak *Debugger*) |
-| LV2: izgradnja i QEMU za GDB | isto za LV2, uz izgradnju; pokreće ga F5 (odjeljak *Debugger*) |
+| LV7: izgradnja Buildroota | izgradnja LV7 (odjeljak *Rad na vježbi*, LV7) |
+| LV1–LV6: izgradnja i QEMU za GDB | skriveni zadaci koje pokreće F5 (odjeljak *Debugger*) |
 
 Zadaci sami nalaze okruženje (skripta `scripts/vscode-task.sh`, na Windowsu
 `.ps1`). Redom pokušavaju aktivan ESP-IDF (i u kontejneru), `~/esp-idf`
@@ -584,14 +590,16 @@ na računalu, a QEMU u kontejneru), pa zadaci za GDB tada javljaju
 U LV6 emulator za GDB nema mrežnu karticu, pa se program ne može spojiti na
 posrednik.
 
-**Prečac za LV2: F5.** Konfiguracija **LV2: GDB u QEMU-u** korake 1, 3 i 4
-izvodi sama. Postavite prijelomnu točku u
-`labs/lab2_gpio_irq/starter/main/main.c`, u *Run and Debug* odaberite
-**LV2: GDB u QEMU-u** i pritisnite **F5**. VS Code pokrene zadatak *LV2:
-izgradnja i QEMU za GDB* (izgradnja, zatim QEMU koji čeka), pričeka redak
-`gdbstub on :1234` i spoji GDB. Prva izgradnja traje nekoliko minuta. U
-prekidnu rutinu `timer_alarm_cb` program ulazi tek kad je riješen TODO 3 (T4);
-prije toga stanite npr. na prvom retku funkcije `app_main`.
+**Prečac: F5 za svaku vježbu (LV1–LV6).** Za svaku vježbu postoji
+konfiguracija **LV*n*: GDB u QEMU-u** (npr. *LV3: GDB u QEMU-u*), koja korake
+1, 3 i 4 izvodi sama. Postavite prijelomnu točku u kodu vježbe, u *Run and
+Debug* odaberite konfiguraciju te vježbe i pritisnite **F5**. VS Code pokrene
+skriveni zadatak *LV*n*: izgradnja i QEMU za GDB* (izgradnja, zatim QEMU koji
+čeka), pričeka redak `gdbstub on :1234` i spoji GDB. Prva izgradnja vježbe
+traje nekoliko minuta. U LV2 program ulazi u prekidnu rutinu `timer_alarm_cb`
+tek kad je riješen TODO 3 (T4); prije toga stanite npr. na prvom retku
+funkcije `app_main`. U LV5 `app_main` je u datoteci primjera odabranog u
+`menuconfig` (zadano `pipeline.c`).
 
 **Rad sa spojenim debuggerom:**
 
@@ -605,7 +613,7 @@ prije toga stanite npr. na prvom retku funkcije `app_main`.
   `-exec print *edata`. Odatle kopirajte i transkript za predaju.
 - Ispis programa iz emulatora je u ploči *Terminal*, u kartici zadatka.
 - **Stop** (Shift-F5) zaustavlja GDB i emulator, a time završava i zadatak.
-  Za novo spajanje ponovite korake 3 i 4 (za LV2 samo F5).
+  Za novo spajanje ponovite korake 3 i 4 ili samo F5.
 
 **Kad spajanje ne uspije:**
 

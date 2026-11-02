@@ -14,7 +14,7 @@ explanations.
 |---|---|
 | `Dockerfile` | development image: ESP-IDF v5.5, Espressif's QEMU, the Lab 7 tools |
 | `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (shell in the container), `verify.sh` / `verify.ps1` (installation check), `vscode-task.*`, `gdb.sh` / `gdb.cmd` and `idf-shell.ps1` (for VS Code) |
-| `.vscode/` | VS Code settings, tasks, the debugger configuration (Lab 2) and recommended extensions |
+| `.vscode/` | VS Code settings, tasks, debugger configurations (F5 for Labs 1–6) and recommended extensions |
 | `labs/labN_*/starter/` | starter projects for Labs 1–6 |
 | `labs/common/` | emulator scripts (`run_qemu*.sh`, for path C `run_qemu*.ps1`) and shared components |
 | `labs/lab6_mqtt/broker/` | MQTT broker and certificates for Lab 6 |
@@ -437,7 +437,13 @@ from PowerShell, Lab 6 is not possible (the scripts need `bash`): do it in WSL2
 or on path C.
 
 **Lab 7.** Buildroot is simplest to build in the course container, in a
-**host terminal** at the repository root.
+**host terminal** at the repository root. In VS Code the *LV7: Buildroot
+build* task (*Terminal → Run Task…*) does the same and picks the way by
+itself: in a window attached to the container it builds there (on macOS and
+Windows in the `lab7_br` volume, which `docker-shell` mounts at `/br`), and in
+an ordinary window it starts the course container. Linux without the course
+image builds natively, with the packages listed below. Lab 7 is not possible
+on path C.
 
 Linux and WSL2 — with the same script as the other labs; the container runs
 as your own user, so the build files belong to you (a plain `docker run`
@@ -521,7 +527,8 @@ same way:
 | idf.py reconfigure | after a new `Kconfig.projbuild` (Labs 1 and 4) |
 | idf.py fullclean | when the same project moves between Docker and the build without it |
 | QEMU for GDB, waits for the debugger | the latest build in an emulator that waits for GDB (section *Debugger*) |
-| LV2: build and QEMU for GDB | the same for Lab 2, with a build; F5 starts it (section *Debugger*) |
+| LV7: Buildroot build | builds Lab 7 (section *Working on a lab*, Lab 7) |
+| LV1–LV6: build and QEMU for GDB | hidden tasks that F5 starts (section *Debugger*) |
 
 The tasks find the environment by themselves (the `scripts/vscode-task.sh`
 script, `.ps1` on Windows). They try, in order, an active ESP-IDF (also in the
@@ -592,14 +599,16 @@ tasks then report
 In Lab 6 the emulator for GDB has no network card, so the program cannot
 connect to the broker.
 
-**Shortcut for Lab 2: F5.** The **LV2: GDB in QEMU** configuration does steps
-1, 3 and 4 by itself. Set a breakpoint in
-`labs/lab2_gpio_irq/starter/main/main.c`, choose **LV2: GDB in QEMU** in *Run
-and Debug* and press **F5**. VS Code runs the *LV2: build and QEMU for GDB*
-task (build, then QEMU waiting), waits for the `gdbstub on :1234` line and
-attaches GDB. The first build takes a few minutes. The program enters the
-`timer_alarm_cb` interrupt handler only once TODO 3 (T4) is solved; before
-that, stop e.g. on the first line of `app_main`.
+**Shortcut: F5 for every lab (Labs 1–6).** Every lab has a configuration
+**LV*n*: GDB in QEMU** (e.g. *LV3: GDB in QEMU*) that does steps 1, 3 and 4 by
+itself. Set a breakpoint in the lab's code, choose that lab's configuration in
+*Run and Debug* and press **F5**. VS Code runs the hidden task *LV*n*: build
+and QEMU for GDB* (build, then QEMU waiting), waits for the
+`gdbstub on :1234` line and attaches GDB. A lab's first build takes a few
+minutes. In Lab 2 the program enters the `timer_alarm_cb` interrupt handler
+only once TODO 3 (T4) is solved; before that, stop e.g. on the first line of
+`app_main`. In Lab 5 `app_main` is in the file of the demo chosen in
+`menuconfig` (`pipeline.c` by default).
 
 **Working with the attached debugger:**
 
@@ -615,7 +624,7 @@ that, stop e.g. on the first line of `app_main`.
 - The program's output from the emulator is in the *Terminal* panel, in the
   task tab.
 - **Stop** (Shift-F5) stops GDB and the emulator, which also ends the task.
-  To attach again, repeat steps 3 and 4 (for Lab 2 just F5).
+  To attach again, repeat steps 3 and 4, or just F5.
 
 **When attaching fails:**
 

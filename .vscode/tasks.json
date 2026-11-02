@@ -112,14 +112,13 @@
       }
     },
     {
-      "label": "LV2: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "label": "LV7: izgradnja Buildroota / Buildroot build",
+      "detail": "30-60 min prvi put / the first time",
       "type": "process",
       "command": "bash",
       "args": [
         "${workspaceFolder}/scripts/vscode-task.sh",
-        "build-gdb",
-        "labs/lab2_gpio_irq/starter"
+        "lab7"
       ],
       "windows": {
         "command": "powershell.exe",
@@ -129,19 +128,10 @@
           "Bypass",
           "-File",
           "${workspaceFolder}\\scripts\\vscode-task.ps1",
-          "build-gdb",
-          "labs/lab2_gpio_irq/starter"
+          "lab7"
         ]
       },
-      "isBackground": true,
-      "problemMatcher": {
-        "base": "$gcc",
-        "background": {
-          "activeBegins": true,
-          "beginsPattern": "^== ",
-          "endsPattern": "gdbstub on :1234"
-        }
-      }
+      "problemMatcher": []
     },
     {
       "label": "menuconfig",
@@ -211,6 +201,204 @@
         ]
       },
       "problemMatcher": []
+    },
+    {
+      "label": "LV1: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "build-gdb",
+        "labs/lab1_toolchain/starter"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "build-gdb",
+          "labs/lab1_toolchain/starter"
+        ]
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$gcc",
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "^== ",
+          "endsPattern": "gdbstub on :1234"
+        }
+      },
+      "hide": true
+    },
+    {
+      "label": "LV2: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "build-gdb",
+        "labs/lab2_gpio_irq/starter"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "build-gdb",
+          "labs/lab2_gpio_irq/starter"
+        ]
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$gcc",
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "^== ",
+          "endsPattern": "gdbstub on :1234"
+        }
+      },
+      "hide": true
+    },
+    {
+      "label": "LV3: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "build-gdb",
+        "labs/lab3_bme280/starter"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "build-gdb",
+          "labs/lab3_bme280/starter"
+        ]
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$gcc",
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "^== ",
+          "endsPattern": "gdbstub on :1234"
+        }
+      },
+      "hide": true
+    },
+    {
+      "label": "LV4: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "build-gdb",
+        "labs/lab4_adc_pwm/starter"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "build-gdb",
+          "labs/lab4_adc_pwm/starter"
+        ]
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$gcc",
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "^== ",
+          "endsPattern": "gdbstub on :1234"
+        }
+      },
+      "hide": true
+    },
+    {
+      "label": "LV5: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "build-gdb",
+        "labs/lab5_rtos/starter"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "build-gdb",
+          "labs/lab5_rtos/starter"
+        ]
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$gcc",
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "^== ",
+          "endsPattern": "gdbstub on :1234"
+        }
+      },
+      "hide": true
+    },
+    {
+      "label": "LV6: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "build-gdb",
+        "labs/lab6_mqtt/starter"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "build-gdb",
+          "labs/lab6_mqtt/starter"
+        ]
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$gcc",
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "^== ",
+          "endsPattern": "gdbstub on :1234"
+        }
+      },
+      "hide": true
     }
   ],
   "inputs": [

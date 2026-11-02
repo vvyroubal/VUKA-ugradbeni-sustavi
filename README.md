@@ -641,6 +641,35 @@ funkcije `app_main`. U LV5 `app_main` je u datoteci primjera odabranog u
 Bez VS Codea isto se radi iz dva terminala (odjeljak *Rad na vježbi*, *GDB iz
 terminala*).
 
+## Ažuriranje repozitorija
+
+Repozitorij se tijekom semestra dopunjuje (upute, zadaci za VS Code, skripte),
+a vaš rad u datotekama vježbi pritom ostaje. Novo stanje preuzimate u
+**terminalu računala**, iz korijena repozitorija (na putu C u PowerShellu ili
+prečacu ESP-IDF 5.5 PowerShell):
+
+```sh
+git pull
+```
+
+Ako git ne završi, nego javi jednu od ovih poruka:
+
+| Poruka | Uzrok i rješenje |
+|---|---|
+| `Need to specify how to reconcile divergent branches` | Svoj rad ste commitali. Spojite ga s novim stanjem: `git pull --no-rebase --no-edit`. |
+| `untracked working tree files would be overwritten by merge: …` | Napravili ste datoteku koju sada donosi repozitorij (npr. vlastiti `.vscode/launch.json`). Preimenujte je (npr. u `launch.json.moj`) i ponovite `git pull`. |
+| `Your local changes to the following files would be overwritten by merge: …` | Promijenili ste datoteku koju je promijenio i repozitorij. Sklonite svoje promjene s `git stash`, zatim `git pull`, pa ih vratite s `git stash pop`. |
+
+Nakon ažuriranja:
+
+- **VS Code** nove zadatke i konfiguracije učita sam. Ako popis nije osvježen,
+  F1 (macOS: Cmd-Shift-P) → *Developer: Reload Window*.
+- **Put A:** zatvorite terminal u kojem radi `./scripts/docker-shell.sh` i
+  pokrenite ga ponovno, jer tek novi kontejner preuzima promjene te skripte.
+  Prozor VS Codea zatim ponovno priključite na kontejner. Kad nastavnik najavi
+  novu razvojnu sliku (promjena `Dockerfile`), najprije obrišite staru s
+  `docker rmi embedded-course`; `docker-shell.sh` zatim gradi novu (15–30 min).
+
 ## Programiranje pločice
 
 ESP32-C3 ima ugrađeno USB sučelje (USB-Serial-JTAG), pa poseban upravljački

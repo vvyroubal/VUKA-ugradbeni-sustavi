@@ -652,6 +652,36 @@ only once TODO 3 (T4) is solved; before that, stop e.g. on the first line of
 Without VS Code the same is done from two terminals (section *Working on a
 lab*, *GDB from the terminal*).
 
+## Updating the repository
+
+The repository is extended during the semester (instructions, VS Code tasks,
+scripts), and your work in the lab files stays. You get the new state in a
+**host terminal**, from the repository root (on path C in PowerShell or the
+ESP-IDF 5.5 PowerShell shortcut):
+
+```sh
+git pull
+```
+
+If git does not finish but reports one of these messages:
+
+| Message | Cause and fix |
+|---|---|
+| `Need to specify how to reconcile divergent branches` | You committed your work. Merge it with the new state: `git pull --no-rebase --no-edit`. |
+| `untracked working tree files would be overwritten by merge: …` | You created a file the repository now brings (e.g. your own `.vscode/launch.json`). Rename it (e.g. to `launch.json.mine`) and run `git pull` again. |
+| `Your local changes to the following files would be overwritten by merge: …` | You changed a file the repository also changed. Put your changes aside with `git stash`, then `git pull`, then bring them back with `git stash pop`. |
+
+After updating:
+
+- **VS Code** loads the new tasks and configurations by itself. If the list is
+  not refreshed, F1 (macOS: Cmd-Shift-P) → *Developer: Reload Window*.
+- **Path A:** close the terminal running `./scripts/docker-shell.sh` and start
+  it again, since only a new container picks up changes to that script. Then
+  attach the VS Code window to the container again. When the instructor
+  announces a new development image (a `Dockerfile` change), first remove the
+  old one with `docker rmi embedded-course`; `docker-shell.sh` then builds the
+  new one (15–30 min).
+
 ## Flashing the board
 
 The ESP32-C3 has a built-in USB interface (USB-Serial-JTAG), so no special

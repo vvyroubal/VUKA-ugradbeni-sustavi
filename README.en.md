@@ -594,7 +594,9 @@ tasks then report
 1. **Build the lab:** Ctrl-Shift-B or the *Build* task.
 2. **Set a breakpoint:** in the lab's code, click left of the line number
    where the program should stop. A red dot appears (a breakpoint). Set it
-   before step 4, otherwise the program runs without stopping.
+   before step 4, otherwise the program runs without stopping. A breakpoint on
+   a line without code (a comment, an empty line, `(void)n;`) moves to the
+   next line with code.
 3. **Start QEMU waiting:** *Terminal → Run Task…* → **QEMU for GDB, waits for
    the debugger** → choose the lab. The task tab shows
    `QEMU starting HALTED with gdbstub on :1234` and the emulator now waits.
@@ -647,7 +649,8 @@ only once TODO 3 (T4) is solved; before that, stop e.g. on the first line of
 | `gdb.sh: riscv32-esp-elf-gdb not found` | VS Code does not run where ESP-IDF is: on path A the window is not attached to the container, in WSL2 the window is not a WSL window. |
 | `with Docker, debug from VS Code attached to the course container` | Path A without an attached window (*Preparation*, above). |
 | the program runs without stopping | No breakpoint is set, or it is on a line that never runs. |
-| `Failed to find an available port: Address already in use` in the task tab | An old emulator is still running: close its task tab (the bin icon) or press Ctrl-A, then X in it. |
+| the program does not stop, there is no error, and *Call Stack* is empty | The debugger is not attached: the *QEMU for GDB* or *LV*n*: build and QEMU for GDB* task run from *Run Task* only starts an emulator that waits. Attach the debugger: *Run and Debug* → configuration → F5 (step 4). |
+| `port 1234 is already in use` in the task tab | An old emulator is still waiting: close its task tab (the bin icon) or press Ctrl-A, then X in it, then F5 again. |
 
 Without VS Code the same is done from two terminals (section *Working on a
 lab*, *GDB from the terminal*).

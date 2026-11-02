@@ -44,6 +44,14 @@ if [ ! -d "$BUILD_DIR" ]; then
   exit 1
 fi
 
+# Port 1234 taken means another QEMU for GDB is still waiting. Starting
+# anyway would print the ready line below while the new QEMU fails to bind,
+# and the debugger would attach to the OLD emulator (another lab's program).
+if (exec 3<>/dev/tcp/127.0.0.1/1234) 2>/dev/null; then
+  echo "run_qemu_gdb.sh: port 1234 is already in use -- another QEMU for GDB is still running; stop it (close its task tab or press Ctrl-A, then X in it)" >&2
+  exit 1
+fi
+
 FLASH_ARGS="$BUILD_DIR/flash_args"
 FLASH_BIN="$BUILD_DIR/flash.bin"
 LOG_FILE="$BUILD_DIR/qemu.log"

@@ -27,6 +27,20 @@ if (-not (Test-Path -PathType Container $BuildDir)) {
     exit 1
 }
 $BuildDir = (Resolve-Path $BuildDir).Path
+
+# Port 1234 taken means another QEMU for GDB is still waiting; starting
+# anyway would let the debugger attach to the OLD emulator.
+$busy = $false
+try {
+    $probe = New-Object System.Net.Sockets.TcpClient
+    $probe.Connect("127.0.0.1", 1234)
+    $probe.Close()
+    $busy = $true
+} catch { }
+if ($busy) {
+    [Console]::Error.WriteLine("${Me}: port 1234 is already in use -- another QEMU for GDB is still running; stop it (close its task tab or press Ctrl-A, then X in it)")
+    exit 1
+}
 $FlashArgs = Join-Path $BuildDir "flash_args"
 $FlashBin = Join-Path $BuildDir "flash.bin"
 $LogFile = Join-Path $BuildDir "qemu.log"

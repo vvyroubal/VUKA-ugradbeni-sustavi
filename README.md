@@ -585,7 +585,8 @@ na računalu, a QEMU u kontejneru), pa zadaci za GDB tada javljaju
 2. **Postavite prijelomnu točku:** u kodu vježbe kliknite lijevo od broja
    retka na kojem program treba stati. Pojavi se crvena točka (prijelomna
    točka, *breakpoint*). Postavite je prije koraka 4, inače program prolazi
-   bez zaustavljanja.
+   bez zaustavljanja. Točka na retku bez koda (komentar, prazan redak,
+   `(void)n;`) premješta se na sljedeći redak s kodom.
 3. **Pokrenite QEMU koji čeka:** *Terminal → Run Task…* → **QEMU za GDB, čeka
    debugger** → odaberite vježbu. U kartici zadatka pojavi se
    `QEMU starting HALTED with gdbstub on :1234` i emulator sada čeka. Isto
@@ -636,7 +637,8 @@ funkcije `app_main`. U LV5 `app_main` je u datoteci primjera odabranog u
 | `gdb.sh: riscv32-esp-elf-gdb not found` | VS Code ne radi ondje gdje je ESP-IDF: na putu A prozor nije priključen na kontejner, u WSL2 prozor nije otvoren u WSL-u. |
 | `with Docker, debug from VS Code attached to the course container` | Put A bez priključenog prozora (*Priprema*, gore). |
 | program prolazi bez zaustavljanja | Prijelomna točka nije postavljena ili je na retku koji se ne izvodi. |
-| `Failed to find an available port: Address already in use` u kartici zadatka | Stari emulator još radi: zatvorite njegovu karticu zadatka (ikona koša) ili u njoj pritisnite Ctrl-A, zatim X. |
+| program ne staje, a pogreške nema; u *Call Stack* nema ničega | Debugger nije spojen: zadatak *QEMU za GDB* ili *LV*n*: izgradnja i QEMU za GDB* pokrenut iz *Run Task* samo pokreće emulator koji čeka. Spojite debugger: *Run and Debug* → konfiguracija → F5 (korak 4). |
+| `port 1234 is already in use` u kartici zadatka | Stari emulator još čeka: zatvorite njegovu karticu zadatka (ikona koša) ili u njoj pritisnite Ctrl-A, zatim X, pa ponovno F5. |
 
 Bez VS Codea isto se radi iz dva terminala (odjeljak *Rad na vježbi*, *GDB iz
 terminala*).

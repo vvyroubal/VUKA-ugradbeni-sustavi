@@ -81,7 +81,7 @@
     },
     {
       "label": "QEMU za GDB, čeka debugger / QEMU for GDB, waits for the debugger",
-      "detail": "zadnja izgradnja odabrane vježbe / latest build of the chosen lab",
+      "detail": "zadnja izgradnja, emulator čeka; zatim Run and Debug → GDB: spoji se… → F5 / latest build, emulator waits; then Run and Debug → GDB: attach… → F5",
       "type": "process",
       "command": "bash",
       "args": [
@@ -204,7 +204,7 @@
     },
     {
       "label": "LV1: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
+      "detail": "samo emulator koji čeka; debugger spaja F5 u Run and Debug / only an emulator that waits; F5 in Run and Debug attaches the debugger",
       "type": "process",
       "command": "bash",
       "args": [
@@ -236,7 +236,7 @@
     },
     {
       "label": "LV2: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
+      "detail": "samo emulator koji čeka; debugger spaja F5 u Run and Debug / only an emulator that waits; F5 in Run and Debug attaches the debugger",
       "type": "process",
       "command": "bash",
       "args": [
@@ -268,7 +268,7 @@
     },
     {
       "label": "LV3: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
+      "detail": "samo emulator koji čeka; debugger spaja F5 u Run and Debug / only an emulator that waits; F5 in Run and Debug attaches the debugger",
       "type": "process",
       "command": "bash",
       "args": [
@@ -300,7 +300,7 @@
     },
     {
       "label": "LV4: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
+      "detail": "samo emulator koji čeka; debugger spaja F5 u Run and Debug / only an emulator that waits; F5 in Run and Debug attaches the debugger",
       "type": "process",
       "command": "bash",
       "args": [
@@ -332,7 +332,7 @@
     },
     {
       "label": "LV5: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
+      "detail": "samo emulator koji čeka; debugger spaja F5 u Run and Debug / only an emulator that waits; F5 in Run and Debug attaches the debugger",
       "type": "process",
       "command": "bash",
       "args": [
@@ -364,7 +364,7 @@
     },
     {
       "label": "LV6: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
+      "detail": "samo emulator koji čeka; debugger spaja F5 u Run and Debug / only an emulator that waits; F5 in Run and Debug attaches the debugger",
       "type": "process",
       "command": "bash",
       "args": [

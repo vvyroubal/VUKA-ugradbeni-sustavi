@@ -12,8 +12,8 @@ na stranicama kolegija.
 | Datoteka ili direktorij | Sadržaj |
 |---|---|
 | `Dockerfile` | razvojna slika: ESP-IDF v5.5, Espressifov QEMU, alati za LV7 |
-| `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (ljuska u kontejneru), `verify.sh` / `verify.ps1` (provjera instalacije), `vscode-task.*` i `idf-shell.ps1` (za VS Code) |
-| `.vscode/` | postavke, zadaci i preporučena proširenja za VS Code |
+| `scripts/` | `docker-shell.sh` / `docker-shell.ps1` (ljuska u kontejneru), `verify.sh` / `verify.ps1` (provjera instalacije), `vscode-task.*`, `gdb.sh` / `gdb.cmd` i `idf-shell.ps1` (za VS Code) |
+| `.vscode/` | postavke, zadaci, konfiguracija debuggera (LV2) i preporučena proširenja za VS Code |
 | `labs/labN_*/starter/` | polazni projekti vježbi LV1–LV6 |
 | `labs/common/` | skripte za emulator (`run_qemu*.sh`, za put C `run_qemu*.ps1`) i zajedničke komponente |
 | `labs/lab6_mqtt/broker/` | MQTT posrednik i certifikati za LV6 |
@@ -389,7 +389,8 @@ je normalan. Ranije ga zaustavljate s **Ctrl-A, zatim X**. Ispis se sprema i u
 Terminal 2: ponovno `./scripts/docker-shell.sh` (spaja se na isti kontejner),
 `cd labs/lab2_gpio_irq/starter`, pa naredba koju je ispisao terminal 1:
 `riscv32-esp-elf-gdb build/<projekt>.elf -ex 'target remote :1234'`.
-Bez Dockera drugi terminal treba vlastiti `. ~/esp-idf/export.sh`.
+Bez Dockera drugi terminal treba vlastiti `. ~/esp-idf/export.sh`. U VS Codeu
+sve to radi jedna tipka, F5 (odjeljak *Rad u VS Codeu*).
 
 **LV3 i LV4 na pločici.** U emulatoru se koristi simulirani senzor odnosno
 ADC. Inačicu za pločicu gradite u **zasebnom** direktoriju `build-hw`, da
@@ -447,7 +448,7 @@ a zatim `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
 ## Rad u VS Codeu
 
 Repozitorij sadrži postavke za VS Code (`.vscode/`): preporučena proširenja,
-zadatke i postavke za dovršavanje koda. Otvorite **korijen repozitorija**
+zadatke, konfiguraciju debuggera za LV2 i postavke za dovršavanje koda. Otvorite **korijen repozitorija**
 (*File → Open Folder*; u WSL2 `code .` iz terminala Ubuntu — VS Code je
 instaliran na Windowsu, a proširenje *WSL* spaja ga s Ubuntuom; na putu C `C:\vuka\VUKA-ugradbeni-sustavi`). Na pitanje vjerujete li autorima mape
 odgovorite *Yes, I trust the authors* — u ograničenom načinu (*Restricted
@@ -456,8 +457,34 @@ samo na Windowsu) i *Dev Containers* (za put A); ponudu paketa *C/C++ Extension
 Pack* možete odbiti. Espressifovo proširenje *ESP-IDF* nije potrebno i ne
 instalirajte ga — ono postavlja vlastiti, drukčiji ESP-IDF.
 
-**Zadaci** (*Terminal → Run Task…*, Ctrl-Shift-B za izgradnju i pokretanje),
-nakon kojih se bira vježba:
+**Put A: VS Code radi u kontejneru.** Na putu A alati su samo u kontejneru, pa
+se VS Code na njega priključuje. Prije rada u terminalu računala, u korijenu
+repozitorija, pokrenite `./scripts/docker-shell.sh` i taj terminal ne
+zatvarajte: kad ljuska završi, kontejner se gasi. Zatim u VS Codeu odaberite
+F1 → *Dev Containers: Attach to Running Container…* → `vuka-ugradbeni-sustavi`.
+U novom prozoru otvorite mapu `/work` (*File → Open Folder*) i odgovorite
+*Yes, I trust the authors*. Sve iz ovog odjeljka (zadaci, ispravljanje
+pogrešaka i dovršavanje koda) tada radi u kontejneru. Proširenje *C/C++* u
+kontejneru treba instalirati posebno: u pregledu *Extensions* (Ctrl-Shift-X) za
+*C/C++* kliknite *Install in Container…*. Isto vrijedi za WSL2, gdje je gumb
+*Install in WSL: Ubuntu*.
+
+**Pokretanje vježbe:**
+
+1. Pritisnite **Ctrl-Shift-B** (zadatak *Izgradnja i QEMU*) i s popisa
+   odaberite vježbu, npr. `labs/lab1_toolchain/starter`.
+2. U ploči *Terminal* otvara se kartica zadatka. U njoj teče izgradnja, a
+   zatim ispis programa iz emulatora. Prva izgradnja vježbe traje nekoliko
+   minuta, sljedeće nekoliko sekundi.
+3. Emulator se sam zaustavlja nakon 30 sekundi. Poruka
+   `run_qemu.sh: timeout (30s) reached after output was produced — treating as success`
+   je normalna. Ranije ga zaustavljate tako da kliknete u karticu zadatka i
+   pritisnete **Ctrl-A, a zatim X**.
+4. Pogreške prevođenja ispisuju se u ploči *Problems* (Ctrl-Shift-M). Klik na
+   pogrešku otvara datoteku na tom retku.
+
+Ostali zadaci su u izborniku *Terminal → Run Task…*, a vježba se bira na isti
+način:
 
 | Zadatak | Što radi |
 |---|---|
@@ -469,19 +496,52 @@ nakon kojih se bira vježba:
 | idf.py fullclean | kad isti projekt prelazi s Dockera na izgradnju bez njega ili obrnuto |
 
 Zadaci sami nalaze okruženje (skripta `scripts/vscode-task.sh`, na Windowsu
-`.ps1`): aktivan ESP-IDF, `~/esp-idf` (put B), instalaciju na Windowsu (put C),
-a ako ESP-IDF-a nema, kontejner tečaja (put A). Na putu A zadatak se spaja na
-kontejner koji već radi, pa zadatke pokrećite jedan po jedan.
+`.ps1`). Redom pokušavaju aktivan ESP-IDF (i u kontejneru), `~/esp-idf`
+(put B) i instalaciju na Windowsu (put C). Ako ESP-IDF-a nema (put A, a VS Code
+nije priključen na kontejner), koriste kontejner tečaja. Zadatak se tada spaja
+na kontejner koji već radi, pa zadatke pokrećite jedan po jedan.
 
-**Terminal:** na putu A `./scripts/docker-shell.sh`, na putu B
-`. ~/esp-idf/export.sh`; na putu C profil **ESP-IDF 5.5 PowerShell** (strelica
-uz `+` u ploči terminala).
+**Ispravljanje pogrešaka u LV2 (debugger na QEMU).** Konfiguracija *LV2: GDB
+u QEMU-u* (`.vscode/launch.json`) sama izgradi LV2, pokrene emulator
+zaustavljen na početku i na njega priključi GDB:
+
+1. Otvorite `labs/lab2_gpio_irq/starter/main/main.c` i kliknite lijevo od broja
+   retka na kojem program treba stati. Pojavi se crvena točka (prijelomna
+   točka, *breakpoint*). Postavite je **prije** pokretanja, inače program
+   prolazi bez zaustavljanja. U prekidnu rutinu `timer_alarm_cb` program ulazi
+   tek kad je riješen TODO 3 (T4); prije toga stanite npr. na prvom retku
+   funkcije `app_main`.
+2. Otvorite pregled *Run and Debug* (Ctrl-Shift-D) i u padajućem izborniku na
+   vrhu odaberite **LV2: GDB u QEMU-u**.
+3. Pritisnite **F5**. VS Code pokreće zadatak *LV2: izgradnja i QEMU za GDB*,
+   čeka da emulator ispiše `gdbstub on :1234` i priključuje GDB. Prva
+   izgradnja traje nekoliko minuta.
+4. Kad program stane, redak je označen žuto. Lijevo su *Variables* (varijable)
+   i *Call Stack* (stog poziva, *backtrace*). Na traci za ispravljanje
+   pogrešaka su *Continue* (F5), *Step Over* (F10, sljedeći redak) i *Step
+   Into* (F11, ulazak u funkciju).
+5. Naredbe GDB-a iz priručnika vježbe upisujte u *Debug Console*
+   (Ctrl-Shift-Y) s prefiksom `-exec`, npr. `-exec bt`,
+   `-exec info registers` i `-exec print *edata`. Odatle kopirajte i
+   transkript za predaju. Ispis programa iz emulatora je u ploči *Terminal*, u
+   kartici zadatka.
+6. **Stop** (Shift-F5) zaustavlja GDB i emulator. Sljedeći F5 ponovno gradi i
+   pokreće.
+
+Na putu A ovo radi samo u prozoru priključenom na kontejner. Bez toga zadatak
+javlja `with Docker, debug from VS Code attached to the course container`.
+Konfiguracija postoji samo za LV2; za ostale vježbe vrijedi naredbeni redak
+iz odjeljka *Rad na vježbi* (`run_qemu_gdb.sh` i GDB u drugom terminalu).
+
+**Terminal:** na putu A `./scripts/docker-shell.sh`; u prozoru priključenom na
+kontejner terminal je već u kontejneru, a ESP-IDF u njemu aktivirate s
+`. $IDF_PATH/export.sh`. Na putu B `. ~/esp-idf/export.sh`; na putu C
+profil **ESP-IDF 5.5 PowerShell** (strelica uz `+` u ploči terminala).
 
 **Dovršavanje koda (IntelliSense)** čita `build/compile_commands.json` vježbe, pa
 radi nakon prve izgradnje (do tada *Problems* za neizgrađene vježbe javlja
-*Cannot find … compile_commands.json*). Na putu A putanje su iz kontejnera (`/work/...`):
-pokrenite `./scripts/docker-shell.sh`, zatim F1 → *Dev Containers: Attach to
-Running Container…* → `vuka-ugradbeni-sustavi` i otvorite mapu `/work`.
+*Cannot find … compile_commands.json*). Na putu A putanje su iz kontejnera
+(`/work/...`), pa dovršavanje radi samo u prozoru priključenom na kontejner.
 
 ## Programiranje pločice
 

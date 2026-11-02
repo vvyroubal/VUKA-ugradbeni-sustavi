@@ -4,7 +4,10 @@
 #
 # Usage:
 #     powershell -ExecutionPolicy Bypass -File scripts\vscode-task.ps1 <action> <project>
-#   action:  build | qemu | build-qemu | menuconfig | reconfigure | fullclean
+#   action:  build | qemu | build-qemu | build-gdb | menuconfig | reconfigure
+#            | fullclean
+#            (build-gdb: build, then QEMU halted, waiting for the VS Code
+#            debugger on :1234 -- .vscode/launch.json, Lab 2)
 #   project: lab project relative to the repository root,
 #            e.g. labs/lab1_toolchain/starter
 #
@@ -19,9 +22,9 @@ param(
 )
 
 $Root = Split-Path -Parent $PSScriptRoot
-$actions = @("build", "qemu", "build-qemu", "menuconfig", "reconfigure", "fullclean")
+$actions = @("build", "qemu", "build-qemu", "build-gdb", "menuconfig", "reconfigure", "fullclean")
 if (-not $Project -or $actions -notcontains $Action) {
-    [Console]::Error.WriteLine("Usage: vscode-task.ps1 <build|qemu|build-qemu|menuconfig|reconfigure|fullclean> <project>")
+    [Console]::Error.WriteLine("Usage: vscode-task.ps1 <build|qemu|build-qemu|build-gdb|menuconfig|reconfigure|fullclean> <project>")
     exit 1
 }
 $Project = $Project.TrimEnd("/", "\")
@@ -41,6 +44,7 @@ if (Get-Command idf.py -ErrorAction SilentlyContinue) {
         "build"       { idf.py build }
         "qemu"        { & $qemu build }
         "build-qemu"  { idf.py build; if ($LASTEXITCODE -eq 0) { & $qemu build } }
+        "build-gdb"   { idf.py build; if ($LASTEXITCODE -eq 0) { & (Join-Path $Root "labs\common\run_qemu_gdb.ps1") build } }
         "menuconfig"  { idf.py menuconfig }
         "reconfigure" { idf.py reconfigure }
         "fullclean"   { idf.py fullclean }
@@ -49,6 +53,12 @@ if (Get-Command idf.py -ErrorAction SilentlyContinue) {
 }
 
 if (Get-Command docker -ErrorAction SilentlyContinue) {
+    # The debugger runs where VS Code runs: with Docker that is the container
+    # only when VS Code is attached to it (then vscode-task.sh runs there).
+    if ($Action -eq "build-gdb") {
+        [Console]::Error.WriteLine("vscode-task.ps1: with Docker, debug from VS Code attached to the course container (README, 'Rad u VS Codeu')")
+        exit 1
+    }
     $script = if ($lab6) { "run_qemu_net.sh" } else { "run_qemu.sh" }
     $cmd = switch ($Action) {
         "build"       { "idf.py build" }

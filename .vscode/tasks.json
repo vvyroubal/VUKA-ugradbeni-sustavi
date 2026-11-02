@@ -80,6 +80,38 @@
       "problemMatcher": []
     },
     {
+      "label": "LV2: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "build-gdb",
+        "labs/lab2_gpio_irq/starter"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "build-gdb",
+          "labs/lab2_gpio_irq/starter"
+        ]
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$gcc",
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "^== ",
+          "endsPattern": "gdbstub on :1234"
+        }
+      }
+    },
+    {
       "label": "menuconfig",
       "type": "process",
       "command": "bash",

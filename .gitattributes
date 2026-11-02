@@ -3,6 +3,7 @@
 # bash fails with "bad interpreter" / "$'\r': command not found".
 * text=auto eol=lf
 *.ps1 text eol=crlf
+*.cmd text eol=crlf
 # signal captures are kept byte-for-byte as recorded (CRLF)
 *.csv -text
 *.pem text eol=lf

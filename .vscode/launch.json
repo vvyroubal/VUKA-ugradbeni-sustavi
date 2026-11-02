@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "LV2: GDB u QEMU-u / GDB in QEMU",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/labs/lab2_gpio_irq/starter/build/lab2.elf",
+      "cwd": "${workspaceFolder}/labs/lab2_gpio_irq/starter",
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/scripts/gdb.sh",
+      "miDebuggerServerAddress": "localhost:1234",
+      "stopAtConnect": false,
+      "externalConsole": false,
+      "preLaunchTask": "LV2: izgradnja i QEMU za GDB / build and QEMU for GDB",
+      "windows": {
+        "program": "${workspaceFolder}\\labs\\lab2_gpio_irq\\starter\\build\\lab2.elf",
+        "miDebuggerPath": "${workspaceFolder}\\scripts\\gdb.cmd"
+      }
+    }
+  ]
+}

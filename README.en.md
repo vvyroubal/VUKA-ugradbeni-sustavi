@@ -524,8 +524,10 @@ stops with Ctrl-A, then X on macOS too, and the monitor with Ctrl-].
 4. Compiler errors are listed in the *Problems* panel (Ctrl-Shift-M). Clicking
    an error opens the file at that line.
 
-The other tasks are under *Terminal → Run Task…*, and you choose the lab the
-same way:
+All tasks are under *Terminal → Run Task…*. Tasks without a lab in their name
+are shared by Labs 1–6: you choose the lab from the list that appears **after**
+choosing the task. The debugger is not in that menu but in the *Run and Debug*
+view (section *Debugger*, below).
 
 | Task | What it does |
 |---|---|
@@ -537,7 +539,7 @@ same way:
 | idf.py fullclean | when the same project moves between Docker and the build without it |
 | QEMU for GDB, waits for the debugger | the latest build in an emulator that waits for GDB (section *Debugger*) |
 | LV7: Buildroot build | builds Lab 7 (section *Working on a lab*, Lab 7) |
-| LV1–LV6: build and QEMU for GDB | hidden tasks that F5 starts (section *Debugger*) |
+| LV1–LV6: build and QEMU for GDB | builds the lab, then an emulator that waits for GDB; F5 starts them too (section *Debugger*) |
 
 The tasks find the environment by themselves (the `scripts/vscode-task.sh`
 script, `.ps1` on Windows). They try, in order, an active ESP-IDF (also in the
@@ -611,7 +613,7 @@ connect to the broker.
 **Shortcut: F5 for every lab (Labs 1–6).** Every lab has a configuration
 **LV*n*: GDB in QEMU** (e.g. *LV3: GDB in QEMU*) that does steps 1, 3 and 4 by
 itself. Set a breakpoint in the lab's code, choose that lab's configuration in
-*Run and Debug* and press **F5**. VS Code runs the hidden task *LV*n*: build
+*Run and Debug* and press **F5**. VS Code runs the task *LV*n*: build
 and QEMU for GDB* (build, then QEMU waiting), waits for the
 `gdbstub on :1234` line and attaches GDB. A lab's first build takes a few
 minutes. In Lab 2 the program enters the `timer_alarm_cb` interrupt handler

@@ -204,7 +204,7 @@
     },
     {
       "label": "LV1: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
       "type": "process",
       "command": "bash",
       "args": [
@@ -232,12 +232,11 @@
           "beginsPattern": "^== ",
           "endsPattern": "gdbstub on :1234"
         }
-      },
-      "hide": true
+      }
     },
     {
       "label": "LV2: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
       "type": "process",
       "command": "bash",
       "args": [
@@ -265,12 +264,11 @@
           "beginsPattern": "^== ",
           "endsPattern": "gdbstub on :1234"
         }
-      },
-      "hide": true
+      }
     },
     {
       "label": "LV3: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
       "type": "process",
       "command": "bash",
       "args": [
@@ -298,12 +296,11 @@
           "beginsPattern": "^== ",
           "endsPattern": "gdbstub on :1234"
         }
-      },
-      "hide": true
+      }
     },
     {
       "label": "LV4: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
       "type": "process",
       "command": "bash",
       "args": [
@@ -331,12 +328,11 @@
           "beginsPattern": "^== ",
           "endsPattern": "gdbstub on :1234"
         }
-      },
-      "hide": true
+      }
     },
     {
       "label": "LV5: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
       "type": "process",
       "command": "bash",
       "args": [
@@ -364,12 +360,11 @@
           "beginsPattern": "^== ",
           "endsPattern": "gdbstub on :1234"
         }
-      },
-      "hide": true
+      }
     },
     {
       "label": "LV6: izgradnja i QEMU za GDB / build and QEMU for GDB",
-      "detail": "pokreće ga F5 (launch.json) / started by F5",
+      "detail": "izgradnja, zatim QEMU čeka debugger; pokreće ga i F5 / build, then QEMU waits for the debugger; F5 starts it too",
       "type": "process",
       "command": "bash",
       "args": [
@@ -397,8 +392,7 @@
           "beginsPattern": "^== ",
           "endsPattern": "gdbstub on :1234"
         }
-      },
-      "hide": true
+      }
     }
   ],
   "inputs": [

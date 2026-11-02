@@ -517,8 +517,10 @@ QEMU se i na macOS-u zaustavlja s Ctrl-A, zatim X, a monitor s Ctrl-].
 4. Pogreške prevođenja ispisuju se u ploči *Problems* (Ctrl-Shift-M). Klik na
    pogrešku otvara datoteku na tom retku.
 
-Ostali zadaci su u izborniku *Terminal → Run Task…*, a vježba se bira na isti
-način:
+Svi zadaci su u izborniku *Terminal → Run Task…*. Zadaci bez oznake vježbe u
+imenu zajednički su za LV1–LV6: vježbu birate s popisa koji se pojavi **nakon**
+odabira zadatka. Debugger nije u tom izborniku, nego u pregledu *Run and Debug*
+(odjeljak *Debugger*, niže).
 
 | Zadatak | Što radi |
 |---|---|
@@ -530,7 +532,7 @@ način:
 | idf.py fullclean | kad isti projekt prelazi s Dockera na izgradnju bez njega ili obrnuto |
 | QEMU za GDB, čeka debugger | zadnja izgradnja u emulatoru koji čeka GDB (odjeljak *Debugger*) |
 | LV7: izgradnja Buildroota | izgradnja LV7 (odjeljak *Rad na vježbi*, LV7) |
-| LV1–LV6: izgradnja i QEMU za GDB | skriveni zadaci koje pokreće F5 (odjeljak *Debugger*) |
+| LV1–LV6: izgradnja i QEMU za GDB | izgradnja vježbe, zatim emulator koji čeka GDB; pokreće ih i F5 (odjeljak *Debugger*) |
 
 Zadaci sami nalaze okruženje (skripta `scripts/vscode-task.sh`, na Windowsu
 `.ps1`). Redom pokušavaju aktivan ESP-IDF (i u kontejneru), `~/esp-idf`
@@ -603,7 +605,7 @@ posrednik.
 konfiguracija **LV*n*: GDB u QEMU-u** (npr. *LV3: GDB u QEMU-u*), koja korake
 1, 3 i 4 izvodi sama. Postavite prijelomnu točku u kodu vježbe, u *Run and
 Debug* odaberite konfiguraciju te vježbe i pritisnite **F5**. VS Code pokrene
-skriveni zadatak *LV*n*: izgradnja i QEMU za GDB* (izgradnja, zatim QEMU koji
+zadatak *LV*n*: izgradnja i QEMU za GDB* (izgradnja, zatim QEMU koji
 čeka), pričeka redak `gdbstub on :1234` i spoji GDB. Prva izgradnja vježbe
 traje nekoliko minuta. U LV2 program ulazi u prekidnu rutinu `timer_alarm_cb`
 tek kad je riješen TODO 3 (T4); prije toga stanite npr. na prvom retku

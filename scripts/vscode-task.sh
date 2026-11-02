@@ -5,10 +5,10 @@
 #
 # Usage (from anywhere):
 #     bash scripts/vscode-task.sh <action> <project>
-#   action:  build | qemu | build-qemu | build-gdb | menuconfig | reconfigure
-#            | fullclean
-#            (build-gdb: build, then QEMU halted, waiting for the VS Code
-#            debugger on :1234 -- .vscode/launch.json, Lab 2)
+#   action:  build | qemu | build-qemu | gdb | build-gdb | menuconfig
+#            | reconfigure | fullclean
+#            (gdb: the latest build in QEMU, halted, waiting for a debugger
+#            on :1234; build-gdb: build first -- .vscode/launch.json)
 #   project: lab project relative to the repository root,
 #            e.g. labs/lab1_toolchain/starter
 #
@@ -23,7 +23,7 @@ set -eo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 usage() {
-  echo "Usage: bash scripts/vscode-task.sh <build|qemu|build-qemu|build-gdb|menuconfig|reconfigure|fullclean> <project>" >&2
+  echo "Usage: bash scripts/vscode-task.sh <build|qemu|build-qemu|gdb|build-gdb|menuconfig|reconfigure|fullclean> <project>" >&2
   exit 1
 }
 [ "$#" -eq 2 ] || usage
@@ -42,6 +42,7 @@ case "$ACTION" in
   build)       CMD="idf.py build" ;;
   qemu)        CMD="bash ../../common/$QEMU_SCRIPT build" ;;
   build-qemu)  CMD="idf.py build && bash ../../common/$QEMU_SCRIPT build" ;;
+  gdb)         CMD="bash ../../common/run_qemu_gdb.sh build" ;;
   build-gdb)   CMD="idf.py build && bash ../../common/run_qemu_gdb.sh build" ;;
   menuconfig)  CMD="idf.py menuconfig" ;;
   reconfigure) CMD="idf.py reconfigure" ;;
@@ -68,7 +69,7 @@ fi
 if command -v docker >/dev/null 2>&1; then
   # The debugger runs where VS Code runs: with Docker that is the container
   # only when VS Code is attached to it (then idf.py is found above).
-  if [ "$ACTION" = build-gdb ]; then
+  if [ "$ACTION" = gdb ] || [ "$ACTION" = build-gdb ]; then
     echo "vscode-task.sh: with Docker, debug from VS Code attached to the course container (README, \"Rad u VS Codeu\")" >&2
     exit 1
   fi

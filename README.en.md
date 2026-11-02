@@ -349,9 +349,17 @@ verify.sh: PASS -- toolchain, build and QEMU all work
 
 ## Working on a lab
 
-Path A: first `./scripts/docker-shell.sh` from the repository root
-(`docker-shell.ps1` in PowerShell) — all following commands run in that shell
-(under `/work`). Path B: `. ~/esp-idf/export.sh`. Example for Lab 1:
+Commands are typed in a terminal with ESP-IDF active, and how you get one
+depends on the path:
+
+- **path A:** `./scripts/docker-shell.sh` from the repository root
+  (`docker-shell.ps1` in PowerShell); all following commands run in that shell
+  (under `/work`);
+- **path B:** `. ~/esp-idf/export.sh` in every new terminal;
+- **path C:** the **ESP-IDF 5.5 PowerShell** shortcut; scripts are run in
+  their `.ps1` version (table in section *Path C*).
+
+Example for Lab 1 (paths A and B; for path C see section *Path C*):
 
 ```sh
 cd labs/lab1_toolchain/starter
@@ -388,13 +396,19 @@ saved to `build/qemu.log`.
 
 What to complete and how it is checked is in each lab's manual.
 
-**Lab 2, GDB.** Terminal 1: `./scripts/docker-shell.sh`,
-`cd labs/lab2_gpio_irq/starter`, `bash ../../common/run_qemu_gdb.sh build`.
-Terminal 2: `./scripts/docker-shell.sh` again (it attaches to the same
-container), `cd labs/lab2_gpio_irq/starter`, then the command terminal 1
-printed: `riscv32-esp-elf-gdb build/<project>.elf -ex 'target remote :1234'`.
-Without Docker the second terminal needs its own `. ~/esp-idf/export.sh`. In
-VS Code all of this is a single key, F5 (section *Working in VS Code*).
+**GDB from the terminal (Lab 2).** In VS Code the debugger does this (section
+*Debugger: GDB attached to QEMU*). Without VS Code you need two terminals, both
+in the `labs/lab2_gpio_irq/starter` directory:
+
+1. **Terminal 1, QEMU waiting:** `bash ../../common/run_qemu_gdb.sh build`
+   (path C: `../../common/run_qemu_gdb.ps1 build`). The script prints the
+   connect command and the emulator waits.
+2. **Terminal 2, GDB:** open a second terminal with ESP-IDF active. On path A
+   run `./scripts/docker-shell.sh` again; it attaches to the same container.
+   On path B open a new terminal and run `. ~/esp-idf/export.sh` in it. On
+   path C open another **ESP-IDF 5.5 PowerShell** shortcut window. Then
+   `cd labs/lab2_gpio_irq/starter` and the command terminal 1 printed:
+   `riscv32-esp-elf-gdb build/lab2.elf -ex "target remote :1234"`.
 
 **Labs 3 and 4 on the board.** In the emulator a simulated sensor and ADC
 are used. Build the board variant in a **separate** `build-hw` directory so
@@ -453,26 +467,33 @@ and then `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
 ## Working in VS Code
 
 The repository contains VS Code settings (`.vscode/`): recommended extensions,
-tasks, the Lab 2 debugger configuration and code-completion settings. Open the **repository root** (*File → Open
-Folder*; in WSL2 `code .` from the Ubuntu terminal — VS Code is installed on
-Windows, and the *WSL* extension connects it to Ubuntu; on path C `C:\vuka\VUKA-ugradbeni-sustavi`). When asked whether you trust the authors
-of the folder, answer *Yes, I trust the authors* — in *Restricted Mode* the
-tasks do not run. VS Code then offers the *C/C++*, *WSL* (needed on Windows
-only) and *Dev Containers* (for path A) extensions; you can decline the
-*C/C++ Extension Pack* offer. Espressif's *ESP-IDF* extension is not needed; do
-not install it — it sets up its own, different ESP-IDF.
+tasks for building and the emulator, debugger configurations and
+code-completion settings. VS Code must run **where ESP-IDF is**, so how you
+open the repository depends on the path:
 
-**Path A: VS Code runs in the container.** On path A the tools exist only in
-the container, so VS Code attaches to it. Before you start, run
-`./scripts/docker-shell.sh` in a terminal on your computer, from the repository
-root. Keep that terminal open: when the shell exits, the container stops. Then
-in VS Code choose F1 → *Dev Containers: Attach to Running Container…* →
-`vuka-ugradbeni-sustavi`. In the new window open the `/work` folder (*File →
-Open Folder*) and answer *Yes, I trust the authors*. Everything in this section
-(tasks, debugging and code completion) then runs in the container. The *C/C++*
-extension has to be installed in the container separately: in the *Extensions*
-view (Ctrl-Shift-X), click *Install in Container…* for *C/C++*. The same holds
-for WSL2, where the button is *Install in WSL: Ubuntu*.
+- **Path A (Docker, all systems).** The tools exist only in the container, so
+  VS Code attaches to it. In a terminal on your computer, from the repository
+  root, run `./scripts/docker-shell.sh` (`docker-shell.ps1` in PowerShell) and
+  keep that terminal open: when the shell exits, the container stops. Then in
+  VS Code choose F1 → *Dev Containers: Attach to Running Container…* →
+  `vuka-ugradbeni-sustavi`, and in the new window *File → Open Folder* →
+  `/work`. The bottom-left corner of the window shows *Container …*. Repeat
+  this at the start of every session.
+- **Path B, Linux and macOS.** *File → Open Folder* → the repository root.
+- **Path B, WSL2.** In the Ubuntu terminal, from the repository root, type
+  `code .`. VS Code is installed on Windows, and the *WSL* extension connects
+  it to Ubuntu; the bottom-left corner shows *WSL: Ubuntu*.
+- **Path C.** *File → Open Folder* → `C:\vuka\VUKA-ugradbeni-sustavi`.
+
+When asked whether you trust the authors of the folder, answer *Yes, I trust
+the authors*: in *Restricted Mode* the tasks do not run. VS Code then offers
+the recommended extensions. *C/C++* is needed on every path, *WSL* only for
+WSL2 and *Dev Containers* only for path A. You can decline the *C/C++
+Extension Pack* offer. On path A and in WSL2 the *C/C++* extension must be
+installed **in the container** or **in WSL**: in the *Extensions* view
+(Ctrl-Shift-X), click *Install in Container…* or *Install in WSL: Ubuntu* for
+*C/C++*. Espressif's *ESP-IDF* extension is not needed; do not install it: it
+sets up its own, different ESP-IDF.
 
 **Running a lab:**
 
@@ -499,44 +520,15 @@ same way:
 | menuconfig | `idf.py menuconfig` |
 | idf.py reconfigure | after a new `Kconfig.projbuild` (Labs 1 and 4) |
 | idf.py fullclean | when the same project moves between Docker and the build without it |
+| QEMU for GDB, waits for the debugger | the latest build in an emulator that waits for GDB (section *Debugger*) |
+| LV2: build and QEMU for GDB | the same for Lab 2, with a build; F5 starts it (section *Debugger*) |
 
 The tasks find the environment by themselves (the `scripts/vscode-task.sh`
 script, `.ps1` on Windows). They try, in order, an active ESP-IDF (also in the
 container), `~/esp-idf` (path B) and the installation on Windows (path C). If
-there is no ESP-IDF (path A with VS Code not attached to the container), they
-use the course container. A task then attaches to a container that is already
-running, so run tasks one at a time.
-
-**Debugging Lab 2 (a debugger on QEMU).** The *LV2: GDB u QEMU-u / GDB in
-QEMU* configuration (`.vscode/launch.json`) builds Lab 2 by itself, starts the
-emulator halted at reset and attaches GDB to it:
-
-1. Open `labs/lab2_gpio_irq/starter/main/main.c` and click left of the line
-   number where the program should stop. A red dot appears (a breakpoint). Set
-   it **before** you start, otherwise the program runs without stopping. The
-   program enters the `timer_alarm_cb` interrupt handler only once TODO 3 (T4)
-   is solved; before that, stop e.g. on the first line of `app_main`.
-2. Open the *Run and Debug* view (Ctrl-Shift-D) and choose **LV2: GDB u QEMU-u
-   / GDB in QEMU** in the drop-down at the top.
-3. Press **F5**. VS Code runs the *LV2: build and QEMU for GDB* task, waits
-   for the emulator to print `gdbstub on :1234` and attaches GDB. The first
-   build takes a few minutes.
-4. When the program stops, the line is highlighted in yellow. On the left are
-   *Variables* and *Call Stack* (the backtrace). The debug toolbar has
-   *Continue* (F5), *Step Over* (F10, next line) and *Step Into* (F11, into a
-   function).
-5. Type the GDB commands from the lab manual in the *Debug Console*
-   (Ctrl-Shift-Y) with the `-exec` prefix, e.g. `-exec bt`,
-   `-exec info registers` and `-exec print *edata`. Copy the transcript for
-   your submission from there too. The program's output from the emulator is
-   in the *Terminal* panel, in the task tab.
-6. **Stop** (Shift-F5) stops GDB and the emulator. The next F5 builds and
-   starts again.
-
-On path A this works only in the window attached to the container. Without it
-the task reports `with Docker, debug from VS Code attached to the course container`.
-The configuration exists for Lab 2 only; for the other labs use the command
-line from *Working on a lab* (`run_qemu_gdb.sh` and GDB in a second terminal).
+there is no ESP-IDF (path A with VS Code not attached to the container), the
+build and emulator tasks use the course container. A task then attaches to a
+container that is already running, so run tasks one at a time.
 
 **Terminal:** on path A `./scripts/docker-shell.sh`; in the window attached to
 the container the terminal is already in the container, and you activate
@@ -549,6 +541,96 @@ so it works after the first build (until then *Problems* shows *Cannot find …
 compile_commands.json* for labs not yet built). On path A the paths come from the
 container (`/work/...`), so code completion works only in the window attached to
 the container.
+
+### Debugger: GDB attached to QEMU
+
+The debugger consists of two programs running at the same time, connected
+through network port **1234**:
+
+- **QEMU in debug mode** (the `run_qemu_gdb.sh` script, `run_qemu_gdb.ps1` on
+  path C) loads the lab's build, halts the processor before the first
+  instruction and waits for a debugger to connect to port 1234. While it
+  waits, the program does not run and prints nothing. The script's last line
+  before waiting is `QEMU starting HALTED with gdbstub on :1234`.
+- **GDB** (`riscv32-esp-elf-gdb`) reads the names of functions and variables
+  and the source lines from `build/<project>.elf`, then connects to
+  `localhost:1234` and controls the emulator. In VS Code the *C/C++* extension
+  starts GDB (through `scripts/gdb.sh`, `scripts\gdb.cmd` on Windows), and you
+  control it by clicking.
+
+Hence two rules: QEMU must be waiting **before** GDB connects, and both must
+run on the same computer, on path A in the same container.
+
+**Preparation.** The repository must be open the way the beginning of
+section *Working in VS Code* describes for your path, with the *C/C++*
+extension installed where VS Code runs: on path A a window attached to the
+container (bottom left *Container …*), in WSL2 a WSL window (bottom left
+*WSL: Ubuntu*), on path B on Linux and macOS and on path C an ordinary window.
+On path A, in a window **not** attached to the container, the debugger cannot
+work (GDB would run on the computer and QEMU in the container), so the GDB
+tasks then report
+`with Docker, debug from VS Code attached to the course container`.
+
+**Attaching the debugger, step by step (any lab):**
+
+1. **Build the lab:** Ctrl-Shift-B or the *Build* task.
+2. **Set a breakpoint:** in the lab's code, click left of the line number
+   where the program should stop. A red dot appears (a breakpoint). Set it
+   before step 4, otherwise the program runs without stopping.
+3. **Start QEMU waiting:** *Terminal → Run Task…* → **QEMU for GDB, waits for
+   the debugger** → choose the lab. The task tab shows
+   `QEMU starting HALTED with gdbstub on :1234` and the emulator now waits.
+   The command in a terminal, from the lab directory, does the same:
+   `bash ../../common/run_qemu_gdb.sh build` (paths A and B) or
+   `../../common/run_qemu_gdb.ps1 build` (path C).
+4. **Attach the debugger:** open the *Run and Debug* view (Ctrl-Shift-D),
+   choose **GDB: attach to the waiting QEMU** in the drop-down at the top,
+   press **F5** and choose the program of the **same** lab from the list, e.g.
+   `labs/lab1_toolchain/starter/build/lab1.elf`. GDB connects to port 1234,
+   the emulator starts and the program stops at the breakpoint.
+
+In Lab 6 the emulator for GDB has no network card, so the program cannot
+connect to the broker.
+
+**Shortcut for Lab 2: F5.** The **LV2: GDB in QEMU** configuration does steps
+1, 3 and 4 by itself. Set a breakpoint in
+`labs/lab2_gpio_irq/starter/main/main.c`, choose **LV2: GDB in QEMU** in *Run
+and Debug* and press **F5**. VS Code runs the *LV2: build and QEMU for GDB*
+task (build, then QEMU waiting), waits for the `gdbstub on :1234` line and
+attaches GDB. The first build takes a few minutes. The program enters the
+`timer_alarm_cb` interrupt handler only once TODO 3 (T4) is solved; before
+that, stop e.g. on the first line of `app_main`.
+
+**Working with the attached debugger:**
+
+- When the program stops at a breakpoint, the line is highlighted in yellow.
+  On the left are *Variables* and *Call Stack* (the backtrace).
+- The debug toolbar at the top: *Continue* (F5, to the next breakpoint),
+  *Step Over* (F10, next line), *Step Into* (F11, into a function), *Stop*
+  (Shift-F5).
+- Type the GDB commands from the lab manual in the *Debug Console*
+  (Ctrl-Shift-Y) with the `-exec` prefix, e.g. `-exec bt`,
+  `-exec info registers` and `-exec print *edata`. Copy the transcript for
+  your submission from there too.
+- The program's output from the emulator is in the *Terminal* panel, in the
+  task tab.
+- **Stop** (Shift-F5) stops GDB and the emulator, which also ends the task.
+  To attach again, repeat steps 3 and 4 (for Lab 2 just F5).
+
+**When attaching fails:**
+
+| Message or symptom | Cause and fix |
+|---|---|
+| `Unable to start debugging. Unexpected GDB output from command "-target-select remote localhost:1234". could not connect …` | QEMU is not waiting: the *QEMU for GDB* task was not started or has already ended. Start it (step 3), then F5 again. |
+| `Unable to start debugging. Program path '…' is missing or invalid.` | The chosen lab is not built (step 1), or you chose another lab's program. |
+| `build dir not found: build` in the task tab | The lab is not built (step 1). |
+| `gdb.sh: riscv32-esp-elf-gdb not found` | VS Code does not run where ESP-IDF is: on path A the window is not attached to the container, in WSL2 the window is not a WSL window. |
+| `with Docker, debug from VS Code attached to the course container` | Path A without an attached window (*Preparation*, above). |
+| the program runs without stopping | No breakpoint is set, or it is on a line that never runs. |
+| `Failed to find an available port: Address already in use` in the task tab | An old emulator is still running: close its task tab (the bin icon) or press Ctrl-A, then X in it. |
+
+Without VS Code the same is done from two terminals (section *Working on a
+lab*, *GDB from the terminal*).
 
 ## Flashing the board
 

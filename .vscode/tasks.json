@@ -80,6 +80,38 @@
       "problemMatcher": []
     },
     {
+      "label": "QEMU za GDB, čeka debugger / QEMU for GDB, waits for the debugger",
+      "detail": "zadnja izgradnja odabrane vježbe / latest build of the chosen lab",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "gdb",
+        "${input:lab}"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "gdb",
+          "${input:lab}"
+        ]
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$gcc",
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "^== ",
+          "endsPattern": "gdbstub on :1234"
+        }
+      }
+    },
+    {
       "label": "LV2: izgradnja i QEMU za GDB / build and QEMU for GDB",
       "detail": "pokreće ga F5 (launch.json) / started by F5",
       "type": "process",

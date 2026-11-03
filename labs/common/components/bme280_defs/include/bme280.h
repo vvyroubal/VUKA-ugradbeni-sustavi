@@ -5,7 +5,7 @@
  *
  * This header is the ONE contract both implementations must satisfy:
  *   - labs/common/components/bme280_sim   -- synthetic data (QEMU / CI path)
- *   - labs/lab3_bme280/{starter,solution}/main/bme280_i2c.c
+ *   - labs/lab3_bme280/starter/main/bme280_i2c.c (and the solution)
  *                                          -- real i2c_master driver (hardware path)
  *
  * Exactly one of the two is compiled into any given firmware image, selected

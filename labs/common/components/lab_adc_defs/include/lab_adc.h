@@ -6,7 +6,7 @@
  *
  * This header is the ONE contract both implementations must satisfy:
  *   - labs/common/components/adc_sim               -- synthetic data (QEMU / CI path)
- *   - labs/lab4_adc_pwm/{starter,solution}/main/lab_adc_oneshot.c
+ *   - labs/lab4_adc_pwm/starter/main/lab_adc_oneshot.c (and the solution)
  *                                                    -- real adc_oneshot driver (hardware path)
  *
  * Exactly one of the two is compiled into any given firmware image, selected

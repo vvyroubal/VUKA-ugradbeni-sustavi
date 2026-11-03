@@ -13,8 +13,8 @@
 #               (10.0.2.2 is the QEMU user-mode host alias the guest connects
 #                to; 127.0.0.1 lets you smoke the broker from the host too).
 #
-# The CA cert is also copied to the starter/ and solution/ projects at
-# main/certs/ca.crt, where each project's CMakeLists embeds it into the firmware
+# The CA cert is also copied to the starter/ project (and, in the instructor
+# repository, to nastavnik/lab6_mqtt/solution/) at main/certs/ca.crt, where each project's CMakeLists embeds it into the firmware
 # (EMBED_TXTFILES) so the device can verify the broker. Those copies are
 # .gitignore'd as well.
 #
@@ -59,10 +59,10 @@ openssl x509 -req -in "$CERT_DIR/server.csr" \
 rm -f "$CERT_DIR/server.csr" "$CERT_DIR/server.ext" "$CERT_DIR/ca.srl"
 
 echo "== gen_certs.sh: distributing ca.crt to projects =="
-for proj in starter solution; do
-    [ -d "$LAB_DIR/$proj/main" ] || continue   # students have no solution/
-    mkdir -p "$LAB_DIR/$proj/main/certs"
-    cp "$CERT_DIR/ca.crt" "$LAB_DIR/$proj/main/certs/ca.crt"
+for proj in "$LAB_DIR/starter" "$LAB_DIR/../../nastavnik/lab6_mqtt/solution"; do
+    [ -d "$proj/main" ] || continue   # students have no nastavnik/ directory
+    mkdir -p "$proj/main/certs"
+    cp "$CERT_DIR/ca.crt" "$proj/main/certs/ca.crt"
     echo "  -> $proj/main/certs/ca.crt"
 done
 

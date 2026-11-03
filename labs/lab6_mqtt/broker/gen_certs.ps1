@@ -58,11 +58,11 @@ try {
 }
 
 Write-Host "== gen_certs.ps1: distributing ca.crt to projects =="
-foreach ($proj in "starter", "solution") {
-    $main = Join-Path $LabDir "$proj\main"
-    if (-not (Test-Path $main)) { continue }   # students have no solution/
+foreach ($proj in (Join-Path $LabDir "starter"), (Join-Path $LabDir "..\..\nastavnik\lab6_mqtt\solution")) {
+    $main = Join-Path $proj "main"
+    if (-not (Test-Path $main)) { continue }   # students have no nastavnik/ directory
     New-Item -ItemType Directory -Force (Join-Path $main "certs") | Out-Null
     Copy-Item -Force (Join-Path $CertDir "ca.crt") (Join-Path $main "certs\ca.crt")
-    Write-Host "  -> $proj/main/certs/ca.crt"
+    Write-Host "  -> $main\certs\ca.crt"
 }
 Write-Host "== gen_certs.ps1: done. Certs in $CertDir (not committed) =="

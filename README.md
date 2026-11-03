@@ -419,6 +419,11 @@ stvara, a `idf.py` popis datoteka postavki pamti u direktoriju izgradnje.
 Gradite li inačicu za pločicu u `build/`, tiho ostaje simulator, a pokvari se
 i povratak na QEMU.
 
+Uz Docker na macOS-u i Windowsu kontejner ne vidi pločicu: prvu naredbu
+izvedite u kontejneru, a program upišite alatom `esptool` s računala kao u
+odjeljku *Programiranje pločice*, ali iz direktorija `build-hw` (npr.
+`labs/lab3_bme280/starter/build-hw`), ne iz `build`.
+
 **LV6.** Iz direktorija `labs/lab6_mqtt/starter`:
 `bash ../broker/gen_certs.sh` (na računalu ili u ljusci kontejnera), zatim
 `idf.py build` i `bash ../../common/run_qemu_net.sh build`. Posrednik
@@ -736,6 +741,58 @@ Zatim u direktoriju izgradnje projekta (npr. `labs/lab1_toolchain/starter/build`
 ```
 
 Ime porta pokazuje `ls /dev/cu.usbmodem*`.
+
+### Logički analizator (LV3 i LV4)
+
+Na klupi su logički analizatori s čipom Cypress FX2 (osam kanala, do 24 MHz),
+a koriste se s besplatnim programom PulseView projekta sigrok. U emulatoru vam
+ne trebaju: snimke za LV3 dane su u `labs/lab3_bme280/captures`.
+
+**Instalacija.**
+
+- **Linux (Debian, Ubuntu):** `sudo apt install pulseview sigrok-firmware-fx2lafw`,
+  zatim analizator iskopčajte i ponovno priključite. Ako ga PulseView ne nađe
+  ili javlja da nema pristup, nedostaju pravila udev: datoteke
+  `60-libsigrok.rules` i `61-libsigrok-uaccess.rules` iz direktorija `contrib`
+  izvornog koda libsigroka kopirajte u `/etc/udev/rules.d/` i izvedite
+  `sudo udevadm control --reload-rules && sudo udevadm trigger`.
+- **Windows:** sa stranice <https://sigrok.org/wiki/Downloads> preuzmite
+  64-bitni instalacijski program PulseViewa. Analizatoru treba upravljački
+  program WinUSB, koji se postavlja alatom Zadig (instalira se uz PulseView i
+  nalazi u izborniku Start): s priključenim analizatorom u Zadigu odaberite
+  *Options → List All Devices*, s popisa odaberite analizator, desno *WinUSB* i
+  *Replace Driver*. Odaberite analizator, **nikako pločicu ESP32-C3**: njoj
+  WinUSB uklanja port COM (vidi gore). Kod analizatora FX2 to ponekad treba
+  ponoviti, jer se nakon što PulseView u njega upiše firmware javlja kao drugi
+  uređaj. Postavka vrijedi samo za USB priključak u kojem je napravljena.
+- **macOS:** sa iste stranice preuzmite PulseView (`.dmg`) i aplikaciju
+  prevucite u *Applications*. To je inačica za procesore x86-64; na Macu s
+  čipom Apple izvodi se preko Rosette 2, koju macOS ponudi instalirati pri
+  prvom pokretanju. Ako macOS aplikaciju odbije otvoriti, prvi put je otvorite
+  desnim klikom → *Open*.
+
+**Spajanje.** Analizator samo sluša. Najprije spojite njegov GND s GND-om
+pločice, jer bez zajedničke mase snimka nema smisla. Zatim za LV3 (I2C)
+spojite kanal 0 na `GPIO5` (SDA) i kanal 1 na `GPIO6` (SCL), a za LV4 (PWM)
+kanal 0 na `GPIO8`. Razine od 3,3 V analizator čita izravno (logičku jedinicu
+prepoznaje od 2,0 V, a podnosi do 5 V). Izvode za napajanje na analizatoru,
+ako ih ima, ne spajajte nikamo. U PulseViewu se kanali zovu D0–D7.
+
+**Snimanje.** U PulseViewu odaberite *Connect to Device*, upravljački program
+`fx2lafw` i *Scan for devices*; analizator se obično javlja kao Saleae Logic.
+Uključite samo kanale koje koristite i postavite brzinu uzorkovanja i broj
+uzoraka: za LV3 2 MHz i 10 M uzoraka (5 s, barem dva očitanja senzora; uz I2C
+na 100 kHz to je 20 uzoraka po bitu), za LV4 4 MHz i 20 M uzoraka (5 s, više
+od jednog ciklusa disanja od oko 4,1 s; korak od 0,25 µs je 1/800 perioda od
+200 µs). Zatim *Run*. Ako snimanje stane prije kraja, smanjite brzinu
+uzorkovanja, ne koristite USB razdjelnik (hub) i probajte drugi kabel.
+
+**Dekoderi.** *Add protocol decoder → I²C*, uz SCL = D1 i SDA = D0: iznad
+signala pojave se START, adresa, podatkovni bajtovi i ACK/NACK, isti slijed
+koji u LV3 dekodirate ručno. Za LV4 dekoder *PWM* na kanalu D0 ispisuje period
+i faktor ispune svakog impulsa; iste vrijednosti možete očitati i pokazivačima
+(*cursors*). Za predaju priložite snimku zaslona ili spremljenu snimku
+(*File → Save*, datoteka `.sr`).
 
 ## Česti problemi
 

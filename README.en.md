@@ -424,6 +424,11 @@ created, and `idf.py` remembers the list of defaults files in the build
 directory. If you build the board variant in `build/`, it silently stays the
 simulator, and the way back to QEMU breaks too.
 
+With Docker on macOS and Windows the container cannot see the board: run the
+first command in the container, then flash with `esptool` from the computer as
+in *Flashing the board*, but from the `build-hw` directory (e.g.
+`labs/lab3_bme280/starter/build-hw`), not from `build`.
+
 **Lab 6.** From `labs/lab6_mqtt/starter`: `bash ../broker/gen_certs.sh` (on
 the computer or in the container shell), then `idf.py build` and
 `bash ../../common/run_qemu_net.sh build`. Start the broker in a **host
@@ -751,6 +756,59 @@ Then, in the project's build directory (e.g. `labs/lab1_toolchain/starter/build`
 ```
 
 `ls /dev/cu.usbmodem*` shows the port name.
+
+### Logic analyser (Labs 3 and 4)
+
+The bench has logic analysers built around a Cypress FX2 chip (eight channels,
+up to 24 MHz), used with the free PulseView program of the sigrok project. You
+do not need one in the emulator: the Lab 3 captures are provided in
+`labs/lab3_bme280/captures`.
+
+**Installation.**
+
+- **Linux (Debian, Ubuntu):** `sudo apt install pulseview sigrok-firmware-fx2lafw`,
+  then unplug the analyser and plug it in again. If PulseView does not find it
+  or reports no access, the udev rules are missing: copy `60-libsigrok.rules`
+  and `61-libsigrok-uaccess.rules` from the `contrib` directory of the
+  libsigrok sources to `/etc/udev/rules.d/` and run
+  `sudo udevadm control --reload-rules && sudo udevadm trigger`.
+- **Windows:** download the 64-bit PulseView installer from
+  <https://sigrok.org/wiki/Downloads>. The analyser needs the WinUSB driver,
+  set with Zadig (installed with PulseView, in the Start menu): with the
+  analyser plugged in, choose *Options → List All Devices* in Zadig, select
+  the analyser, pick *WinUSB* on the right and *Replace Driver*. Select the
+  analyser, **never the ESP32-C3 board**: WinUSB removes the board's COM port
+  (see above). An FX2 analyser sometimes needs this twice, because once
+  PulseView has uploaded its firmware it shows up as a different device. The
+  setting applies only to the USB port it was made on.
+- **macOS:** download PulseView (`.dmg`) from the same page and drag the
+  application to *Applications*. It is an x86-64 build; on a Mac with Apple
+  silicon it runs through Rosetta 2, which macOS offers to install on first
+  launch. If macOS refuses to open it, open it the first time with a
+  right-click → *Open*.
+
+**Wiring.** The analyser only listens. First connect its GND to the board's
+GND, because without a common ground the capture is meaningless. Then for
+Lab 3 (I2C) connect channel 0 to `GPIO5` (SDA) and channel 1 to `GPIO6` (SCL),
+and for Lab 4 (PWM) channel 0 to `GPIO8`. The analyser reads 3.3 V levels
+directly (it sees a logic one from 2.0 V and tolerates up to 5 V). Leave any
+supply pins on the analyser unconnected. PulseView names the channels D0–D7.
+
+**Capturing.** In PulseView choose *Connect to Device*, the `fx2lafw` driver
+and *Scan for devices*; the analyser usually shows up as a Saleae Logic.
+Enable only the channels you use and set the sample rate and sample count: for
+Lab 3 2 MHz and 10 M samples (5 s, at least two sensor reads; with I2C at
+100 kHz that is 20 samples per bit), for Lab 4 4 MHz and 20 M samples (5 s,
+more than one breathing cycle of about 4.1 s; a 0.25 µs step is 1/800 of the
+200 µs period). Then *Run*. If the capture stops early, lower the sample rate,
+avoid USB hubs and try another cable.
+
+**Decoders.** *Add protocol decoder → I²C*, with SCL = D1 and SDA = D0: START,
+the address, the data bytes and ACK/NACK appear above the signals, the same
+sequence you decode by hand in Lab 3. For Lab 4 the *PWM* decoder on channel D0
+shows the period and duty cycle of every pulse; you can read the same values
+with the cursors. For the submission attach a screenshot or the saved capture
+(*File → Save*, a `.sr` file).
 
 ## Troubleshooting
 

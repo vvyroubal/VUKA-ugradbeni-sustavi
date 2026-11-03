@@ -4,13 +4,25 @@ menu "Lab 6 (MQTT/TLS)"
         bool "Use plain MQTT (no TLS) instead of MQTT over TLS"
         default n
         help
-            Default (n): connect with MQTT over TLS to mqtts://10.0.2.2:8883 and
+            Default (n): connect with MQTT over TLS to mqtts://<LAB6_BROKER_HOST>:8883 and
             verify the broker against the CA cert embedded from
             main/certs/ca.crt (run broker/run_broker.sh first). This is the real
             lab target.
 
-            When set (y): connect with plain MQTT to mqtt://10.0.2.2:1883 with no
+            When set (y): connect with plain MQTT to mqtt://<LAB6_BROKER_HOST>:1883 with no
             certificate. Provided for the automated QEMU smoke test only; the
             graded lab is the TLS path.
+
+    config LAB6_BROKER_HOST
+        string "Broker IP address, as the device sees it"
+        default "10.0.2.2"
+        help
+            The app connects to mqtts://<this address>:8883 (or
+            mqtt://<this address>:1883 with LAB6_PLAINTEXT). The default
+            10.0.2.2 is this computer as seen from QEMU's user-mode
+            network. On a board over Wi-Fi, set this computer's LAN IP
+            address instead, and regenerate the certificates with it
+            (bash ../broker/gen_certs.sh <LAN IP>): the broker certificate
+            must list exactly this address in its subjectAltName.
 
 endmenu

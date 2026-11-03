@@ -12,14 +12,15 @@
  *     Lab 3).
  *
  * What YOU must add (see the TODOs):
- *   1. TLS config: point esp-mqtt at mqtts://10.0.2.2:8883 and
- *      give it the CA certificate to verify the broker. The CA
+ *   1. TLS config: point esp-mqtt at the broker (address from
+ *      CONFIG_LAB6_BROKER_HOST, port 8883; 10.0.2.2 under QEMU)
+ *      and give it the CA certificate to verify it. The CA
  *      cert is embedded from main/certs/ca.crt (EMBED_TXTFILES in
  *      main/CMakeLists.txt) -- generate it first with
  *      broker/gen_certs.sh. Use the symbols declared below.
  *      (CONFIG_LAB6_PLAINTEXT, default off, is available if you
- *       first want to bring MQTT up without TLS against
- *       mqtt://10.0.2.2:1883.)
+ *       first want to bring MQTT up without TLS against port
+ *       1883.)
  *   2. Topic design: publish to "vuka/sensors/telemetry".
  *   3. Publish loop: every 2 s format one sample as JSON and
  *      publish it. Print "LAB6 OK connected=1" once the broker
@@ -71,8 +72,10 @@ void app_main(void)
 
     /* TODO 1: create and start an esp-mqtt client, configured for
      *   TLS. Fill in an esp_mqtt_client_config_t: point
-     *   cfg.broker.address.uri at the TLS broker
-     *   (mqtts://10.0.2.2:8883), and give it the embedded CA
+     *   cfg.broker.address.uri at the TLS broker,
+     *   "mqtts://" CONFIG_LAB6_BROKER_HOST ":8883" (adjacent
+     *   string literals; the default host 10.0.2.2 is this
+     *   computer as QEMU sees it), and give it the embedded CA
      *   certificate for server verification via the two
      *   cfg.broker.verification.certificate / .certificate_len
      *   fields -- ca_crt_start/ca_crt_end above are exactly what
@@ -81,7 +84,7 @@ void app_main(void)
      *   an event handler, and start the client with
      *   esp_mqtt_client_start().
      *   (CONFIG_LAB6_PLAINTEXT, default off, swaps in
-     *    mqtt://10.0.2.2:1883 with no TLS fields at all, if you
+     *    mqtt://<host>:1883 with no TLS fields at all, if you
      *    first want MQTT working without TLS before tackling the
      *    certificate wiring.)
      *

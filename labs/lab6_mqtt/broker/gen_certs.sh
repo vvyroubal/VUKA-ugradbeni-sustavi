@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # gen_certs.sh — generate the self-signed TLS material for Lab 6's MQTT broker.
 #
-# Usage: bash labs/lab6_mqtt/broker/gen_certs.sh
+# Usage: bash labs/lab6_mqtt/broker/gen_certs.sh [IP ...]
+#
+# Each IP given is added to the broker certificate's subjectAltName -- on a
+# board over Wi-Fi, pass this computer's LAN IP (the same address as
+# CONFIG_LAB6_BROKER_HOST), e.g.  bash ../broker/gen_certs.sh 192.168.1.23
 #
 # Produces, in this directory's certs/ (all .gitignore'd — NEVER committed;
 # regenerate per run):
@@ -10,6 +14,7 @@
 #   server.key  broker private key
 #   server.crt  broker certificate, signed by the CA, with
 #               CN=10.0.2.2 and subjectAltName = IP:10.0.2.2, IP:127.0.0.1
+#               plus every IP given on the command line
 #               (10.0.2.2 is the QEMU user-mode host alias the guest connects
 #                to; 127.0.0.1 lets you smoke the broker from the host too).
 #
@@ -30,6 +35,15 @@ LAB_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 CERT_DIR="$SCRIPT_DIR/certs"
 DAYS=3650
 
+SAN="IP:10.0.2.2,IP:127.0.0.1"
+for ip in "$@"; do
+    if ! printf '%s' "$ip" | grep -Eq '^([0-9]{1,3}\.){3}[0-9]{1,3}$'; then
+        echo "gen_certs.sh: '$ip' is not an IPv4 address (usage: gen_certs.sh [IP ...])" >&2
+        exit 2
+    fi
+    SAN="$SAN,IP:$ip"
+done
+
 # Git Bash rewrites arguments that look like POSIX paths before running a
 # native program; the certificate subjects start with "/C=" and must stay as
 # they are (file paths are still converted, as they should be).
@@ -45,12 +59,12 @@ openssl req -x509 -new -nodes -key "$CERT_DIR/ca.key" -sha256 -days "$DAYS" \
     -subj "/C=HR/O=VUKA/OU=Ugradbeni racunalni sustavi/CN=VUKA Lab6 CA" \
     -out "$CERT_DIR/ca.crt"
 
-echo "== gen_certs.sh: server cert (CN=10.0.2.2, SAN IP:10.0.2.2,127.0.0.1) =="
+echo "== gen_certs.sh: server cert (CN=10.0.2.2, SAN $SAN) =="
 openssl genrsa -out "$CERT_DIR/server.key" 2048
 openssl req -new -key "$CERT_DIR/server.key" \
     -subj "/C=HR/O=VUKA/OU=Ugradbeni racunalni sustavi/CN=10.0.2.2" \
     -out "$CERT_DIR/server.csr"
-printf 'subjectAltName=IP:10.0.2.2,IP:127.0.0.1\n' > "$CERT_DIR/server.ext"
+printf 'subjectAltName=%s\n' "$SAN" > "$CERT_DIR/server.ext"
 openssl x509 -req -in "$CERT_DIR/server.csr" \
     -CA "$CERT_DIR/ca.crt" -CAkey "$CERT_DIR/ca.key" -CAcreateserial \
     -days "$DAYS" -sha256 \

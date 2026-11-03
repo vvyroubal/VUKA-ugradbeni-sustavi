@@ -5,11 +5,16 @@
 #
 # Usage, in the "ESP-IDF 5.5 PowerShell" shortcut, e.g. from
 # labs/lab6_mqtt/starter:
-#     ../broker/gen_certs.ps1
+#     ../broker/gen_certs.ps1 [IP ...]
+#
+# Each IP given is added to the broker certificate's subjectAltName -- on a
+# board over Wi-Fi, pass this computer's LAN IP (the same address as
+# CONFIG_LAB6_BROKER_HOST), e.g.  ../broker/gen_certs.ps1 192.168.1.23
 #
 # Needs openssl: the one that comes with Git for Windows is found by itself.
 # The broker certificate has CN=10.0.2.2 and subjectAltName IP:10.0.2.2,
-# IP:127.0.0.1 (QEMU's address of this computer, and this computer itself).
+# IP:127.0.0.1 (QEMU's address of this computer, and this computer itself),
+# plus every IP given on the command line.
 # ASCII only: Windows PowerShell 5.1 reads scripts without a BOM as ANSI.
 
 # openssl prints progress on stderr, which Windows PowerShell 5.1 turns into
@@ -19,6 +24,15 @@ $ScriptDir = $PSScriptRoot
 $LabDir = Split-Path -Parent $ScriptDir
 $CertDir = Join-Path $ScriptDir "certs"
 $Days = "3650"
+
+$San = "IP:10.0.2.2,IP:127.0.0.1"
+foreach ($ip in $args) {
+    if ("$ip" -notmatch '^(\d{1,3}\.){3}\d{1,3}$') {
+        [Console]::Error.WriteLine("gen_certs.ps1: '$ip' is not an IPv4 address (usage: gen_certs.ps1 [IP ...])")
+        exit 2
+    }
+    $San = "$San,IP:$ip"
+}
 
 $openssl = (Get-Command openssl -ErrorAction SilentlyContinue).Source
 if (-not $openssl) {
@@ -45,11 +59,11 @@ try {
     Invoke-OpenSsl req -x509 -new -nodes -key ca.key -sha256 -days $Days `
         -subj "/C=HR/O=VUKA/OU=Ugradbeni racunalni sustavi/CN=VUKA Lab6 CA" -out ca.crt
 
-    Write-Host "== gen_certs.ps1: server cert (CN=10.0.2.2, SAN IP:10.0.2.2,127.0.0.1) =="
+    Write-Host "== gen_certs.ps1: server cert (CN=10.0.2.2, SAN $San) =="
     Invoke-OpenSsl genrsa -out server.key 2048
     Invoke-OpenSsl req -new -key server.key `
         -subj "/C=HR/O=VUKA/OU=Ugradbeni racunalni sustavi/CN=10.0.2.2" -out server.csr
-    Set-Content -Path server.ext -Value "subjectAltName=IP:10.0.2.2,IP:127.0.0.1" -Encoding Ascii
+    Set-Content -Path server.ext -Value "subjectAltName=$San" -Encoding Ascii
     Invoke-OpenSsl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial `
         -days $Days -sha256 -extfile server.ext -out server.crt
     Remove-Item -Force server.csr, server.ext, ca.srl -ErrorAction SilentlyContinue

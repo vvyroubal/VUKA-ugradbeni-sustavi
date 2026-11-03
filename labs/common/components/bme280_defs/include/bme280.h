@@ -15,8 +15,8 @@
  *
  * All register-map constants, offsets and the calibration struct's field
  * widths/signedness below are transcribed from the Bosch BME280 datasheet
- * (Rev. 1.1), "Register description" (sec. 5.3) and "Trimming parameter
- * readout" (sec. 4.2.2).
+ * (Rev. 1.23), "Memory map" (sec. 5.3), "Register description" (sec. 5.4)
+ * and "Trimming parameter readout" (sec. 4.2.2).
  */
 #pragma once
 
@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 /* ---------------------------------------------------------------------
- * I2C bus address (datasheet sec. 5.2). SDO pin tied to GND -> 0x76 (the
+ * I2C bus address (datasheet sec. 6.2). SDO pin tied to GND -> 0x76 (the
  * value used throughout this lab); tied to VDDIO -> 0x77.
  * --------------------------------------------------------------------- */
 #define BME280_I2C_ADDR             0x76
@@ -66,7 +66,7 @@ extern "C" {
 #define BME280_REG_HUM_LSB          0xFE
 #define BME280_REG_DATA_LEN         8       /* 0xF7 .. 0xFE inclusive */
 
-/* status register bits (sec. 5.3, ctrl/status table) */
+/* status register bits (sec. 5.4.4, Table 21) */
 #define BME280_STATUS_MEASURING     0x08
 #define BME280_STATUS_IM_UPDATE     0x01
 
@@ -78,7 +78,7 @@ extern "C" {
 #define BME280_OSRS_X8              0x04
 #define BME280_OSRS_X16             0x05
 
-/* ctrl_meas power-mode encoding (sec. 3.3, Table 25) */
+/* ctrl_meas power-mode encoding (sec. 3.3 / 5.4.5, Table 25) */
 #define BME280_MODE_SLEEP           0x00
 #define BME280_MODE_FORCED          0x01
 #define BME280_MODE_NORMAL          0x03

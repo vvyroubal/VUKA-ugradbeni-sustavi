@@ -131,9 +131,9 @@ static esp_err_t read_calibration(void)
  * first (it sets s_t_fine), then compensate_P()/compensate_H()
  * (which read it).
  *
- * Once implemented, validate against the datasheet's worked
- * example: dig_T1=27504, dig_T2=26435, dig_T3=-1000, adc_T=519888
- * should give t_fine=128422 and T=2508 (25.08 degC).
+ * Once implemented, validate against the worked example in the
+ * BMP280 datasheet, sec. 3.12 (same T/P formulas): dig_T1=27504,
+ * dig_T2=26435, dig_T3=-1000, adc_T=519888 -> t_fine=128422, T=2508.
  * -------------------------------------------------------------- */
 
 static int32_t compensate_T(int32_t adc_T)
@@ -148,7 +148,7 @@ static int32_t compensate_T(int32_t adc_T)
      * Transliterate the datasheet listing exactly -- every shift
      * and cast matters.
      *
-     * Self-check with the datasheet's worked example:
+     * Self-check with the BMP280 example (sec. 3.12):
      * dig_T1=27504, dig_T2=26435, dig_T3=-1000, adc_T=519888 must
      * give t_fine=128422 and a return value of 2508
      * (= 25.08 degC). */
@@ -160,9 +160,9 @@ static uint32_t compensate_P(int32_t adc_P)
 {
     (void)adc_P;
     /* TODO 2b: 64-bit Q24.8 fixed-point formula from the datasheet,
-     * using s_t_fine set by compensate_T() above. See the solution
-     * or the datasheet sec. 4.2.3 for the full var1/var2/p
-     * derivation. */
+     * using s_t_fine set by compensate_T() above. Transliterate
+     * BME280_compensate_P_int64 from datasheet sec. 4.2.3, the
+     * whole var1/var2/p listing, line by line. */
     return 0;
 }
 
@@ -170,8 +170,8 @@ static uint32_t compensate_H(int32_t adc_H)
 {
     (void)adc_H;
     /* TODO 2c: Q22.10 fixed-point formula from the datasheet, using
-     * s_t_fine set by compensate_T() above. See the solution or the
-     * datasheet sec. 4.2.3 for the full derivation. */
+     * s_t_fine set by compensate_T() above. Transliterate
+     * bme280_compensate_H_int32 from datasheet sec. 4.2.3. */
     return 0;
 }
 

@@ -46,8 +46,8 @@ static const char *TAG = "lab2";
 #define DEBOUNCE_US (30 * 1000) /* 30 ms debounce window */
 
 /* ----------------------------------------------------------------
- * Direct-register GPIO access (ESP32-C3 TRM, "GPIO Controller"
- * chapter). GPIO_BASE = 0x6000_4000.
+ * Direct-register GPIO access (ESP32-C3 TRM, chapter 5 "IO MUX
+ * and GPIO Matrix"). GPIO_BASE = 0x6000_4000.
  *
  *   GPIO_OUT_W1TS_REG    (+0x0008): write 1 bits to SET   GPIO_OUT
  *   GPIO_OUT_W1TC_REG    (+0x000C): write 1 bits to CLEAR GPIO_OUT

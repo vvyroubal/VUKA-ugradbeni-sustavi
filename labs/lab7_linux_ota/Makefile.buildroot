@@ -32,7 +32,8 @@
 # invocations above work there unchanged.
 #
 # The full build takes ~30-60 min on first run (toolchain + kernel + rootfs).
-# Targets: fetch, extract, defconfig, build, artifacts, all (default), clean, distclean.
+# Targets: fetch, extract, defconfig, build, artifacts, all (default), rootfs,
+# clean, distclean.
 
 # --- pinned Buildroot LTS release (2025.02.x line) ---
 BR_VERSION := 2025.02.18
@@ -59,40 +60,54 @@ BR_MAKE    := $(MAKE) -C $(BR_SRC) O=$(BR_OUTPUT) BR2_EXTERNAL=$(EXT_TREE)
 all: artifacts
 
 # --- 1. fetch the pinned tarball and verify its checksum ---
+# wget writes to .part and renames only on success, so an interrupted download
+# never leaves a truncated tarball that make would take as up to date.
 $(BR_DIR)/$(BR_TARBALL):
 	@mkdir -p $(BR_DIR)
 	@echo "== fetching $(BR_TARBALL)"
-	wget -O $@ $(BR_URL)
+	wget -O $@.part $(BR_URL)
+	mv -f $@.part $@
 
 fetch: $(BR_DIR)/$(BR_TARBALL)
 	@echo "== verifying sha256 of $(BR_TARBALL)"
 	@echo "$(BR_SHA256)  $(BR_DIR)/$(BR_TARBALL)" | sha256sum -c -
 
-# --- 2. extract the source tree ---
-# rm -rf the target tree first: extracting over a partially-populated tree from
-# an interrupted earlier run makes GNU tar abort ("Cannot open: Operation not
-# supported") on the stale entries. Starting clean keeps this step idempotent.
-$(BR_SRC)/Makefile: fetch
+# --- 2. extract the source tree (once) ---
+# The stamp is a real file that depends on the tarball, so the tree is
+# extracted once and again only for a new tarball (a BR_VERSION bump). It is
+# touched only after tar succeeds: an interrupted extraction leaves no stamp
+# and the next run starts over. rm -rf the target tree first: extracting over a
+# partially-populated tree from an interrupted earlier run makes GNU tar abort
+# ("Cannot open: Operation not supported") on the stale entries.
+BR_STAMP   := $(BR_DIR)/.extracted-$(BR_VERSION)
+
+$(BR_STAMP): $(BR_DIR)/$(BR_TARBALL)
+	@echo "== verifying sha256 of $(BR_TARBALL)"
+	@echo "$(BR_SHA256)  $(BR_DIR)/$(BR_TARBALL)" | sha256sum -c -
 	@echo "== extracting $(BR_TARBALL)"
 	rm -rf $(BR_SRC)
 	tar -C $(BR_DIR) -xf $(BR_DIR)/$(BR_TARBALL)
-	@touch $(BR_SRC)/Makefile
+	@touch $@
 
-extract: $(BR_SRC)/Makefile
+extract: $(BR_STAMP)
 
 # --- 3. apply lab7_defconfig into the out-of-tree output dir ---
-$(BR_OUTPUT)/.config: $(BR_SRC)/Makefile $(EXT_TREE)/configs/lab7_defconfig
+# Re-applied only when .config is missing, lab7_defconfig is newer than it, or
+# the source was (re)extracted. So a `make menuconfig` edit in output/.config
+# survives `make all` until the next lab7_defconfig change, which overwrites it.
+$(BR_OUTPUT)/.config: $(BR_STAMP) $(EXT_TREE)/configs/lab7_defconfig
 	@echo "== configuring lab7_defconfig (BR2_EXTERNAL=$(EXT_TREE))"
 	$(BR_MAKE) lab7_defconfig
 
 defconfig: $(BR_OUTPUT)/.config
 
-# --- 4. build (long) ---
-$(BR_OUTPUT)/images/Image: $(BR_OUTPUT)/.config
+# --- 4. build ---
+# Always hands over to Buildroot's own make: Buildroot tracks per-package
+# progress with its stamps, so a finished tree only reassembles target/ (overlay
+# included) and the images, which takes seconds to a minute.
+build: $(BR_OUTPUT)/.config
 	@echo "== building buildroot (this takes ~30-60 min on a clean tree)"
 	$(BR_MAKE)
-
-build: $(BR_OUTPUT)/images/Image
 
 # --- 5. copy boot artifacts out of the (gitignored) build tree ---
 artifacts: build

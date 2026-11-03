@@ -60,6 +60,7 @@ version            human-readable version string
 # 2. boot slot A, apply the bundle, power off
 LAB7_VDD=../artifacts/ota_v2.tar ../run_virt.sh          # login root/root
 #   guest:  ota-apply /dev/vdd     -> verifies, writes /dev/vdb, flips bootenv
+#           (one apply per boot: a second one before rebooting is refused)
 
 # 3. reboot — the runner now selects slot B
 ../run_virt.sh
@@ -87,7 +88,15 @@ exits non-zero, and leaves the inactive slot and boot env untouched.
   `/etc/lab7/ota_pub.pem` in the image — the point is to show *where* the anchor
   sits, not to be unbreakable.
 - **No anti-rollback / version pinning, no encryption** — we verify integrity and
-  authenticity of the image, nothing more.
+  authenticity of the image, nothing more. Only `rootfs.ext4` is signed: the
+  bundle's `version` file is unsigned and only printed, and `LAB7_SLOT` inside
+  the image is a label set by `make_bundle.sh`, not the slot it lands in
+  (`ota-apply` always writes the inactive slot). A real system signs a manifest
+  that carries the version and other metadata.
+- **Only the rootfs is A/B.** Both slots boot the same host-side
+  `artifacts/Image` (`run_virt.sh -kernel`), so an OTA here never updates the
+  kernel. A real device keeps the kernel in the slot (or a per-slot boot
+  partition) and its bootloader loads it from the active slot.
 
 ## ⚠️ The signing key here is a throwaway demo key
 

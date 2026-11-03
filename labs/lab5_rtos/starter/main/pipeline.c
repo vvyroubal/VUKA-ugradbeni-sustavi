@@ -96,7 +96,7 @@ static void processing_task(void *arg)
             /* Queue not created yet (TODO 1): block on the tick,
              * NOT with a bare `continue` -- that would busy-spin at
              * priority 4, starve the idle task, and trip the Task
-             * Watchdog every 5 s. */
+             * Watchdog. */
             vTaskDelay(pdMS_TO_TICKS(200));
             continue;
         }

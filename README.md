@@ -31,7 +31,7 @@ Upute nude tri puta:
 - **Put A — s Dockerom**: alatni lanac dolazi gotov u slici, isti na
   svim sustavima; najjednostavniji put.
 - **Put B — bez Dockera**: ESP-IDF se instalira izravno na Linux, u WSL2 ili na
-  macOS; više koraka, ali izravno vidi pločicu. Putovi A i B mogu postojati
+  macOS; treba više koraka, ali alati izravno vide pločicu. Putovi A i B mogu postojati
   usporedno.
 - **Put C — Windows bez virtualizacije**: za računala na kojima WSL2 i Docker
   ne rade; ESP-IDF se instalira izravno u Windows, a skripte kolegija pokreću se
@@ -163,10 +163,10 @@ naredbe u nastavku pišu se iz korijena repozitorija
 
 Što skripta `docker-shell` radi: pokreće kontejner imena `vuka-ugradbeni-sustavi`,
 repozitorij je u njemu direktorij `/work`, okruženje ESP-IDF-a već je aktivno,
-a port 8883 (posrednik za LV6) objavljen je na računalu. Sve što izgradnja
+a port 8883 (posrednik za LV6) proslijeđen je na računalo. Sve što izgradnja
 stvori ostaje u repozitoriju i nakon izlaska (`exit` ili Ctrl-D). Na Linuxu i
 u WSL2 kontejner radi pod vašim korisnikom, pa datoteke koje stvori pripadaju
-vama; odzivnik `I have no name!@...:/work$` tada je normalan. **Ponovno
+vama; odzivnik `I have no name!@...:/work$` tada je očekivan. **Ponovno
 pokretanje iste skripte dok kontejner radi otvara drugi terminal u istom
 kontejneru** (tako se u LV2 otvara terminal za GDB).
 
@@ -266,8 +266,8 @@ računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban j
 
 **Skripte kolegija na Windowsu.** Za svaku skriptu kolegija postoji PowerShell
 inačica **istog imena s nastavkom `.ps1`**, s istim argumentima i istim
-ponašanjem (emulator se sam zaustavlja nakon zadanog vremena, Ctrl-A pa X ga
-zaustavlja ranije, a ispis se sprema i u `build/qemu.log`). Pokreću se u
+ponašanjem (emulator se sam zaustavlja nakon zadanog vremena, ranije ga
+zaustavlja Ctrl-A, zatim X, a ispis se sprema i u `build/qemu.log`). Pokreću se u
 prečacu *ESP-IDF 5.5 PowerShell*, koji dopušta pokretanje skripti. Prečac se
 otvara u direktoriju ESP-IDF-a, pa pri svakom otvaranju najprije prijeđite u
 repozitorij.
@@ -294,7 +294,7 @@ putu C pokrećete PowerShell inačice istog imena: izostavite `bash`, nastavak
 
 | Naredba | Što radi |
 |---|---|
-| `bash ../../common/run_qemu.sh build` | pokreće izgradnju u emulatoru |
+| `bash ../../common/run_qemu.sh build` | pokreće izgrađeni program u emulatoru |
 | `bash ../../common/run_qemu_net.sh build` | isto, s mrežnom karticom (LV6) |
 | `bash ../../common/run_qemu_gdb.sh build` | emulator čeka GDB na portu 1234 (LV2) |
 | `bash ../broker/gen_certs.sh` | izrađuje TLS certifikate posrednika (LV6) |
@@ -305,7 +305,7 @@ putu C pokrećete PowerShell inačice istog imena: izostavite `bash`, nastavak
 
 | Naredba | Što radi |
 |---|---|
-| `../../common/run_qemu.ps1 build` | pokreće izgradnju u emulatoru |
+| `../../common/run_qemu.ps1 build` | pokreće izgrađeni program u emulatoru |
 | `../../common/run_qemu_net.ps1 build` | isto, s mrežnom karticom (LV6) |
 | `../../common/run_qemu_gdb.ps1 build` | emulator čeka GDB (LV2); GDB pokrenite u drugom prozoru prečaca, naredbom koju skripta ispiše |
 | `../broker/gen_certs.ps1` | izrađuje TLS certifikate posrednika (LV6) |
@@ -317,8 +317,8 @@ Naredbu koju priručnik prelama znakom `\` na putu C upišite u jednom retku.
 Za brzo isprobavanje radi i ESP-IDF-ova naredba `idf.py qemu monitor` (izgradi,
 pokrene i prikaže ispis; izlaz Ctrl-]).
 
-**LV6:** posrednik (`run_broker.ps1`) emulator vidi na `10.0.2.2:8883`, alati na
-računalu na `127.0.0.1:8883`. Ako Windows upita, dopustite pristup u privatnoj
+**LV6:** emulator posrednika (`run_broker.ps1`) vidi na `10.0.2.2:8883`, a alati
+na računalu na `127.0.0.1:8883`. Ako Windows upita, dopustite pristup u privatnoj
 mreži. `mosquitto_sub` i `mosquitto_pub` su u `C:\Program Files\mosquitto`, pa se
 naredba iz priručnika LV6, iz `labs\lab6_mqtt\starter`, piše ovako:
 ```powershell
@@ -498,7 +498,7 @@ repozitorij otvara različito prema putu:
   taj terminal ne zatvarajte: kad ljuska završi, kontejner se gasi. Zatim u VS
   Codeu odaberite F1 → *Dev Containers: Attach to Running Container…* →
   `vuka-ugradbeni-sustavi`, a u novom prozoru *File → Open Folder* → `/work`.
-  Dolje lijevo u prozoru piše *Container …*. Isto ponavljate na početku
+  Dolje lijevo u prozoru piše *Container …*. Isto ponovite na početku
   svakog rada.
 - **Put B, Linux i macOS.** *File → Open Folder* → korijen repozitorija.
 - **Put B, WSL2.** U terminalu Ubuntu, u korijenu repozitorija, upišite
@@ -534,8 +534,8 @@ QEMU se i na macOS-u zaustavlja s Ctrl-A, zatim X, a monitor s Ctrl-].
    minuta, sljedeće nekoliko sekundi.
 3. Emulator se sam zaustavlja nakon 30 sekundi. Poruka
    `run_qemu.sh: timeout (30s) reached after output was produced — treating as success`
-   je normalna. Ranije ga zaustavljate tako da kliknete u karticu zadatka i
-   pritisnete **Ctrl-A, a zatim X**.
+   znači da je sve u redu. Želite li ga zaustaviti prije, kliknite u karticu
+   zadatka i pritisnite **Ctrl-A, a zatim X**.
 4. Pogreške prevođenja ispisuju se u ploči *Problems* (Ctrl-Shift-M). Klik na
    pogrešku otvara datoteku na tom retku.
 
@@ -551,25 +551,26 @@ odabira zadatka. Debugger nije u tom izborniku, nego u pregledu *Run and Debug*
 | QEMU | pokreće zadnju izgradnju u emulatoru |
 | menuconfig | `idf.py menuconfig` |
 | idf.py reconfigure | nakon novog `Kconfig.projbuild` (LV1, LV4) |
-| idf.py fullclean | kad isti projekt prelazi s Dockera na izgradnju bez njega ili obrnuto |
+| idf.py fullclean | kad isti projekt gradite naizmjence s Dockerom i bez njega |
 | QEMU za GDB, čeka debugger | zadnja izgradnja u emulatoru koji čeka GDB (odjeljak *Debugger*) |
 | LV7: izgradnja Buildroota | izgradnja LV7 (odjeljak *Rad na vježbi*, LV7) |
 | LV1–LV6: izgradnja i QEMU za GDB | izgradnja vježbe, zatim emulator koji čeka GDB; pokreće ih i F5 (odjeljak *Debugger*) |
 
 Zadaci sami nalaze okruženje (skripta `scripts/vscode-task.sh`, na Windowsu
-`.ps1`). Redom pokušavaju aktivan ESP-IDF (i u kontejneru), `~/esp-idf`
-(put B) i instalaciju na Windowsu (put C). Ako ESP-IDF-a nema (put A, a VS Code
+`.ps1`), i to ovim redom: aktivan ESP-IDF (i u kontejneru), `~/esp-idf`
+(put B), instalacija na Windowsu (put C). Ako ESP-IDF-a nema (put A, a VS Code
 nije priključen na kontejner), zadaci za izgradnju i emulator koriste kontejner
-kolegija. Zadatak se tada spaja na kontejner koji već radi, pa zadatke pokrećite
-jedan po jedan.
+kolegija. Svi se tada izvode u istom kontejneru, pa ih pokrećite jedan po
+jedan: zadatak pokrenut dok prethodni još traje završava zajedno s njim.
 
-**Terminal:** na putu A `./scripts/docker-shell.sh`; u prozoru priključenom na
-kontejner terminal je već u kontejneru, a ESP-IDF u njemu aktivirate s
-`. $IDF_PATH/export.sh`. Na putu B `. ~/esp-idf/export.sh`; na putu C
-profil **ESP-IDF 5.5 PowerShell** (strelica uz `+` u ploči terminala).
+**Terminal u VS Codeu.** Na putu A u terminalu pokrenite
+`./scripts/docker-shell.sh`; u prozoru priključenom na kontejner terminal je
+već u kontejneru, a ESP-IDF u njemu aktivirate s `. $IDF_PATH/export.sh`. Na
+putu B izvedite `. ~/esp-idf/export.sh`, a na putu C otvorite profil
+**ESP-IDF 5.5 PowerShell** (strelica uz `+` u ploči terminala).
 
 **Dovršavanje koda (IntelliSense)** čita `build/compile_commands.json` vježbe, pa
-radi nakon prve izgradnje (do tada *Problems* za neizgrađene vježbe javlja
+radi tek nakon prve izgradnje (do tada *Problems* za neizgrađene vježbe javlja
 *Cannot find … compile_commands.json*). Na putu A putanje su iz kontejnera
 (`/work/...`), pa dovršavanje radi samo u prozoru priključenom na kontejner.
 
@@ -579,17 +580,17 @@ Debugger čine dva programa koja rade istodobno, a spaja ih mrežni priključak
 (port) **1234**:
 
 - **QEMU u načinu za ispravljanje pogrešaka** (skripta `run_qemu_gdb.sh`, na
-  putu C `run_qemu_gdb.ps1`) učita izgradnju vježbe, zaustavi procesor prije
+  putu C `run_qemu_gdb.ps1`) učita izgrađeni program, zaustavi procesor prije
   prve instrukcije i čeka da se na port 1234 spoji debugger. Dok čeka, program
   ne radi i ništa ne ispisuje. Zadnji redak skripte prije čekanja je
   `QEMU starting HALTED with gdbstub on :1234`.
 - **GDB** (`riscv32-esp-elf-gdb`) iz datoteke `build/<projekt>.elf` čita imena
   funkcija i varijabli te retke izvornog koda, a zatim se spaja na
   `localhost:1234` i upravlja emulatorom. U VS Codeu GDB pokreće proširenje
-  *C/C++* (preko `scripts/gdb.sh`, na Windowsu `scripts\gdb.cmd`), a vi ga
+  *C/C++* (preko `scripts/gdb.sh`, na Windowsu `scripts\gdb.cmd`), a vi njime
   upravljate klikovima.
 
-Zato vrijede dva pravila: QEMU mora čekati **prije** nego što se GDB spaja, a
+Zato vrijede dva pravila: QEMU mora čekati **prije** nego što se GDB spoji, a
 oba moraju raditi na istom računalu, na putu A u istom kontejneru.
 
 **Priprema.** Repozitorij mora biti otvoren onako kako je za vaš put opisano
@@ -622,7 +623,7 @@ na računalu, a QEMU u kontejneru), pa zadaci za GDB tada javljaju
    emulator krene i program stane na prijelomnoj točki.
 
 U LV6 emulator za GDB nema mrežnu karticu, pa se program ne može spojiti na
-posrednik.
+posrednika.
 
 **Prečac: F5 za svaku vježbu (LV1–LV6).** Za svaku vježbu postoji
 konfiguracija **LV*n*: GDB u QEMU-u** (npr. *LV3: GDB u QEMU-u*), koja korake
@@ -631,9 +632,9 @@ Debug* odaberite konfiguraciju te vježbe i pritisnite **F5**. VS Code pokrene
 zadatak *LV*n*: izgradnja i QEMU za GDB* (izgradnja, zatim QEMU koji
 čeka), pričeka redak `gdbstub on :1234` i spoji GDB. Prva izgradnja vježbe
 traje nekoliko minuta. U LV2 program ulazi u prekidnu rutinu `timer_alarm_cb`
-tek kad je riješen TODO 3 (T4); prije toga stanite npr. na prvom retku
-funkcije `app_main`. U LV5 `app_main` je u datoteci primjera odabranog u
-`menuconfig` (zadano `pipeline.c`).
+tek kad je riješen TODO 3 (T4); prije toga postavite prijelomnu točku npr. na
+prvi redak funkcije `app_main`. U LV5 `app_main` je u datoteci primjera odabranog u
+`menuconfig`-u (zadano `pipeline.c`).
 
 **Rad sa spojenim debuggerom:**
 
@@ -680,7 +681,7 @@ Ako git ne završi, nego javi jednu od ovih poruka:
 
 | Poruka | Uzrok i rješenje |
 |---|---|
-| `Need to specify how to reconcile divergent branches` | Svoj rad ste commitali. Spojite ga s novim stanjem: `git pull --no-rebase --no-edit`. |
+| `Need to specify how to reconcile divergent branches` | Svoj ste rad commitali. Spojite ga s novim stanjem: `git pull --no-rebase --no-edit`. |
 | `untracked working tree files would be overwritten by merge: …` | Napravili ste datoteku koju sada donosi repozitorij (npr. vlastiti `.vscode/launch.json`). Preimenujte je (npr. u `launch.json.moj`) i ponovite `git pull`. |
 | `Your local changes to the following files would be overwritten by merge: …` | Promijenili ste datoteku koju je promijenio i repozitorij. Sklonite svoje promjene s `git stash`, zatim `git pull`, pa ih vratite s `git stash pop`. |
 
@@ -846,7 +847,7 @@ i faktor ispune svakog impulsa; iste vrijednosti možete očitati i pokazivačim
   običnom PowerShellu; otvorite prečac *ESP-IDF 5.5 PowerShell*. Ako nema ni
   `qemu-system-riscv32`, prečac nakon instalacije QEMU-a nije ponovno otvoren.
 - **WSL2: nema `/dev/ttyACM0`** — `usbipd attach` nije pokrenut ili je
-  pločica preko drugog kabela/priključka; u PowerShellu provjerite
+  pločica priključena na drugi kabel ili priključak; u PowerShellu provjerite
   `usbipd list` (stanje *Attached*).
 
 ## Napomena o ključu u LV7

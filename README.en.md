@@ -298,7 +298,7 @@ directory.
 
 | Command | What it does |
 |---|---|
-| `bash ../../common/run_qemu.sh build` | runs the build in the emulator |
+| `bash ../../common/run_qemu.sh build` | runs the built program in the emulator |
 | `bash ../../common/run_qemu_net.sh build` | the same, with a network card (Lab 6) |
 | `bash ../../common/run_qemu_gdb.sh build` | the emulator waits for GDB on port 1234 (Lab 2) |
 | `bash ../broker/gen_certs.sh` | creates the broker's TLS certificates (Lab 6) |
@@ -309,7 +309,7 @@ directory.
 
 | Command | What it does |
 |---|---|
-| `../../common/run_qemu.ps1 build` | runs the build in the emulator |
+| `../../common/run_qemu.ps1 build` | runs the built program in the emulator |
 | `../../common/run_qemu_net.ps1 build` | the same, with a network card (Lab 6) |
 | `../../common/run_qemu_gdb.ps1 build` | the emulator waits for GDB (Lab 2); start GDB in a second shortcut window, with the command the script prints |
 | `../broker/gen_certs.ps1` | creates the broker's TLS certificates (Lab 6) |
@@ -541,7 +541,7 @@ stops with Ctrl-A, then X on macOS too, and the monitor with Ctrl-].
    later builds take a few seconds.
 3. The emulator stops by itself after 30 seconds. The message
    `run_qemu.sh: timeout (30s) reached after output was produced — treating as success`
-   is normal. To stop it earlier, click in the task tab and press
+   means everything is fine. To stop it earlier, click in the task tab and press
    **Ctrl-A, then X**.
 4. Compiler errors are listed in the *Problems* panel (Ctrl-Shift-M). Clicking
    an error opens the file at that line.
@@ -558,7 +558,7 @@ view (section *Debugger*, below).
 | QEMU | runs the latest build in the emulator |
 | menuconfig | `idf.py menuconfig` |
 | idf.py reconfigure | after a new `Kconfig.projbuild` (Labs 1 and 4) |
-| idf.py fullclean | when the same project moves between Docker and the build without it |
+| idf.py fullclean | when you build the same project alternately with and without Docker |
 | QEMU for GDB, waits for the debugger | the latest build in an emulator that waits for GDB (section *Debugger*) |
 | LV7: Buildroot build | builds Lab 7 (section *Working on a lab*, Lab 7) |
 | LV1–LV6: build and QEMU for GDB | builds the lab, then an emulator that waits for GDB; F5 starts them too (section *Debugger*) |
@@ -567,14 +567,16 @@ The tasks find the environment by themselves (the `scripts/vscode-task.sh`
 script, `.ps1` on Windows). They try, in order, an active ESP-IDF (also in the
 container), `~/esp-idf` (path B) and the installation on Windows (path C). If
 there is no ESP-IDF (path A with VS Code not attached to the container), the
-build and emulator tasks use the course container. A task then attaches to a
-container that is already running, so run tasks one at a time.
+build and emulator tasks use the course container. They all run in the same
+container then, so run them one at a time: a task started while the previous
+one is still running ends together with it.
 
-**Terminal:** on path A `./scripts/docker-shell.sh`; in the window attached to
-the container the terminal is already in the container, and you activate
-ESP-IDF there with `. $IDF_PATH/export.sh`. On path B
-`. ~/esp-idf/export.sh`; on path C the **ESP-IDF 5.5 PowerShell** profile (the
-arrow next to `+` in the terminal panel).
+**The terminal in VS Code.** On path A run `./scripts/docker-shell.sh` in the
+terminal; in the window attached to the container the terminal is already in
+the container, and you activate ESP-IDF there with `. $IDF_PATH/export.sh`. On
+path B run `. ~/esp-idf/export.sh`, and on path C open the
+**ESP-IDF 5.5 PowerShell** profile (the arrow next to `+` in the terminal
+panel).
 
 **Code completion (IntelliSense)** reads the lab's `build/compile_commands.json`,
 so it works after the first build (until then *Problems* shows *Cannot find …
@@ -641,8 +643,8 @@ itself. Set a breakpoint in the lab's code, choose that lab's configuration in
 and QEMU for GDB* (build, then QEMU waiting), waits for the
 `gdbstub on :1234` line and attaches GDB. A lab's first build takes a few
 minutes. In Lab 2 the program enters the `timer_alarm_cb` interrupt handler
-only once TODO 3 (T4) is solved; before that, stop e.g. on the first line of
-`app_main`. In Lab 5 `app_main` is in the file of the demo chosen in
+only once TODO 3 (T4) is solved; before that, set a breakpoint e.g. on the first
+line of `app_main`. In Lab 5 `app_main` is in the file of the demo chosen in
 `menuconfig` (`pipeline.c` by default).
 
 **Working with the attached debugger:**

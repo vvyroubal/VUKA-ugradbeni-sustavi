@@ -44,9 +44,9 @@ Windows are not supported.
 
 | System | Recommended path | Board over USB |
 |---|---|---|
-| **Windows 10/11** | **WSL2** (Ubuntu), and inside it the Linux instructions: path A (Docker Desktop) or path B | in WSL2, path B + `usbipd` |
-| **macOS** | **path A** (Docker Desktop) | `esptool` from macOS, or path B |
 | **Linux** | **path A** or path B | path A with `URS_PORT`, or path B |
+| **macOS** | **path A** (Docker Desktop) | `esptool` from macOS, or path B |
+| **Windows 10/11** | **WSL2** (Ubuntu), and inside it the Linux instructions: path A (Docker Desktop) or path B | in WSL2, path B + `usbipd` |
 | **Windows without virtualization** | **path C** (Labs 1–6) | directly, `COM<n>` |
 
 On Windows, path A can also be run straight from PowerShell
@@ -68,13 +68,30 @@ run are described in the *Path C* section. *Working in VS Code* and
 
 ## Step 0: preparing the computer and getting the repository
 
-You need a **code editor** on every system, because the labs ask you to change
-source code: [VS Code](https://code.visualstudio.com) is recommended, and any
-other will do. How to open and use the repository in VS Code is described in
-the *Working in VS Code* section. The rest of the preparation depends on the
-system.
+Every system needs two things: a **code editor**, because the labs ask you to
+change source code ([VS Code](https://code.visualstudio.com) is recommended,
+and any other will do; working in it is described in *Working in VS Code*),
+and **Git**, to get the repository. What else you need depends on the system
+and the path:
 
-**Windows** has three options (see "Which path to choose"):
+| System | Install before you start | Administrator | Disk space |
+|---|---|---|---|
+| Linux | Git; for path A, Docker Engine (*Path A*) | `sudo` for packages | path A about 8 GB, path B about 7 GB |
+| macOS | Git; for path A, Docker Desktop (*Path A*) | when installing Docker Desktop | path A about 8 GB, path B about 7 GB |
+| Windows, WSL2 (paths A and B) | WSL2 with Ubuntu (`wsl --install`); for path A, Docker Desktop; for the board, `usbipd` (`winget install usbipd` or [GitHub](https://github.com/dorssel/usbipd-win/releases)) | for `wsl --install` and `usbipd` | Ubuntu a few GB; path A about 8 GB, path B about 7 GB |
+| Windows, Docker from PowerShell (path A) | [Git for Windows](https://git-scm.com/download/win) (or `winget install Git.Git`) and [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows 10 22H2 or Windows 11 23H2, 8 GB of RAM, virtualization enabled) | once, when Docker Desktop first turns on WSL2 | about 8 GB plus Docker Desktop |
+| Windows, path C | Git for Windows, the ESP-IDF Tools Installer v5.5, the QEMU emulator and, for Lab 6, Mosquitto for Windows (all in the *Path C* section) | for Mosquitto (it installs as a service) | about 8 GB, plus a 1.6 GB download and about 0.3 GB per lab |
+
+**Linux.** Git on Debian and Ubuntu: `sudo apt-get install -y git` (Fedora:
+`sudo dnf install git`, Arch: `sudo pacman -S git`). The path B packages for
+distributions other than Debian and Ubuntu are listed in the
+[ESP-IDF documentation](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32c3/get-started/linux-macos-setup.html);
+path A is the simplest choice there.
+
+**macOS.** Type `git --version` in Terminal; if the command does not exist,
+install it with `xcode-select --install`.
+
+**Windows** offers three options (see *Which path to choose*):
 
 - **WSL2** (recommended; paths A and B as on Linux): in PowerShell started as
   administrator run `wsl --install`, restart the computer, open the **Ubuntu**
@@ -82,32 +99,18 @@ system.
   in the Ubuntu terminal, and the repository is cloned into the Linux file
   system (`~/`), never into `/mnt/c/...`. If virtualization is not enabled,
   enable it in the BIOS/UEFI (*Intel VT-x*, *AMD-V*); if the processor does not
-  support it, choose path C.
+  support it, choose path C. Git is already installed in Ubuntu.
 - **Docker from PowerShell** (path A without Ubuntu in WSL2): Git for Windows
-  (`winget install Git.Git`) and Docker Desktop (path A, below); the repository
-  is cloned in PowerShell (below).
+  and Docker Desktop from the table; the repository is cloned in PowerShell
+  (below).
 - **Path C** (no virtualization): the installation and getting the repository
-  are in the *Path C* section; from this section only the prerequisites table
-  and the code editor apply to it.
+  are in the *Path C* section; from this section only the table and the code
+  editor apply to it.
 
-Before you start, install (Git and VS Code can also be installed without
-administrator rights; on its first run `winget` asks you to accept its terms —
-answer `Y`):
+On Windows, Git and VS Code can also be installed without administrator
+rights; on its first run `winget` asks you to accept its terms — answer `Y`.
 
-| Option | Install before you start | Administrator | Disk space |
-|---|---|---|---|
-| WSL2 (paths A and B) | WSL2 with Ubuntu (`wsl --install`); for path A, Docker Desktop; for the board, `usbipd` (`winget install usbipd` or [GitHub](https://github.com/dorssel/usbipd-win/releases)) | for `wsl --install` and `usbipd` | Ubuntu a few GB; path A about 8 GB, path B about 7 GB |
-| Docker from PowerShell (path A) | [Git for Windows](https://git-scm.com/download/win) (or `winget install Git.Git`) and [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows 10 22H2 or Windows 11 23H2, 8 GB of RAM, virtualization enabled) | once, when Docker Desktop first turns on WSL2 | about 8 GB plus Docker Desktop |
-| Path C | Git for Windows, the ESP-IDF Tools Installer v5.5, the QEMU emulator and, for Lab 6, Mosquitto for Windows (all in the *Path C* section) | for Mosquitto (it installs as a service) | about 8 GB, plus a 1.6 GB download and about 0.3 GB per lab |
-
-**macOS.** Type `git --version` in Terminal; if the command does not exist,
-install it with
-`xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`
-(Fedora: `sudo dnf install git`, Arch: `sudo pacman -S git`; the path B packages
-for those distributions are listed in the [ESP-IDF documentation](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32c3/get-started/linux-macos-setup.html),
-and path A is the simplest choice there).
-
-Get the course repository in a terminal (Linux, macOS) or in the Ubuntu
+**Getting the repository.** In a terminal (Linux, macOS) or in the Ubuntu
 terminal (WSL2):
 
 ```sh
@@ -116,29 +119,27 @@ git clone https://github.com/vvyroubal/VUKA-ugradbeni-sustavi.git
 cd VUKA-ugradbeni-sustavi
 ```
 
-**Docker from PowerShell only (without Ubuntu in WSL2):** in a regular PowerShell first
-install Git with `winget install Git.Git`, then open a **new** PowerShell and
-run the same three lines.
-
-The `.gitattributes` file keeps Linux line endings in the scripts even when
-the repository is cloned by Git for Windows. All commands below are typed in
-the repository root (`~/VUKA-ugradbeni-sustavi`) unless stated otherwise.
+For Docker from PowerShell, run the same three lines in a **new** PowerShell,
+opened after Git was installed. The `.gitattributes` file keeps Linux line
+endings in the scripts even when the repository is cloned by Git for Windows.
+All commands below are typed in the repository root
+(`~/VUKA-ugradbeni-sustavi`) unless stated otherwise.
 
 ## Path A: with Docker
 
 1. Install Docker:
-   - **Windows:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-     with the WSL2 backend (the default); the installer ends by asking you to
-     log out or restart the computer — do so. If you work in WSL2, enable
-     *Settings → Resources → WSL integration* for **Ubuntu** in Docker Desktop
-     (Docker from PowerShell does not need this step).
-   - **macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop/).
    - **Linux:** Docker Engine following the [official instructions](https://docs.docker.com/engine/install/),
      then add your user to the `docker` group and log out and back in (or
      run `newgrp docker` in the current terminal):
      ```sh
      sudo usermod -aG docker $USER
      ```
+   - **macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+   - **Windows:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+     with the WSL2 backend (the default); the installer ends by asking you to
+     log out or restart the computer — do so. If you work in WSL2, enable
+     *Settings → Resources → WSL integration* for **Ubuntu** in Docker Desktop
+     (Docker from PowerShell does not need this step).
 
    On its first start Docker Desktop asks you to accept the terms of use and
    offers a Docker account sign-in; signing in is not needed (*Continue

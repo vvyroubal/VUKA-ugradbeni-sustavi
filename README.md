@@ -43,9 +43,9 @@ Windowsu nisu podržani.
 
 | Sustav | Preporučeni put | Pločica preko USB-a |
 |---|---|---|
-| **Windows 10/11** | **WSL2** (Ubuntu), a u njemu upute za Linux: put A (Docker Desktop) ili put B | u WSL2, put B + `usbipd` |
-| **macOS** | **put A** (Docker Desktop) | `esptool` s macOS-a ili put B |
 | **Linux** | **put A** ili put B | put A uz `URS_PORT` ili put B |
+| **macOS** | **put A** (Docker Desktop) | `esptool` s macOS-a ili put B |
+| **Windows 10/11** | **WSL2** (Ubuntu), a u njemu upute za Linux: put A (Docker Desktop) ili put B | u WSL2, put B + `usbipd` |
 | **Windows bez virtualizacije** | **put C** (LV1–LV6) | izravno, `COM<n>` |
 
 Na Windowsu se put A može izvesti i izravno iz PowerShella
@@ -67,12 +67,29 @@ pločice* dolaze na red kad okruženje radi.
 
 ## Korak 0: priprema računala i preuzimanje repozitorija
 
-**Uređivač koda** trebate na svim sustavima, jer vježbe traže izmjene izvornog
-koda: preporučen je [VS Code](https://code.visualstudio.com), a odgovara i bilo
-koji drugi. Kako se repozitorij otvara i koristi u VS Codeu, opisuje odjeljak
-*Rad u VS Codeu*. Ostatak pripreme ovisi o sustavu.
+Na svakom sustavu trebate dvoje: **uređivač koda**, jer vježbe traže izmjene
+izvornog koda (preporučen je [VS Code](https://code.visualstudio.com), a
+odgovara i bilo koji drugi; rad u njemu opisuje odjeljak *Rad u VS Codeu*), i
+**Git**, kojim preuzimate repozitorij. Što još treba, ovisi o sustavu i putu:
 
-**Windows** ima tri mogućnosti (vidi „Koji put odabrati”):
+| Sustav | Instalirajte prije početka | Administrator | Prostor |
+|---|---|---|---|
+| Linux | Git; za put A Docker Engine (*Put A*) | `sudo` za pakete | put A oko 8 GB, put B oko 7 GB |
+| macOS | Git; za put A Docker Desktop (*Put A*) | pri instalaciji Docker Desktopa | put A oko 8 GB, put B oko 7 GB |
+| Windows, WSL2 (putovi A i B) | WSL2 s Ubuntuom (`wsl --install`); za put A Docker Desktop; za pločicu `usbipd` (`winget install usbipd` ili [GitHub](https://github.com/dorssel/usbipd-win/releases)) | za `wsl --install` i `usbipd` | Ubuntu nekoliko GB; put A oko 8 GB, put B oko 7 GB |
+| Windows, Docker iz PowerShella (put A) | [Git for Windows](https://git-scm.com/download/win) (ili `winget install Git.Git`) i [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows 10 22H2 ili Windows 11 23H2, 8 GB RAM-a, uključena virtualizacija) | jednom, kad Docker Desktop prvi put uključuje WSL2 | oko 8 GB uz Docker Desktop |
+| Windows, put C | Git for Windows, ESP-IDF Tools Installer v5.5, emulator QEMU i, za LV6, Mosquitto za Windows (sve u odjeljku *Put C*) | za Mosquitto (instalira se kao servis) | oko 8 GB, uz 1,6 GB preuzimanja i oko 0,3 GB po vježbi |
+
+**Linux.** Git na Debianu i Ubuntuu: `sudo apt-get install -y git` (Fedora:
+`sudo dnf install git`, Arch: `sudo pacman -S git`). Pakete za put B na
+distribucijama izvan Debiana i Ubuntua navodi
+[dokumentacija ESP-IDF-a](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32c3/get-started/linux-macos-setup.html);
+ondje je najjednostavniji put A.
+
+**macOS.** U Terminalu upišite `git --version`; ako naredba ne postoji,
+instalirajte je s `xcode-select --install`.
+
+**Windows** nudi tri mogućnosti (vidi *Koji put odabrati*):
 
 - **WSL2** (preporučeno; putovi A i B kao na Linuxu): u PowerShellu pokrenutom
   kao administrator izvedite `wsl --install`, ponovno pokrenite računalo,
@@ -80,32 +97,17 @@ koji drugi. Kako se repozitorij otvara i koristi u VS Codeu, opisuje odjeljak
   Sve daljnje naredbe pišu se u terminalu Ubuntu, a repozitorij klonirajte u
   Linuxov datotečni sustav (`~/`), nikako u `/mnt/c/...`. Ako virtualizacija
   nije uključena, uključite je u BIOS-u/UEFI-ju (*Intel VT-x*, *AMD-V*); ako je
-  procesor ne podržava, odaberite put C.
-- **Docker iz PowerShella** (put A bez Ubuntua u WSL2): Git za Windows
-  (`winget install Git.Git`) i Docker Desktop (put A, niže); repozitorij se
-  klonira u PowerShellu (niže).
+  procesor ne podržava, odaberite put C. Git je u Ubuntuu već instaliran.
+- **Docker iz PowerShella** (put A bez Ubuntua u WSL2): Git za Windows i Docker
+  Desktop iz tablice; repozitorij se klonira u PowerShellu (niže).
 - **Put C** (bez virtualizacije): instalaciju i preuzimanje repozitorija opisuje
-  odjeljak *Put C*; od ovog odjeljka za njega vrijede samo tablica preduvjeta i
-  uređivač koda.
+  odjeljak *Put C*; od ovog odjeljka za njega vrijede samo tablica i uređivač
+  koda.
 
-Prije početka instalirajte (Git i VS Code mogu se instalirati i bez
-administratorskih prava; `winget` pri prvom pokretanju traži da prihvaćanje
-uvjeta potvrdite slovom `Y`):
+Git i VS Code na Windowsu mogu se instalirati i bez administratorskih prava;
+`winget` pri prvom pokretanju traži da prihvaćanje uvjeta potvrdite slovom `Y`.
 
-| Mogućnost | Instalirajte prije početka | Administrator | Prostor |
-|---|---|---|---|
-| WSL2 (putovi A i B) | WSL2 s Ubuntuom (`wsl --install`); za put A Docker Desktop; za pločicu `usbipd` (`winget install usbipd` ili [GitHub](https://github.com/dorssel/usbipd-win/releases)) | za `wsl --install` i `usbipd` | Ubuntu nekoliko GB; put A oko 8 GB, put B oko 7 GB |
-| Docker iz PowerShella (put A) | [Git for Windows](https://git-scm.com/download/win) (ili `winget install Git.Git`) i [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows 10 22H2 ili Windows 11 23H2, 8 GB RAM-a, uključena virtualizacija) | jednom, kad Docker Desktop prvi put uključuje WSL2 | oko 8 GB uz Docker Desktop |
-| Put C | Git for Windows, ESP-IDF Tools Installer v5.5, emulator QEMU i, za LV6, Mosquitto za Windows (sve u odjeljku *Put C*) | za Mosquitto (instalira se kao servis) | oko 8 GB, uz 1,6 GB preuzimanja i oko 0,3 GB po vježbi |
-
-**macOS.** U Terminalu upišite `git --version`; ako naredba ne postoji,
-instalirajte je s
-`xcode-select --install`. **Linux** (Debian/Ubuntu): `sudo apt-get install -y git`
-(Fedora: `sudo dnf install git`, Arch: `sudo pacman -S git`; pakete za put B na
-tim distribucijama navodi [dokumentacija ESP-IDF-a](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32c3/get-started/linux-macos-setup.html),
-a najjednostavniji je ondje put A).
-
-Repozitorij kolegija preuzmite u terminalu (Linux, macOS) odnosno terminalu
+**Preuzimanje repozitorija.** U terminalu (Linux, macOS) odnosno terminalu
 Ubuntu (WSL2):
 
 ```sh
@@ -114,30 +116,28 @@ git clone https://github.com/vvyroubal/VUKA-ugradbeni-sustavi.git
 cd VUKA-ugradbeni-sustavi
 ```
 
-**Samo za Docker iz PowerShella (bez Ubuntua u WSL2):** u običnom PowerShellu najprije
-instalirajte Git naredbom `winget install Git.Git`, zatim otvorite **novi**
-PowerShell i izvedite ista tri retka.
-
-Datoteka `.gitattributes` čuva Linuxove završetke redaka u skriptama i kad
-repozitorij klonira Git za Windows. Sve naredbe u nastavku pišu se iz korijena
-repozitorija (`~/VUKA-ugradbeni-sustavi`), osim ako piše drukčije.
+Za Docker iz PowerShella izvedite ista tri retka u **novom** PowerShellu,
+otvorenom nakon instalacije Gita. Datoteka `.gitattributes` čuva Linuxove
+završetke redaka u skriptama i kad repozitorij klonira Git za Windows. Sve
+naredbe u nastavku pišu se iz korijena repozitorija
+(`~/VUKA-ugradbeni-sustavi`), osim ako piše drukčije.
 
 ## Put A: s Dockerom
 
 1. Instalirajte Docker:
-   - **Windows:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-     s WSL2 pozadinom (zadano); instalacijski program na kraju traži odjavu
-     ili ponovno pokretanje računala — učinite to. Radite li u WSL2, u Docker
-     Desktopu uključite
-     *Settings → Resources → WSL integration* za **Ubuntu** (za Docker iz
-     PowerShella taj korak ne treba).
-   - **macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop/).
    - **Linux:** Docker Engine prema [službenim uputama](https://docs.docker.com/engine/install/),
      a zatim dodajte korisnika u grupu `docker` i odjavite se pa ponovno
      prijavite (ili u tekućem terminalu izvedite `newgrp docker`):
      ```sh
      sudo usermod -aG docker $USER
      ```
+   - **macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+   - **Windows:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+     s WSL2 pozadinom (zadano); instalacijski program na kraju traži odjavu
+     ili ponovno pokretanje računala — učinite to. Radite li u WSL2, u Docker
+     Desktopu uključite
+     *Settings → Resources → WSL integration* za **Ubuntu** (za Docker iz
+     PowerShella taj korak ne treba).
 
    Pri prvom pokretanju Docker Desktop traži prihvaćanje uvjeta korištenja i
    nudi prijavu na Docker račun; prijava nije potrebna (*Continue without

@@ -92,12 +92,26 @@ $(BR_STAMP): $(BR_DIR)/$(BR_TARBALL)
 extract: $(BR_STAMP)
 
 # --- 3. apply lab7_defconfig into the out-of-tree output dir ---
-# Re-applied only when .config is missing, lab7_defconfig is newer than it, or
-# the source was (re)extracted. So a `make menuconfig` edit in output/.config
-# survives `make all` until the next lab7_defconfig change, which overwrites it.
-$(BR_OUTPUT)/.config: $(BR_STAMP) $(EXT_TREE)/configs/lab7_defconfig
+# Re-applied only when .config is missing, lab7_defconfig is newer than it, the
+# source was (re)extracted, or EXT_TREE now names a different tree. So a
+# `make menuconfig` edit in output/.config survives `make all` until the next
+# lab7_defconfig change, which overwrites it.
+#
+# The EXT_TREE stamp holds the path of the tree last configured from. Its
+# recipe runs every time but rewrites the file only when the path differs, so
+# its mtime -- and with it the reconfigure -- changes only on a switch to
+# another tree, whose defconfig may well be OLDER than the current .config.
+EXT_STAMP  := $(BR_OUTPUT)/.lab7-ext-tree
+
+$(EXT_STAMP): FORCE
+	@mkdir -p $(BR_OUTPUT)
+	@[ "$$(cat $@ 2>/dev/null)" = "$(EXT_TREE)" ] || echo "$(EXT_TREE)" > $@
+
+$(BR_OUTPUT)/.config: $(BR_STAMP) $(EXT_TREE)/configs/lab7_defconfig $(EXT_STAMP)
 	@echo "== configuring lab7_defconfig (BR2_EXTERNAL=$(EXT_TREE))"
 	$(BR_MAKE) lab7_defconfig
+
+FORCE:
 
 defconfig: $(BR_OUTPUT)/.config
 

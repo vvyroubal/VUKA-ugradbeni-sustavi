@@ -37,10 +37,11 @@ PUB=/etc/lab7/ota_pub.pem
 SLOT_DEV=/dev/vdb          # runner guarantees: the INACTIVE slot's backing image
 BOOTENV=/dev/vdc          # runner guarantees: 1-byte boot-select env ('a'/'b')
 BUNDLE="${1:-/dev/vdd}"   # default: bundle attached as a raw virtio disk
-PENDING=/run/ota-apply.pending   # tmpfs: set by a successful apply, cleared by reboot
+PENDING=/run/ota-apply.pending   # tmpfs: set on apply, gone at reboot
 
 if [ -f "$PENDING" ]; then
-  echo "ota-apply: update already staged (next boot = slot $(cat "$PENDING")); power off and boot again first" >&2
+  echo "ota-apply: update already staged (next boot = slot" \
+       "$(cat "$PENDING")); power off and boot again first" >&2
   exit 3
 fi
 
@@ -53,10 +54,12 @@ tar -xf "$BUNDLE" -C "$WORK" 2>/dev/null \
 
 IMG="$WORK/rootfs.ext4"; SIG="$WORK/rootfs.ext4.sig"; VER="$WORK/version"
 [ -f "$IMG" ] && [ -f "$SIG" ] \
-  || { echo "ota-apply: bundle is missing rootfs.ext4 or rootfs.ext4.sig" >&2; exit 2; }
+  || { echo "ota-apply: bundle is missing rootfs.ext4 or" \
+            "rootfs.ext4.sig" >&2; exit 2; }
 
 # --- verify BEFORE touching any slot ---
-if ! openssl dgst -sha256 -verify "$PUB" -signature "$SIG" "$IMG" >/dev/null 2>&1; then
+if ! openssl dgst -sha256 -verify "$PUB" -signature "$SIG" "$IMG" \
+     >/dev/null 2>&1; then
   echo "LAB7 OK tamper=rejected"
   echo "ota-apply: signature verification FAILED — inactive slot left untouched" >&2
   exit 1
@@ -78,4 +81,5 @@ printf '%s' "$next" | dd of="$BOOTENV" bs=1 count=1 conv=notrunc,fsync 2>/dev/nu
 sync                      # and the flip itself
 printf '%s\n' "$next" > "$PENDING"
 
-echo "ota-apply: installed version $(cat "$VER" 2>/dev/null || echo '?'); next boot = slot $next"
+echo "ota-apply: installed version" \
+     "$(cat "$VER" 2>/dev/null || echo '?'); next boot = slot $next"

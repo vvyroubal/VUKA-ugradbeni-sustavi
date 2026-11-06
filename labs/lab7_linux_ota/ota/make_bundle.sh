@@ -39,8 +39,12 @@ done
 [ -n "$IN" ] && [ -n "$VERSION" ] && [ -n "$SLOT" ] \
   || { echo "make_bundle.sh: --in, --version and --slot are required" >&2; exit 2; }
 [ -f "$IN" ]  || { echo "make_bundle.sh: base image '$IN' not found" >&2; exit 2; }
-[ -f "$KEY" ] || { echo "make_bundle.sh: signing key '$KEY' not found" >&2; exit 2; }
-case "$SLOT" in a|b) ;; *) echo "make_bundle.sh: --slot must be a or b" >&2; exit 2 ;; esac
+[ -f "$KEY" ] || { echo "make_bundle.sh: signing key '$KEY'" \
+                        "not found" >&2; exit 2; }
+case "$SLOT" in
+  a|b) ;;
+  *) echo "make_bundle.sh: --slot must be a or b" >&2; exit 2 ;;
+esac
 
 SLOT_UP=$(printf '%s' "$SLOT" | tr 'a-z' 'A-Z')
 OUT="${OUT:-$LAB_DIR/artifacts/ota_v${VERSION}_slot${SLOT}.tar}"

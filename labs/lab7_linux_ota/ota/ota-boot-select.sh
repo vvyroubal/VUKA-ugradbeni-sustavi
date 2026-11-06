@@ -42,18 +42,22 @@ read_bootenv() { head -c1 "$BOOTENV"; }
 
 case "$CMD" in
   init)
-    [ -f "$ROOTFS" ] || { echo "ota-boot-select: $ROOTFS not found (build the image first)" >&2; exit 1; }
+    [ -f "$ROOTFS" ] || { echo "ota-boot-select: $ROOTFS not found" \
+                               "(build the image first)" >&2; exit 1; }
     cp -f "$ROOTFS" "$SLOT_A"
     cp -f "$ROOTFS" "$SLOT_B"
     write_bootenv a
     echo "ota-boot-select: initialised slots A/B from rootfs.ext4; active = a"
     ;;
   get)
-    [ -f "$BOOTENV" ] || { echo "ota-boot-select: no bootenv (run 'init')" >&2; exit 1; }
+    [ -f "$BOOTENV" ] ||
+      { echo "ota-boot-select: no bootenv (run 'init')" >&2; exit 1; }
     read_bootenv; echo
     ;;
   set)
-    case "${ARGS[0]:-}" in a|b) write_bootenv "${ARGS[0]}"; echo "ota-boot-select: active = ${ARGS[0]}" ;;
+    case "${ARGS[0]:-}" in
+      a|b) write_bootenv "${ARGS[0]}"
+           echo "ota-boot-select: active = ${ARGS[0]}" ;;
       *) echo "ota-boot-select: 'set' needs a|b" >&2; exit 2 ;; esac
     ;;
   toggle)

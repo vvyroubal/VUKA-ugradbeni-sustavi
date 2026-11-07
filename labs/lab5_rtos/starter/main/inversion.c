@@ -7,18 +7,20 @@
  *
  * Compiled in when CONFIG_LAB5_DEMO_INVERSION=y (see
  * main/Kconfig.projbuild). Three tasks, staggered start (10 ms
- * apart -- a multiple of the default 10 ms FreeRTOS tick, so wake
- * order is deterministic under QEMU):
+ * apart; medium_task and high_task count their offsets from the
+ * moment low_task actually holds the lock, see
+ * start_after_low_takes(), so a QEMU stall cannot reorder them):
  *
  *   low_task    (prio 2, wakes at t=20 ms) takes the lock,
  *               busy-holds it for ~50 ms.
- *   medium_task (prio 3, wakes at t=30 ms) busy-hogs the CPU for
- *               ~200 ms. It never touches the lock -- it is what
- *               starves low_task of CPU time while low_task still
- *               holds it.
- *   high_task   (prio 5, wakes at t=40 ms) blocks trying to take
- *               the same lock; the time it spends blocked is
- *               measured with esp_timer_get_time().
+ *   medium_task (prio 3, starts 10 ms after the take, t=30 ms)
+ *               busy-hogs the CPU for ~200 ms. It never touches
+ *               the lock -- it is what starves low_task of CPU
+ *               time while low_task still holds it.
+ *   high_task   (prio 5, starts 20 ms after the take, t=40 ms)
+ *               blocks trying to take the same lock; the time
+ *               it spends blocked is measured with
+ *               esp_timer_get_time().
  *
  * ONE TODO in this file (manual, T4): create the two lock
  * primitives. lock_take()/lock_give() below already treat a NULL
@@ -46,6 +48,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
+#include "freertos/event_groups.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 
@@ -76,6 +79,11 @@ static SemaphoreHandle_t s_inv_mutex;
 static volatile inv_primitive_t s_primitive;
 static volatile bool s_low_done, s_medium_done, s_high_done;
 static volatile int64_t s_block_us;
+
+/* low_task sets this bit once it HOLDS the lock; medium_task and
+ * high_task start counting their offsets from that event. */
+#define LOW_HOLDS_BIT (1u << 0)
+static EventGroupHandle_t s_inv_ev;
 
 static SemaphoreHandle_t active_lock(void)
 {
@@ -113,12 +121,25 @@ static void busy_wait_ms(uint32_t ms)
     }
 }
 
+/* Block until low_task holds the lock, then wait `after_ms` more.
+ * Fixed delays from task creation (20/30/40 ms) are not enough
+ * under QEMU: a host stall can wake low_task and high_task in the
+ * same tick, high_task then takes the free lock first and no
+ * inversion happens at all (measured once: inv_sem_us=13). */
+static void start_after_low_takes(uint32_t after_ms)
+{
+    xEventGroupWaitBits(s_inv_ev, LOW_HOLDS_BIT, pdFALSE, pdTRUE,
+                        portMAX_DELAY);
+    vTaskDelay(pdMS_TO_TICKS(after_ms));
+}
+
 static void low_task(void *arg)
 {
     (void)arg;
     vTaskDelay(pdMS_TO_TICKS(LOW_START_MS));
 
     lock_take();
+    xEventGroupSetBits(s_inv_ev, LOW_HOLDS_BIT);
     busy_wait_ms(LOW_HOLD_MS);
     lock_give();
 
@@ -129,7 +150,7 @@ static void low_task(void *arg)
 static void medium_task(void *arg)
 {
     (void)arg;
-    vTaskDelay(pdMS_TO_TICKS(MEDIUM_START_MS));
+    start_after_low_takes(MEDIUM_START_MS - LOW_START_MS);
 
     busy_wait_ms(MEDIUM_HOG_MS);
 
@@ -140,7 +161,7 @@ static void medium_task(void *arg)
 static void high_task(void *arg)
 {
     (void)arg;
-    vTaskDelay(pdMS_TO_TICKS(HIGH_START_MS));
+    start_after_low_takes(HIGH_START_MS - LOW_START_MS);
 
     int64_t t0 = esp_timer_get_time();
     lock_take();
@@ -159,6 +180,10 @@ static int64_t run_inversion(inv_primitive_t primitive)
     s_medium_done = false;
     s_high_done = false;
     s_block_us = 0;
+    if (s_inv_ev == NULL) {
+        s_inv_ev = xEventGroupCreate();
+    }
+    xEventGroupClearBits(s_inv_ev, LOW_HOLDS_BIT);
 
     xTaskCreate(low_task, "lab5_inv_lo", INV_STACK_BYTES, NULL,
                 LOW_PRIO, NULL);

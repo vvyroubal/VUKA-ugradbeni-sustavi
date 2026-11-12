@@ -812,6 +812,12 @@ i faktor ispune svakog impulsa; iste vrijednosti možete očitati i pokazivačim
 (*cursors*). Za predaju priložite snimku zaslona ili spremljenu snimku
 (*File → Save*, datoteka `.sr`).
 
+**Pinovi iz emulatora (LV1 i LV2).** PulseView otvara i datoteke
+`build/gpio/gpioN.vcd` koje skripta `run_qemu.sh` stvara uz opciju
+`--gpio-vcd` (`run_qemu.ps1 -GpioVcd` na putu C): razinu svakog GPIO izlaza
+kroz vrijeme, zapisanu iz upisa programa u GPIO registre. Otvaraju se naredbom
+*Import → Value Change Dump*; za to analizator nije potreban.
+
 ## Česti problemi
 
 - **`idf.py: command not found`** — okruženje nije aktivirano u ovom

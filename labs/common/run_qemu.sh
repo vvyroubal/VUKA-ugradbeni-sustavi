@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # run_qemu.sh — boot an ESP-IDF esp32c3 app build in QEMU and capture serial output.
 #
-# Usage: run_qemu.sh <build_dir> [timeout=30]
+# Usage: run_qemu.sh [--gpio-vcd] <build_dir> [timeout=30]
 #
 # <build_dir> is an IDF project's `build/` directory (contains flash_args and the
 # app/bootloader/partition-table binaries produced by `idf.py build`).
@@ -13,6 +13,11 @@
 #   - Boots `qemu-system-riscv32 -M esp32c3 -nographic` with that flash image
 #     attached as raw MTD, tee-ing serial output to <build_dir>/qemu.log.
 #   - QEMU is bounded by `timeout <timeout>`.
+#   - --gpio-vcd: QEMU also traces every peripheral write; afterwards
+#     gpio_vcd.py (next to this script) turns the GPIO writes into one
+#     <build_dir>/gpio/gpioN.vcd per output pin (LOW/HIGH over time, open
+#     in PulseView or GTKWave) and the trace is deleted. Off by default:
+#     tracing slows QEMU a little, which matters for timing measurements.
 #
 # Exit status:
 #   0  if QEMU exited on its own (clean exit, status 0) OR if the timeout was
@@ -30,8 +35,14 @@
 set -u
 
 usage() {
-  echo "Usage: $0 <build_dir> [timeout=30]" >&2
+  echo "Usage: $0 [--gpio-vcd] <build_dir> [timeout=30]" >&2
 }
+
+GPIO_VCD=0
+if [ "${1:-}" = "--gpio-vcd" ]; then
+  GPIO_VCD=1
+  shift
+fi
 
 if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
   usage
@@ -96,13 +107,36 @@ fi
 
 : > "$LOG_FILE"
 
+# The trace (~10 000 lines per second) goes to a local temporary file, not
+# next to the build: written line by line onto a slow disk -- e.g. a Docker
+# Desktop bind mount on macOS -- it holds QEMU back and the guest's timers
+# drift (ticks bunch up), which is exactly what the VCD is meant to show.
+TRACE_ARGS=()
+TRACE_FILE=""
+if [ "$GPIO_VCD" -eq 1 ]; then
+  TRACE_FILE="$(mktemp "${TMPDIR:-/tmp}/qemu-trace.XXXXXX")"
+  TRACE_ARGS=(-msg timestamp=on -trace memory_region_ops_write
+              -D "$TRACE_FILE")
+fi
+
 # --foreground: without it `timeout` moves QEMU into a background process
 # group, and when stdin is a terminal (an interactive shell, a VS Code task,
 # docker -it) QEMU's -nographic console set-up then stops it with SIGTTOU --
 # no output at all. QEMU starts no children, so nothing escapes the timeout.
 "$TIMEOUT_BIN" --foreground "$TIMEOUT" qemu-system-riscv32 -M esp32c3 -nographic \
-    -drive file="$FLASH_BIN",if=mtd,format=raw 2>&1 | tee "$LOG_FILE"
+    -drive file="$FLASH_BIN",if=mtd,format=raw ${TRACE_ARGS[@]+"${TRACE_ARGS[@]}"} \
+    2>&1 | tee "$LOG_FILE"
 QEMU_STATUS="${PIPESTATUS[0]}"
+
+if [ "$GPIO_VCD" -eq 1 ]; then
+  PYTHON="$(command -v python3 || command -v python || true)"
+  if [ -n "$PYTHON" ] && [ -s "$TRACE_FILE" ]; then
+    "$PYTHON" "$(dirname "$0")/gpio_vcd.py" "$TRACE_FILE" "$BUILD_DIR/gpio" >&2
+  else
+    echo "run_qemu.sh: --gpio-vcd: no trace or no python, no VCD written" >&2
+  fi
+  rm -f "$TRACE_FILE"
+fi
 
 # `timeout` exits 124 when it had to kill the process after the time budget.
 # That is our normal/expected outcome for apps that loop forever (e.g.

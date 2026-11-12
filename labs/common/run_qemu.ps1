@@ -4,23 +4,29 @@
 # <build_dir>/qemu.log.
 #
 # Usage, in the "ESP-IDF 5.5 PowerShell" shortcut, from the project directory:
-#     ../../common/run_qemu.ps1 build [timeout=30]
+#     ../../common/run_qemu.ps1 [-GpioVcd] build [timeout=30]
 #
 # Same behaviour as run_qemu.sh: flash.bin is (re)merged from the build's
 # flash_args on every run, so the latest build always boots; the run ends by
 # itself after <timeout> seconds (a timeout after output counts as success);
 # Ctrl-A then X quits QEMU earlier.
 #
+# -GpioVcd: QEMU also traces every peripheral write (into a temporary file);
+# afterwards gpio_vcd.py, next to this script, writes one
+# <build_dir>/gpio/gpioN.vcd per output pin (LOW/HIGH over time, open in
+# PulseView or GTKWave). Off by default: tracing slows QEMU a little.
+#
 # ASCII only: Windows PowerShell 5.1 reads scripts without a BOM as ANSI.
 
 param(
     [Parameter(Position = 0)][string]$BuildDir,
-    [Parameter(Position = 1)][int]$Timeout = 30
+    [Parameter(Position = 1)][int]$Timeout = 30,
+    [switch]$GpioVcd
 )
 
 $Me = "run_qemu.ps1"
 if (-not $BuildDir) {
-    [Console]::Error.WriteLine("Usage: $Me <build_dir> [timeout=30]")
+    [Console]::Error.WriteLine("Usage: $Me [-GpioVcd] <build_dir> [timeout=30]")
     exit 1
 }
 if (-not (Test-Path -PathType Container $BuildDir)) {
@@ -63,6 +69,11 @@ if (-not $Qemu) {
 $psi = New-Object System.Diagnostics.ProcessStartInfo
 $psi.FileName = $Qemu.Source
 $psi.Arguments = "-M esp32c3 -nographic -drive `"file=$FlashBin,if=mtd,format=raw`""
+$TraceFile = $null
+if ($GpioVcd) {
+    $TraceFile = [System.IO.Path]::GetTempFileName()
+    $psi.Arguments += " -msg timestamp=on -trace memory_region_ops_write -D `"$TraceFile`""
+}
 $psi.UseShellExecute = $false
 $psi.RedirectStandardOutput = $true
 $psi.RedirectStandardError = $true
@@ -97,6 +108,16 @@ while ($out -or $err) {
 }
 $proc.WaitForExit()
 $log.Close()
+
+if ($GpioVcd) {
+    if ((Test-Path $TraceFile) -and (Get-Item $TraceFile).Length -gt 0) {
+        $Converter = Join-Path $PSScriptRoot "gpio_vcd.py"
+        python $Converter $TraceFile (Join-Path $BuildDir "gpio") | ForEach-Object { [Console]::Error.WriteLine($_) }
+    } else {
+        [Console]::Error.WriteLine("${Me}: -GpioVcd: the trace is empty, no VCD written")
+    }
+    Remove-Item -Force $TraceFile -ErrorAction SilentlyContinue
+}
 
 if ($timedOut) {
     if ((Get-Item $LogFile).Length -gt 0) {

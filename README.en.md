@@ -829,6 +829,12 @@ shows the period and duty cycle of every pulse; you can read the same values
 with the cursors. For the submission attach a screenshot or the saved capture
 (*File → Save*, a `.sr` file).
 
+**Pins from the emulator (Labs 1 and 2).** PulseView also opens the
+`build/gpio/gpioN.vcd` files that `run_qemu.sh` writes with the `--gpio-vcd`
+option (`run_qemu.ps1 -GpioVcd` on path C): the level of each GPIO output over
+time, recorded from the program's writes to the GPIO registers. Open them with
+*Import → Value Change Dump*; no analyser is needed for that.
+
 ## Troubleshooting
 
 - **`idf.py: command not found`** — the environment is not active in this

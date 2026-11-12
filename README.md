@@ -554,6 +554,7 @@ odabira zadatka. Debugger nije u tom izborniku, nego u pregledu *Run and Debug*
 | idf.py fullclean | kad isti projekt gradite naizmjence s Dockerom i bez njega |
 | QEMU za GDB, čeka debugger | zadnja izgradnja u emulatoru koji čeka GDB (odjeljak *Debugger*) |
 | LV7: izgradnja Buildroota | izgradnja LV7 (odjeljak *Rad na vježbi*, LV7) |
+| LV1, LV2: izgradnja, QEMU i VCD pinova | izgradnja, zatim `run_qemu.sh --gpio-vcd`: uz `qemu.log` i `build/gpio/gpioN.vcd` za PulseView (odjeljak *Logički analizator*) |
 | LV1–LV6: izgradnja i QEMU za GDB | izgradnja vježbe, zatim emulator koji čeka GDB; pokreće ih i F5 (odjeljak *Debugger*) |
 
 Zadaci sami nalaze okruženje (skripta `scripts/vscode-task.sh`, na Windowsu

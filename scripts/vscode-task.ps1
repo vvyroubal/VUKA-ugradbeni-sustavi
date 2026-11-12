@@ -4,9 +4,11 @@
 #
 # Usage:
 #     powershell -ExecutionPolicy Bypass -File scripts\vscode-task.ps1 <action> <project>
-#   action:  build | qemu | build-qemu | gdb | build-gdb | menuconfig
-#            | reconfigure | fullclean
-#            (gdb: the latest build in QEMU, halted, waiting for a debugger
+#   action:  build | qemu | build-qemu | build-vcd | gdb | build-gdb
+#            | menuconfig | reconfigure | fullclean
+#            (build-vcd: build, then QEMU with -GpioVcd -- one
+#            build\gpio\gpioN.vcd per output pin, LV1 and LV2;
+#            gdb: the latest build in QEMU, halted, waiting for a debugger
 #            on :1234; build-gdb: build first -- .vscode/launch.json)
 #   or:      ... vscode-task.ps1 lab7   (Lab 7: Buildroot in the course container)
 #   project: lab project relative to the repository root,
@@ -37,9 +39,9 @@ if ($Action -eq "lab7") {
     & (Join-Path $PSScriptRoot "docker-shell.ps1") bash -c $mk
     exit $LASTEXITCODE
 }
-$actions = @("build", "qemu", "build-qemu", "gdb", "build-gdb", "menuconfig", "reconfigure", "fullclean")
+$actions = @("build", "qemu", "build-qemu", "build-vcd", "gdb", "build-gdb", "menuconfig", "reconfigure", "fullclean")
 if (-not $Project -or $actions -notcontains $Action) {
-    [Console]::Error.WriteLine("Usage: vscode-task.ps1 <build|qemu|build-qemu|gdb|build-gdb|menuconfig|reconfigure|fullclean> <project>")
+    [Console]::Error.WriteLine("Usage: vscode-task.ps1 <build|qemu|build-qemu|build-vcd|gdb|build-gdb|menuconfig|reconfigure|fullclean> <project>")
     exit 1
 }
 $Project = $Project.TrimEnd("/", "\")
@@ -49,6 +51,10 @@ if (-not (Test-Path (Join-Path $ProjectDir "CMakeLists.txt"))) {
     exit 1
 }
 $lab6 = $Project -match "lab6_mqtt"
+if ($lab6 -and $Action -eq "build-vcd") {
+    [Console]::Error.WriteLine("vscode-task.ps1: build-vcd is for labs without a network (LV1, LV2)")
+    exit 1
+}
 
 . (Join-Path $PSScriptRoot "idf-shell.ps1") | Out-Null
 if (Get-Command idf.py -ErrorAction SilentlyContinue) {
@@ -59,6 +65,7 @@ if (Get-Command idf.py -ErrorAction SilentlyContinue) {
         "build"       { idf.py build }
         "qemu"        { & $qemu build }
         "build-qemu"  { idf.py build; if ($LASTEXITCODE -eq 0) { & $qemu build } }
+        "build-vcd"   { idf.py build; if ($LASTEXITCODE -eq 0) { & $qemu -GpioVcd build } }
         "gdb"         { & (Join-Path $Root "labs\common\run_qemu_gdb.ps1") build }
         "build-gdb"   { idf.py build; if ($LASTEXITCODE -eq 0) { & (Join-Path $Root "labs\common\run_qemu_gdb.ps1") build } }
         "menuconfig"  { idf.py menuconfig }
@@ -80,6 +87,7 @@ if (Get-Command docker -ErrorAction SilentlyContinue) {
         "build"       { "idf.py build" }
         "qemu"        { "bash ../../common/$script build" }
         "build-qemu"  { "idf.py build && bash ../../common/$script build" }
+        "build-vcd"   { "idf.py build && bash ../../common/run_qemu.sh --gpio-vcd build" }
         "menuconfig"  { "idf.py menuconfig" }
         "reconfigure" { "idf.py reconfigure" }
         "fullclean"   { "idf.py fullclean" }

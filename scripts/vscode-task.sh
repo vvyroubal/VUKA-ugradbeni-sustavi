@@ -5,9 +5,11 @@
 #
 # Usage (from anywhere):
 #     bash scripts/vscode-task.sh <action> <project>
-#   action:  build | qemu | build-qemu | gdb | build-gdb | menuconfig
-#            | reconfigure | fullclean
-#            (gdb: the latest build in QEMU, halted, waiting for a debugger
+#   action:  build | qemu | build-qemu | build-vcd | gdb | build-gdb
+#            | menuconfig | reconfigure | fullclean
+#            (build-vcd: build, then QEMU with --gpio-vcd -- one
+#            build/gpio/gpioN.vcd per output pin, LV1 and LV2;
+#            gdb: the latest build in QEMU, halted, waiting for a debugger
 #            on :1234; build-gdb: build first -- .vscode/launch.json)
 #   or:      bash scripts/vscode-task.sh lab7
 #            (Lab 7: Buildroot build, 30-60 min the first time)
@@ -25,7 +27,7 @@ set -eo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 usage() {
-  echo "Usage: bash scripts/vscode-task.sh <build|qemu|build-qemu|gdb|build-gdb|menuconfig|reconfigure|fullclean> <project>" >&2
+  echo "Usage: bash scripts/vscode-task.sh <build|qemu|build-qemu|build-vcd|gdb|build-gdb|menuconfig|reconfigure|fullclean> <project>" >&2
   exit 1
 }
 # Lab 7 is a Buildroot (Linux) build, not an ESP-IDF project. Where it runs:
@@ -85,6 +87,10 @@ case "$ACTION" in
   build)       CMD="idf.py build" ;;
   qemu)        CMD="bash ../../common/$QEMU_SCRIPT build" ;;
   build-qemu)  CMD="idf.py build && bash ../../common/$QEMU_SCRIPT build" ;;
+  build-vcd)   [ "$QEMU_SCRIPT" = run_qemu.sh ] || {
+                 echo "vscode-task.sh: build-vcd is for labs without a network (LV1, LV2)" >&2
+                 exit 1; }
+               CMD="idf.py build && bash ../../common/run_qemu.sh --gpio-vcd build" ;;
   gdb)         CMD="bash ../../common/run_qemu_gdb.sh build" ;;
   build-gdb)   CMD="idf.py build && bash ../../common/run_qemu_gdb.sh build" ;;
   menuconfig)  CMD="idf.py menuconfig" ;;

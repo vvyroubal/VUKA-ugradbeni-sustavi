@@ -80,6 +80,58 @@
       "problemMatcher": []
     },
     {
+      "label": "LV1: izgradnja, QEMU i VCD pinova / build, QEMU and pin VCDs",
+      "detail": "build/gpio/gpioN.vcd po izlaznom pinu, otvoriti u PulseViewu (Import → Value Change Dump) / one per output pin, open in PulseView",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "build-vcd",
+        "labs/lab1_toolchain/starter"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "build-vcd",
+          "labs/lab1_toolchain/starter"
+        ]
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "LV2: izgradnja, QEMU i VCD pinova / build, QEMU and pin VCDs",
+      "detail": "build/gpio/gpioN.vcd po izlaznom pinu, otvoriti u PulseViewu (Import → Value Change Dump) / one per output pin, open in PulseView",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/vscode-task.sh",
+        "build-vcd",
+        "labs/lab2_gpio_irq/starter"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\vscode-task.ps1",
+          "build-vcd",
+          "labs/lab2_gpio_irq/starter"
+        ]
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
       "label": "QEMU za GDB, čeka debugger / QEMU for GDB, waits for the debugger",
       "detail": "zadnja izgradnja, emulator čeka; zatim Run and Debug → GDB: spoji se… → F5 / latest build, emulator waits; then Run and Debug → GDB: attach… → F5",
       "type": "process",

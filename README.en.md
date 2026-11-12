@@ -561,6 +561,7 @@ view (section *Debugger*, below).
 | idf.py fullclean | when you build the same project alternately with and without Docker |
 | QEMU for GDB, waits for the debugger | the latest build in an emulator that waits for GDB (section *Debugger*) |
 | LV7: Buildroot build | builds Lab 7 (section *Working on a lab*, Lab 7) |
+| LV1, LV2: build, QEMU and pin VCDs | build, then `run_qemu.sh --gpio-vcd`: `build/gpio/gpioN.vcd` next to `qemu.log`, for PulseView (section *Logic analyser*) |
 | LV1–LV6: build and QEMU for GDB | builds the lab, then an emulator that waits for GDB; F5 starts them too (section *Debugger*) |
 
 The tasks find the environment by themselves (the `scripts/vscode-task.sh`

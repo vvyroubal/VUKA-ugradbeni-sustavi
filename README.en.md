@@ -61,10 +61,14 @@ in Labs 1–5 and for Lab 7, but not for Lab 6; the board is then flashed with
 | Lab 7 (Buildroot, embedded Linux) | yes | yes | Linux and WSL2 with extra packages; macOS via Docker | no |
 | Flashing the board | on Linux; on macOS `esptool` from the computer | `esptool` from Windows | yes | yes |
 
-**Order:** on every path, first Step 0, then the section of your path (A, B or
-C), then *Checking* and *Working on a lab*; for path C the check and the first
-run are described in the *Path C* section. *Working in VS Code* and
-*Flashing the board* come once the environment works.
+**Order.** On every path, go through these in turn:
+
+1. *Step 0*;
+2. the section of your path: *Path A*, *Path B* or *Path C*;
+3. *Checking* and *Working on a lab*; on path C these are steps 6 and 7 in the
+   *Path C* section;
+4. once the environment works, as needed, *Working in VS Code* and *Flashing
+   the board*.
 
 ## Step 0: preparing the computer and getting the repository
 
@@ -157,6 +161,11 @@ All commands below are typed in the repository root
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\scripts\docker-shell.ps1
    ```
+   The shell is open when the message `Done! You can now compile ESP-IDF
+   projects.` is followed by the container prompt: on macOS and on Windows from
+   PowerShell `root@<id>:/work#`, on Linux and in WSL2
+   `I have no name!@<id>:/work$` (`<id>` is the short container ID, e.g.
+   `8e003a0a6342`).
 3. In the container shell, check the installation:
    ```sh
    bash scripts/verify.sh
@@ -266,6 +275,31 @@ the instructor). A 64-bit Windows 10 or 11 is required.
    it needs an administrator because it installs as a service). The installer
    is not signed, so at the *Windows protected your PC* warning choose
    *More info* → *Run anyway*.
+6. **Check the installation.** Open the **ESP-IDF 5.5 PowerShell** shortcut,
+   change into the repository and run the PowerShell version of `verify.sh`:
+   ```powershell
+   cd C:\vuka\VUKA-ugradbeni-sustavi
+   ./scripts/verify.ps1
+   ```
+   The script prints four steps, from `== 1/4 idf.py` to `== 4/4 boot in QEMU`;
+   the first build takes a few minutes. Success is the last line
+   `verify.ps1: PASS -- toolchain, build and QEMU all work`. If a step fails,
+   the script prints `verify.ps1: FAIL --` and the reason (see
+   *Troubleshooting*).
+7. **First lab run.** In the same window, from the repository root:
+   ```powershell
+   cd labs\lab1_toolchain\starter
+   idf.py set-target esp32c3
+   idf.py build
+   ../../common/run_qemu.ps1 build
+   ```
+   `idf.py set-target esp32c3` is run only the first time. Success looks as on
+   paths A and B: first the Espressif boot output (*bootloader*, chip
+   information), then the program's output (for the unmodified Lab 1 starter
+   the line `I (…) lab1: Ugradbeni racunalni sustavi -- Lab 1`), and after
+   30 seconds the final line
+   `run_qemu.ps1: timeout (30s) reached after output was produced -- treating as success`.
+   The whole output is also saved to `build\qemu.log`.
 
 **The course scripts on Windows.** Every course script has a PowerShell
 version **of the same name with the `.ps1` extension**, with the same arguments
@@ -274,20 +308,6 @@ Ctrl-A then X stops it earlier, and the output is also saved to
 `build/qemu.log`). They are run in the *ESP-IDF 5.5 PowerShell* shortcut, which
 allows running scripts. The shortcut opens in the ESP-IDF directory, so every
 time you open it, first change into the repository.
-
-**Checking**, with the PowerShell version of `verify.sh`:
-```powershell
-cd C:\vuka\VUKA-ugradbeni-sustavi
-./scripts/verify.ps1
-```
-The last line is what matters, `verify.ps1: PASS -- toolchain, build and QEMU
-all work`. The first run of Lab 1 then looks like this:
-```powershell
-cd labs\lab1_toolchain\starter
-idf.py set-target esp32c3
-idf.py build
-../../common/run_qemu.ps1 build
-```
 
 **Commands from the lab manuals** are written for bash, as on paths A and B.
 On path C you run the PowerShell versions of the same name: leave out `bash`,
@@ -335,7 +355,7 @@ allow access on private networks. `mosquitto_sub` and `mosquitto_pub` are in
 ## Checking: `verify.sh`
 
 This section and the next apply to paths A and B; on path C, checking and
-working on the labs are described in the *Path C* section.
+working on the labs are described in the *Path C* section (steps 6 and 7).
 
 `bash scripts/verify.sh` (from the repository root, with the environment
 active; in the container it always is) checks `idf.py` and version v5.5,
@@ -360,7 +380,7 @@ terminal where ESP-IDF is active. How you open one depends on the path:
 - **path B:** in every new terminal, first run `. ~/esp-idf/export.sh`.
 - **path C:** open the **ESP-IDF 5.5 PowerShell** shortcut. On this path the
   course scripts have a `.ps1` version of the same name (table in section
-  *Path C*).
+  *Path C*), and the first run is step 7 in that section.
 
 **Building and the emulator.** Using Lab 1 as the example, on paths A and B
 (for path C see section *Path C*):
@@ -414,9 +434,32 @@ terminals, both in the `labs/lab2_gpio_irq/starter` directory:
 2. **Terminal 2 runs GDB.** Open a second terminal with ESP-IDF active: on
    path A run `./scripts/docker-shell.sh` again, which attaches to the same
    container; on path B run `. ~/esp-idf/export.sh` in a new terminal; on
-   path C open another **ESP-IDF 5.5 PowerShell** shortcut window. Then change
-   to `labs/lab2_gpio_irq/starter` and type the command terminal 1 printed:
+   path C open another **ESP-IDF 5.5 PowerShell** shortcut window. A new
+   terminal does not start in the lab directory, so change into it by its full
+   path:
+   ```sh
+   cd /work/labs/lab2_gpio_irq/starter                         # path A (container)
+   cd ~/VUKA-ugradbeni-sustavi/labs/lab2_gpio_irq/starter      # path B
+   cd C:\vuka\VUKA-ugradbeni-sustavi\labs\lab2_gpio_irq\starter  # path C
+   ```
+   Then type the command terminal 1 printed:
    `riscv32-esp-elf-gdb build/lab2.elf -ex "target remote :1234"`.
+
+The connection works when GDB prints:
+
+```text
+Remote debugging using :1234
+0x40000000 in ?? ()
+(gdb)
+```
+
+The processor is halted at the first ROM instruction (address `0x40000000`,
+for which GDB has no function name); the program is not running yet and
+terminal 1 prints nothing. You type the commands from the Lab 2 manual
+(`break`, `continue` …) after the `(gdb)` prompt; the program's output appears
+in terminal 1. If GDB reports `Connection refused`, terminal 1 is not running a
+waiting `run_qemu_gdb.sh` (perhaps `run_qemu.sh` was started instead, or the
+emulator has already finished).
 
 **Labs 3 and 4 on the board.** In the emulator Lab 3 reads simulated sensor
 registers instead of the I2C bus, and Lab 4 uses a simulated ADC. The board variant is built in a **separate**
@@ -469,7 +512,8 @@ builds there (on macOS and Windows on the `lab7_br` volume, which
 container. On Linux without the course image it builds directly, with the
 packages listed below. Lab 7 is not possible on path C.
 
-**Linux and WSL2** — with the same script as the other labs. The container
+**Linux and WSL2** (in WSL2 also when Docker comes from Docker Desktop) — with
+the same script as the other labs. The container
 then runs as your user, so the build files belong to you (a plain `docker run`
 without `--user` would build as root, and you could not delete those files
 without `sudo`):
@@ -482,7 +526,8 @@ without `sudo`):
 docker run --rm -v "$PWD:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
 ```
 
-**Windows** (PowerShell, Docker Desktop) — the same command, on one line:
+**Windows without Ubuntu in WSL2** (Docker Desktop, PowerShell) — the same
+command, on one line:
 ```powershell
 docker run --rm -v "${PWD}:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
 ```
@@ -492,6 +537,23 @@ docker run --rm -v "${PWD}:/work" -w /work -v lab7_br:/br embedded-course bash -
 and the build is then run directly:
 `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
 
+Whichever way you build, the build has succeeded when the output ends with a
+list of the built files (sizes and dates differ):
+
+```text
+== artifacts ready:
+total ...
+...  Image
+...  fw_jump.bin
+...  rootfs.ext4
+make: Leaving directory '.../labs/lab7_linux_ota'
+```
+
+The files are in the `labs/lab7_linux_ota/artifacts` directory. If the output
+ends with a line such as `make: *** […] Error 2` and there is no
+`== artifacts ready:` line, the build failed; running the same command again
+continues where it stopped.
+
 ## Working in VS Code
 
 The repository contains VS Code settings (`.vscode/`): recommended extensions,
@@ -500,13 +562,19 @@ code-completion settings. VS Code must run **where ESP-IDF is**, so how you
 open the repository depends on the path:
 
 - **Path A (Docker, all systems).** The tools exist only in the container, so
-  VS Code attaches to it. In a terminal on your computer, from the repository
-  root, run `./scripts/docker-shell.sh` (`docker-shell.ps1` in PowerShell) and
-  keep that terminal open: when the shell exits, the container stops. Then in
-  VS Code choose F1 → *Dev Containers: Attach to Running Container…* →
-  `vuka-ugradbeni-sustavi`, and in the new window *File → Open Folder* →
-  `/work`. The bottom-left corner of the window shows *Container …*. Repeat
-  this at the start of every session.
+  VS Code attaches to it:
+  1. First time only: in VS Code open the *Extensions* view (Ctrl-Shift-X),
+     search for *Dev Containers* (publisher Microsoft) and click *Install*.
+     Without this extension the command in step 3 does not exist.
+  2. In a terminal on your computer, from the repository root, run
+     `./scripts/docker-shell.sh` (`docker-shell.ps1` in PowerShell) and keep
+     that terminal open: when the shell exits, the container stops.
+  3. In VS Code choose F1 → *Dev Containers: Attach to Running Container…* →
+     `vuka-ugradbeni-sustavi`.
+  4. In the new window choose *File → Open Folder* → `/work`. The bottom-left
+     corner of the window shows *Container …*.
+
+  Repeat steps 2–4 at the start of every session.
 - **Path B, Linux and macOS.** *File → Open Folder* → the repository root.
 - **Path B, WSL2.** In the Ubuntu terminal, from the repository root, type
   `code .`. VS Code is installed on Windows, and the *WSL* extension connects
@@ -788,10 +856,20 @@ do not need one in the emulator: the Lab 3 captures are provided in
 
 - **Linux (Debian, Ubuntu):** `sudo apt install pulseview sigrok-firmware-fx2lafw`,
   then unplug the analyser and plug it in again. If PulseView does not find it
-  or reports no access, the udev rules are missing: copy `60-libsigrok.rules`
-  and `61-libsigrok-uaccess.rules` from the `contrib` directory of the
-  libsigrok sources to `/etc/udev/rules.d/` and run
-  `sudo udevadm control --reload-rules && sudo udevadm trigger`.
+  or reports no access, the udev rules are missing. They are the files
+  `contrib/60-libsigrok.rules` and `contrib/61-libsigrok-uaccess.rules` from the
+  sources of the libsigrok library (the sigrok project, GitHub mirror
+  <https://github.com/sigrokproject/libsigrok>). In a terminal, download,
+  install and load them, then unplug the analyser and plug it in again:
+  ```sh
+  cd /tmp
+  R=https://raw.githubusercontent.com/sigrokproject/libsigrok/master
+  wget $R/contrib/60-libsigrok.rules
+  wget $R/contrib/61-libsigrok-uaccess.rules
+  sudo cp 60-libsigrok.rules 61-libsigrok-uaccess.rules /etc/udev/rules.d/
+  sudo udevadm control --reload-rules
+  sudo udevadm trigger
+  ```
 - **Windows:** download the 64-bit PulseView installer from
   <https://sigrok.org/wiki/Downloads>. The analyser needs the WinUSB driver,
   set with Zadig (installed with PulseView, in the Start menu): with the
@@ -814,14 +892,23 @@ and for Lab 4 (PWM) channel 0 to `GPIO8`. The analyser reads 3.3 V levels
 directly (it sees a logic one from 2.0 V and tolerates up to 5 V). Leave any
 supply pins on the analyser unconnected. PulseView names the channels D0–D7.
 
-**Capturing.** In PulseView choose *Connect to Device*, the `fx2lafw` driver
-and *Scan for devices*; the analyser usually shows up as a Saleae Logic.
-Enable only the channels you use and set the sample rate and sample count: for
-Lab 3 2 MHz and 10 M samples (5 s, at least two sensor reads; with I2C at
-100 kHz that is 20 samples per bit), for Lab 4 4 MHz and 20 M samples (5 s,
-more than one breathing cycle of about 4.1 s; a 0.25 µs step is 1/800 of the
-200 µs period). Then *Run*. If the capture stops early, lower the sample rate,
-avoid USB hubs and try another cable.
+**Capturing:**
+
+1. Connect the analyser as described above, plug it into the computer and
+   start PulseView.
+2. Choose *Connect to Device*, the `fx2lafw` driver, then *Scan for devices*;
+   select the analyser in the list (it usually shows up as a Saleae Logic) and
+   confirm with *OK*.
+3. Enable only the channels you use: D0 and D1 for Lab 3, D0 for Lab 4.
+4. Set the sample rate and sample count. For Lab 3 2 MHz and 10 M samples
+   (5 s, at least two sensor reads; with I2C at 100 kHz that is 20 samples per
+   bit), for Lab 4 4 MHz and 20 M samples (5 s, more than one breathing cycle
+   of about 4.1 s; a 0.25 µs step is 1/800 of the 200 µs period).
+5. Click *Run*. The capture takes 5 s, then the signals appear on the
+   channels.
+
+If the capture stops early, lower the sample rate, avoid USB hubs and try
+another cable.
 
 **Decoders.** *Add protocol decoder → I²C*, with SCL = D1 and SDA = D0: START,
 the address, the data bytes and ACK/NACK appear above the signals, the same

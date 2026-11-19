@@ -60,10 +60,14 @@ Windowsa. Što koji put pokriva:
 | LV7 (Buildroot, ugradbeni Linux) | da | da | Linux i WSL2 uz dodatne pakete; macOS preko Dockera | ne |
 | Programiranje pločice | na Linuxu; na macOS-u `esptool` s računala | `esptool` iz Windowsa | da | da |
 
-**Redoslijed:** na svakom putu najprije Korak 0, zatim odjeljak svojega puta
-(A, B ili C), pa *Provjera* i *Rad na vježbi*; za put C provjera i prvo
-pokretanje opisani su u odjeljku *Put C*. *Rad u VS Codeu* i *Programiranje
-pločice* dolaze na red kad okruženje radi.
+**Redoslijed.** Na svakom putu redom prođite:
+
+1. *Korak 0*;
+2. odjeljak svojega puta: *Put A*, *Put B* ili *Put C*;
+3. *Provjera* i *Rad na vježbi*; na putu C to su koraci 6 i 7 u odjeljku
+   *Put C*;
+4. kad okruženje radi, prema potrebi *Rad u VS Codeu* i *Programiranje
+   pločice*.
 
 ## Korak 0: priprema računala i preuzimanje repozitorija
 
@@ -155,6 +159,10 @@ naredbe u nastavku pišu se iz korijena repozitorija
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\scripts\docker-shell.ps1
    ```
+   Ljuska je otvorena kad nakon poruke `Done! You can now compile ESP-IDF
+   projects.` stoji odzivnik kontejnera: na macOS-u i Windowsu iz PowerShella
+   `root@<oznaka>:/work#`, na Linuxu i u WSL2 `I have no name!@<oznaka>:/work$`
+   (`<oznaka>` je skraćeni identifikator kontejnera, npr. `8e003a0a6342`).
 3. U ljusci kontejnera provjerite instalaciju:
    ```sh
    bash scripts/verify.sh
@@ -263,6 +271,31 @@ računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban j
    traži administratora jer se instalira kao servis). Instalacijski program
    nije potpisan, pa na upozorenje *Windows protected your PC* odaberite
    *More info* → *Run anyway*.
+6. **Provjera instalacije.** Otvorite prečac **ESP-IDF 5.5 PowerShell**,
+   prijeđite u repozitorij i pokrenite PowerShell inačicu skripte `verify.sh`:
+   ```powershell
+   cd C:\vuka\VUKA-ugradbeni-sustavi
+   ./scripts/verify.ps1
+   ```
+   Skripta ispisuje četiri koraka, od `== 1/4 idf.py` do `== 4/4 boot in QEMU`;
+   prva izgradnja traje nekoliko minuta. Uspjeh je zadnji redak
+   `verify.ps1: PASS -- toolchain, build and QEMU all work`. Ako koji korak ne
+   uspije, skripta ispisuje `verify.ps1: FAIL --` i razlog (vidi *Česti
+   problemi*).
+7. **Prvo pokretanje vježbe.** U istom prozoru, iz korijena repozitorija:
+   ```powershell
+   cd labs\lab1_toolchain\starter
+   idf.py set-target esp32c3
+   idf.py build
+   ../../common/run_qemu.ps1 build
+   ```
+   `idf.py set-target esp32c3` izvodi se samo prvi put. Uspjeh izgleda kao na
+   putovima A i B: najprije Espressifov pozdravni ispis (*bootloader*, podaci o
+   čipu), zatim ispis programa (za nepromijenjeni polazni projekt LV1 redak
+   `I (…) lab1: Ugradbeni racunalni sustavi -- Lab 1`), a nakon 30 sekundi
+   završni redak
+   `run_qemu.ps1: timeout (30s) reached after output was produced -- treating as success`.
+   Cijeli ispis sprema se i u `build\qemu.log`.
 
 **Skripte kolegija na Windowsu.** Za svaku skriptu kolegija postoji PowerShell
 inačica **istog imena s nastavkom `.ps1`**, s istim argumentima i istim
@@ -271,20 +304,6 @@ zaustavlja Ctrl-A, zatim X, a ispis se sprema i u `build/qemu.log`). Pokreću se
 prečacu *ESP-IDF 5.5 PowerShell*, koji dopušta pokretanje skripti. Prečac se
 otvara u direktoriju ESP-IDF-a, pa pri svakom otvaranju najprije prijeđite u
 repozitorij.
-
-**Provjera**, PowerShell inačicom skripte `verify.sh`:
-```powershell
-cd C:\vuka\VUKA-ugradbeni-sustavi
-./scripts/verify.ps1
-```
-Bitan je zadnji redak, `verify.ps1: PASS -- toolchain, build and QEMU all work`.
-Prvo pokretanje LV1 zatim izgleda ovako:
-```powershell
-cd labs\lab1_toolchain\starter
-idf.py set-target esp32c3
-idf.py build
-../../common/run_qemu.ps1 build
-```
 
 **Naredbe iz priručnika vježbi** pisane su za bash, kao na putovima A i B. Na
 putu C pokrećete PowerShell inačice istog imena: izostavite `bash`, nastavak
@@ -330,7 +349,7 @@ naredba iz priručnika LV6, iz `labs\lab6_mqtt\starter`, piše ovako:
 ## Provjera: `verify.sh`
 
 Ovaj i sljedeći odjeljak vrijede za putove A i B; na putu C provjeru i rad na
-vježbama opisuje odjeljak *Put C*.
+vježbama opisuje odjeljak *Put C* (koraci 6 i 7).
 
 `bash scripts/verify.sh` (iz korijena repozitorija, s aktivnim okruženjem;
 u kontejneru je uvijek aktivno) provjerava `idf.py` i verziju v5.5,
@@ -356,7 +375,8 @@ putu:
 - **put B:** u svakom novom terminalu najprije izvedite
   `. ~/esp-idf/export.sh`.
 - **put C:** otvorite prečac **ESP-IDF 5.5 PowerShell**. Skripte kolegija na
-  tom putu imaju istoimenu inačicu `.ps1` (tablica u odjeljku *Put C*).
+  tom putu imaju istoimenu inačicu `.ps1` (tablica u odjeljku *Put C*), a
+  prvo pokretanje opisuje korak 7 u tom odjeljku.
 
 **Izgradnja i emulator.** Na primjeru LV1, na putovima A i B (za put C vidi
 odjeljak *Put C*):
@@ -409,9 +429,30 @@ u direktoriju `labs/lab2_gpio_irq/starter`:
    na putu A ponovno pokrenite `./scripts/docker-shell.sh`, koji se spaja na
    isti kontejner; na putu B u novom terminalu izvedite
    `. ~/esp-idf/export.sh`; na putu C otvorite još jedan prozor prečaca
-   **ESP-IDF 5.5 PowerShell**. Zatim prijeđite u `labs/lab2_gpio_irq/starter`
-   i upišite naredbu koju je ispisao terminal 1:
+   **ESP-IDF 5.5 PowerShell**. Novi terminal ne počinje u direktoriju vježbe,
+   pa u njega prijeđite punom putanjom:
+   ```sh
+   cd /work/labs/lab2_gpio_irq/starter                         # put A (kontejner)
+   cd ~/VUKA-ugradbeni-sustavi/labs/lab2_gpio_irq/starter      # put B
+   cd C:\vuka\VUKA-ugradbeni-sustavi\labs\lab2_gpio_irq\starter  # put C
+   ```
+   Zatim upišite naredbu koju je ispisao terminal 1:
    `riscv32-esp-elf-gdb build/lab2.elf -ex "target remote :1234"`.
+
+Spajanje je uspjelo kad GDB ispiše:
+
+```text
+Remote debugging using :1234
+0x40000000 in ?? ()
+(gdb)
+```
+
+Procesor stoji na prvoj instrukciji ROM-a (adresa `0x40000000`, za koju GDB
+nema imena funkcije), a program još ne radi i terminal 1 ništa ne ispisuje.
+Naredbe iz priručnika LV2 (`break`, `continue` …) upisujete iza odzivnika
+`(gdb)`; ispis programa pojavljuje se u terminalu 1. Javi li GDB `Connection
+refused`, u terminalu 1 ne čeka `run_qemu_gdb.sh` (možda je pokrenut
+`run_qemu.sh` ili je emulator već završio).
 
 **LV3 i LV4 na pločici.** U emulatoru LV3 umjesto I2C sabirnice čita
 simulirane registre senzora, a LV4 koristi simulirani ADC. Inačica za pločicu gradi se u **zasebnom** direktoriju
@@ -462,7 +503,8 @@ Windowsu na volumenu `lab7_br`, koji `docker-shell` montira na `/br`), a u
 običnom prozoru pokreće kontejner kolegija. Na Linuxu bez slike kolegija gradi
 izravno, uz pakete navedene niže. Na putu C LV7 nije moguća.
 
-**Linux i WSL2** — istom skriptom kao za ostale vježbe. Kontejner tada radi
+**Linux i WSL2** (u WSL2 i kad Docker dolazi iz Docker Desktopa) — istom
+skriptom kao za ostale vježbe. Kontejner tada radi
 pod vašim korisnikom, pa datoteke izgradnje pripadaju vama (izravan
 `docker run` bez `--user` gradio bi kao root, a takve datoteke ne možete
 obrisati bez `sudo`):
@@ -475,7 +517,8 @@ obrisati bez `sudo`):
 docker run --rm -v "$PWD:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
 ```
 
-**Windows** (PowerShell, Docker Desktop) — ista naredba, u jednom retku:
+**Windows bez Ubuntua u WSL2** (Docker Desktop, PowerShell) — ista naredba, u
+jednom retku:
 ```powershell
 docker run --rm -v "${PWD}:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
 ```
@@ -485,6 +528,23 @@ docker run --rm -v "${PWD}:/work" -w /work -v lab7_br:/br embedded-course bash -
 a izgradnja se zatim pokreće izravno:
 `make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
 
+Izgradnja je uspjela kad ispis, na bilo kojem od ovih načina, završava popisom
+izgrađenih datoteka (veličine i datumi su drukčiji):
+
+```text
+== artifacts ready:
+total ...
+...  Image
+...  fw_jump.bin
+...  rootfs.ext4
+make: Leaving directory '.../labs/lab7_linux_ota'
+```
+
+Datoteke su u direktoriju `labs/lab7_linux_ota/artifacts`. Ako ispis završava
+retkom poput `make: *** […] Error 2`, a retka `== artifacts ready:` nema,
+izgradnja nije uspjela; ponovno pokretanje iste naredbe nastavlja ondje gdje je
+stala.
+
 ## Rad u VS Codeu
 
 Repozitorij sadrži postavke za VS Code (`.vscode/`): preporučena proširenja,
@@ -493,13 +553,19 @@ dovršavanje koda. VS Code mora raditi **ondje gdje je ESP-IDF**, pa se
 repozitorij otvara različito prema putu:
 
 - **Put A (Docker, svi sustavi).** Alati su samo u kontejneru, pa se VS Code
-  na njega priključuje. U terminalu računala, u korijenu repozitorija,
-  pokrenite `./scripts/docker-shell.sh` (u PowerShellu `docker-shell.ps1`) i
-  taj terminal ne zatvarajte: kad ljuska završi, kontejner se gasi. Zatim u VS
-  Codeu odaberite F1 → *Dev Containers: Attach to Running Container…* →
-  `vuka-ugradbeni-sustavi`, a u novom prozoru *File → Open Folder* → `/work`.
-  Dolje lijevo u prozoru piše *Container …*. Isto ponovite na početku
-  svakog rada.
+  na njega priključuje:
+  1. Samo prvi put: u VS Codeu otvorite pregled *Extensions* (Ctrl-Shift-X),
+     potražite *Dev Containers* (izdavač Microsoft) i kliknite *Install*. Bez
+     tog proširenja naredbe iz koraka 3 nema.
+  2. U terminalu računala, u korijenu repozitorija, pokrenite
+     `./scripts/docker-shell.sh` (u PowerShellu `docker-shell.ps1`) i taj
+     terminal ne zatvarajte: kad ljuska završi, kontejner se gasi.
+  3. U VS Codeu odaberite F1 → *Dev Containers: Attach to Running Container…*
+     → `vuka-ugradbeni-sustavi`.
+  4. U novom prozoru odaberite *File → Open Folder* → `/work`. Dolje lijevo u
+     prozoru piše *Container …*.
+
+  Korake 2–4 ponovite na početku svakog rada.
 - **Put B, Linux i macOS.** *File → Open Folder* → korijen repozitorija.
 - **Put B, WSL2.** U terminalu Ubuntu, u korijenu repozitorija, upišite
   `code .`. VS Code je instaliran na Windowsu, a proširenje *WSL* spaja ga s
@@ -771,10 +837,20 @@ ne trebaju: snimke za LV3 dane su u `labs/lab3_bme280/captures`.
 
 - **Linux (Debian, Ubuntu):** `sudo apt install pulseview sigrok-firmware-fx2lafw`,
   zatim analizator iskopčajte i ponovno priključite. Ako ga PulseView ne nađe
-  ili javlja da nema pristup, nedostaju pravila udev: datoteke
-  `60-libsigrok.rules` i `61-libsigrok-uaccess.rules` iz direktorija `contrib`
-  izvornog koda libsigroka kopirajte u `/etc/udev/rules.d/` i izvedite
-  `sudo udevadm control --reload-rules && sudo udevadm trigger`.
+  ili javlja da nema pristup, nedostaju pravila udev. To su datoteke
+  `contrib/60-libsigrok.rules` i `contrib/61-libsigrok-uaccess.rules` iz
+  izvornog koda biblioteke libsigrok (projekt sigrok, zrcalo na GitHubu
+  <https://github.com/sigrokproject/libsigrok>). U terminalu ih preuzmite,
+  postavite i učitajte, pa analizator ponovno iskopčajte i priključite:
+  ```sh
+  cd /tmp
+  R=https://raw.githubusercontent.com/sigrokproject/libsigrok/master
+  wget $R/contrib/60-libsigrok.rules
+  wget $R/contrib/61-libsigrok-uaccess.rules
+  sudo cp 60-libsigrok.rules 61-libsigrok-uaccess.rules /etc/udev/rules.d/
+  sudo udevadm control --reload-rules
+  sudo udevadm trigger
+  ```
 - **Windows:** sa stranice <https://sigrok.org/wiki/Downloads> preuzmite
   64-bitni instalacijski program PulseViewa. Analizatoru treba upravljački
   program WinUSB, koji se postavlja alatom Zadig (instalira se uz PulseView i
@@ -797,14 +873,22 @@ kanal 0 na `GPIO8`. Razine od 3,3 V analizator čita izravno (logičku jedinicu
 prepoznaje od 2,0 V, a podnosi do 5 V). Izvode za napajanje na analizatoru,
 ako ih ima, ne spajajte nikamo. U PulseViewu se kanali zovu D0–D7.
 
-**Snimanje.** U PulseViewu odaberite *Connect to Device*, upravljački program
-`fx2lafw` i *Scan for devices*; analizator se obično javlja kao Saleae Logic.
-Uključite samo kanale koje koristite i postavite brzinu uzorkovanja i broj
-uzoraka: za LV3 2 MHz i 10 M uzoraka (5 s, barem dva očitanja senzora; uz I2C
-na 100 kHz to je 20 uzoraka po bitu), za LV4 4 MHz i 20 M uzoraka (5 s, više
-od jednog ciklusa disanja od oko 4,1 s; korak od 0,25 µs je 1/800 perioda od
-200 µs). Zatim *Run*. Ako snimanje stane prije kraja, smanjite brzinu
-uzorkovanja, ne koristite USB razdjelnik (hub) i probajte drugi kabel.
+**Snimanje:**
+
+1. Spojite analizator kako je opisano gore, priključite ga na računalo i
+   pokrenite PulseView.
+2. Odaberite *Connect to Device*, upravljački program `fx2lafw`, zatim *Scan
+   for devices*; s popisa odaberite analizator (obično se javlja kao Saleae
+   Logic) i potvrdite s *OK*.
+3. Uključite samo kanale koje koristite: za LV3 D0 i D1, za LV4 D0.
+4. Postavite brzinu uzorkovanja i broj uzoraka. Za LV3 2 MHz i 10 M uzoraka
+   (5 s, barem dva očitanja senzora; uz I2C na 100 kHz to je 20 uzoraka po
+   bitu), za LV4 4 MHz i 20 M uzoraka (5 s, više od jednog ciklusa disanja od
+   oko 4,1 s; korak od 0,25 µs je 1/800 perioda od 200 µs).
+5. Kliknite *Run*. Snimanje traje 5 s, a zatim se signali prikažu na kanalima.
+
+Ako snimanje stane prije kraja, smanjite brzinu uzorkovanja, ne koristite USB
+razdjelnik (hub) i probajte drugi kabel.
 
 **Dekoderi.** *Add protocol decoder → I²C*, uz SCL = D1 i SDA = D0: iznad
 signala pojave se START, adresa, podatkovni bajtovi i ACK/NACK, isti slijed

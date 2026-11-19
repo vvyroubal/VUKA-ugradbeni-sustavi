@@ -75,8 +75,9 @@ static int s_samples[NUM_SAMPLES];
 #define PWM_STEP          (PWM_MAX_DUTY / PWM_SWEEP_STEPS)
 
 static esp_timer_handle_t s_pwm_timer;
-static int s_pwm_duty = 0;
-static int s_pwm_dir = 1;
+/* written by the timer callback, read by app_main's loop */
+static volatile int s_pwm_duty = 0;
+static volatile int s_pwm_dir = 1;
 
 static void pwm_sweep_cb(void *arg)
 {
@@ -235,7 +236,14 @@ void app_main(void)
     ESP_ERROR_CHECK(pwm_init_and_start());
     ESP_LOGI(TAG, "LAB4 OK pwm=running");
 
+    /* T3 evidence: one line at every reversal of the sweep (about
+     * every 2 s); none while TODO 3 is still empty. */
+    int last_dir = s_pwm_dir;
     for (;;) {
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        vTaskDelay(pdMS_TO_TICKS(100));
+        if (s_pwm_dir != last_dir) {
+            last_dir = s_pwm_dir;
+            ESP_LOGI(TAG, "LAB4 OK pwm_dir=%d", last_dir);
+        }
     }
 }

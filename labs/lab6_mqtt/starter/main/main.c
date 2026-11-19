@@ -18,9 +18,6 @@
  *      cert is embedded from main/certs/ca.crt (EMBED_TXTFILES in
  *      main/CMakeLists.txt) -- generate it first with
  *      broker/gen_certs.sh. Use the symbols declared below.
- *      (CONFIG_LAB6_PLAINTEXT, default off, is available if you
- *       first want to bring MQTT up without TLS against port
- *       1883.)
  *   2. Topic design: publish to "vuka/sensors/telemetry".
  *   3. Publish loop: every 2 s format one sample as JSON and
  *      publish it. Print "LAB6 OK connected=1" once the broker
@@ -83,10 +80,8 @@ void app_main(void)
      *   arithmetic). Then call esp_mqtt_client_init(&cfg), register
      *   an event handler, and start the client with
      *   esp_mqtt_client_start().
-     *   (CONFIG_LAB6_PLAINTEXT, default off, swaps in
-     *    mqtt://<host>:1883 with no TLS fields at all, if you
-     *    first want MQTT working without TLS before tackling the
-     *    certificate wiring.)
+     *   (Leave CONFIG_LAB6_PLAINTEXT off: the course broker
+     *    listens only on 8883, with TLS.)
      *
      * TODO 2: in the event handler, on MQTT_EVENT_CONNECTED, log
      *   "LAB6 OK connected=1" and signal the publish loop (e.g. an
@@ -107,9 +102,11 @@ void app_main(void)
 
             /* TODO 3: format this sample as JSON and publish it
              *   to TELEMETRY_TOPIC with
-             *   esp_mqtt_client_publish(..., qos=1). On a
-             *   successful publish, increment `published` and
-             *   log "LAB6 OK published=%d". */
+             *   esp_mqtt_client_publish(..., qos=1); "seq" in
+             *   the JSON is published + 1. On success (msg_id >= 0)
+             *   increment `published` and log
+             *   "LAB6 OK published=%d"; otherwise log
+             *   "publish failed (msg_id=%d)" (needed in T4). */
             (void)published;
             (void)TELEMETRY_TOPIC;
         } else {

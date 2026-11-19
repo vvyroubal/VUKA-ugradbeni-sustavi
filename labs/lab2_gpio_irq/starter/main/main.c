@@ -92,7 +92,7 @@ static void led_init(void)
      *          GPIO_OUT_W1TC_REG. */
 }
 
-static inline void led_set(bool on)
+static void __attribute__((noinline)) led_set(bool on)
 {
     (void)on;
     /* TODO 1c: if `on`, write (1u << LED_GPIO) to

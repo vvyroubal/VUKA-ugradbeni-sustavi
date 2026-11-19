@@ -1,7 +1,10 @@
 CONFIG_IDF_TARGET="esp32c3"
 
-# Sim ON by default so the starter boots and prints in QEMU with no changes
-# -- the lab's TODOs (in main/bme280_i2c.c) only matter once you switch to
-# the real-hardware build (unset this / build with a sdkconfig.hw fragment
-# like the solution's).
-CONFIG_LAB_SIM_BME280=y
+# Lab 3 always runs its own driver, main/bme280_i2c.c -- never the
+# synthetic bme280_sim of Labs 5 and 6.
+# CONFIG_LAB_SIM_BME280 is not set
+
+# QEMU (build/): the driver talks to the simulated registers of
+# component bme280_regsim. The board variant (build-hw/) turns this
+# off with sdkconfig.hw.
+CONFIG_LAB3_REG_SIM=y

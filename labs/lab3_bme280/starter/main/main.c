@@ -3,19 +3,12 @@
  *
  * Ugradbeni racunalni sustavi -- Lab 3: BME280 (I2C)
  *
- * app_main() talks to bme280.h's shared API only -- it never knows
- * whether it is linked against bme280_sim (QEMU/CI,
- * CONFIG_LAB_SIM_BME280=y, the default here -- so this starter
- * boots and prints in QEMU with no changes) or the real i2c_master
- * driver in bme280_i2c.c (hardware, CONFIG_LAB_SIM_BME280 unset),
- * which still has TODOs to fill in -- see bme280_i2c.c and the
- * manual.
- *
- * Every 2 s: read one T/P/H sample and print
+ * Nothing to change in this file: all of the lab's TODOs are in
+ * bme280_i2c.c. app_main() initialises the sensor and, every 2 s,
+ * prints one sample:
  *   "LAB3 OK T=<c.c>C P=<hhhh.h>hPa H=<rr.r>%"
- *
- * Nothing to implement in THIS file -- the lab's TODOs are all in
- * bme280_i2c.c (register layer + compensation formulas).
+ * In QEMU the values come from the simulated registers through
+ * YOUR driver code: all zeros until TODO 1c and 2a-2c are done.
  */
 #include <stdio.h>
 

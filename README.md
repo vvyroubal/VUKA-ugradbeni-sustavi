@@ -413,8 +413,8 @@ u direktoriju `labs/lab2_gpio_irq/starter`:
    i upišite naredbu koju je ispisao terminal 1:
    `riscv32-esp-elf-gdb build/lab2.elf -ex "target remote :1234"`.
 
-**LV3 i LV4 na pločici.** U emulatoru LV3 koristi simulirani senzor, a LV4
-simulirani ADC. Inačica za pločicu gradi se u **zasebnom** direktoriju
+**LV3 i LV4 na pločici.** U emulatoru LV3 umjesto I2C sabirnice čita
+simulirane registre senzora, a LV4 koristi simulirani ADC. Inačica za pločicu gradi se u **zasebnom** direktoriju
 `build-hw`, kako bi izgradnja za QEMU u `build/` ostala netaknuta. Iz
 direktorija `starter` vježbe:
 

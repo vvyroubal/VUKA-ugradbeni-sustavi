@@ -1,39 +1,40 @@
 /*
- * bme280_i2c.c -- real BME280 driver over I2C (starter).
+ * bme280_i2c.c -- BME280 driver from the datasheet (starter).
  *
  * Ugradbeni racunalni sustavi -- Lab 3: BME280 (I2C)
  *
- * Implements bme280.h using ESP-IDF v5.5's new i2c_master driver
- * (driver/i2c_master.h). Compiled only for the real-hardware build
- * (see labs/common/components/bme280_sim/README.md for the Kconfig
- * mechanism); with the default sim-on config this file compiles to
- * nothing and you won't see your changes here take effect until you
- * build with CONFIG_LAB_SIM_BME280 unset (sdkconfig.hw fragment).
+ * ALL of your Lab 3 code goes into this file (main.c stays as is).
  *
- * The I2C bus/device bring-up (an ESP-IDF API concern, not a
- * datasheet one) is already filled in below. Your job is the two
- * things that actually come straight out of the Bosch BME280
- * datasheet:
+ * Two build variants, the same driver:
+ *   build/    (QEMU, CONFIG_LAB3_REG_SIM=y, the default): reg_read()
+ *             and reg_write() answer from the simulated BME280
+ *             registers (component bme280_regsim) -- QEMU has no
+ *             I2C bus. Fixed registers, known results.
+ *   build-hw/ (board, sdkconfig.hw): the real sensor on the I2C bus.
  *
- *   TODO 1 (register layer, sec. 5.3/5.4 + Table 16):
- *           reg_read()/reg_write() (the actual I2C transactions)
- *           and the calibration-block byte-unpacking in
- *           read_calibration().
- *   TODO 2 (compensation formulas, sec. 4.2.3): compensate_T()/
- *           compensate_P()/compensate_H(), the Bosch integer math
- *           that turns raw ADC counts into engineering units via
- *           the shared t_fine intermediate.
+ * What you write (manual, tasks T3 and T4):
+ *   TODO 1a/1b  the two I2C transactions (board only; the code is
+ *               given in the comments -- copy it in)
+ *   TODO 1c     unpack the calibration bytes (datasheet Table 16)
+ *   TODO 2a-2c  the compensation formulas (datasheet sec. 4.2.3)
  *
- * Wiring (adjust I2C_SDA_GPIO/I2C_SCL_GPIO below to your board):
- *   BME280 VDD -> 3V3   BME280 SDA -> GPIO5 (default)
- *   BME280 GND -> GND   BME280 SCL -> GPIO6 (default)
- *   BME280 SDO -> GND (selects I2C address 0x76, matching
- *                      BME280_I2C_ADDR)
- *   BME280 CSB -> VDD (selects I2C mode, not SPI)
+ * How you check it (QEMU): the log prints "calib T/P/H: ..." after
+ * bme280_init() and "adc: ..." / "int: ..." on the first reading --
+ * compare them with the expected values in the manual. Before you
+ * start, every value is 0.
+ *
+ * Wiring on the board (adjust I2C_SDA_GPIO/I2C_SCL_GPIO if needed):
+ *   VDD -> 3V3, GND -> GND, SDA -> GPIO5, SCL -> GPIO6,
+ *   SDO -> GND (address 0x76), CSB -> 3V3 (I2C, not SPI).
  */
 #include "sdkconfig.h"
-#if !CONFIG_LAB_SIM_BME280
+#if CONFIG_LAB_SIM_BME280
+/* An sdkconfig from before November 2026 still selects the old
+ * synthetic sensor (bme280_sim) and would hide this driver. */
+#error "Lab 3: stale configuration -- delete sdkconfig and build/, then build again"
+#endif
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -41,6 +42,9 @@
 #include "driver/i2c_master.h"
 #include "esp_log.h"
 #include "bme280.h"
+#if CONFIG_LAB3_REG_SIM
+#include "bme280_regsim.h"
+#endif
 
 static const char *TAG = "bme280_i2c";
 
@@ -49,8 +53,10 @@ static const char *TAG = "bme280_i2c";
 #define I2C_SCL_HZ     100000
 #define I2C_TIMEOUT_MS 1000
 
+#if !CONFIG_LAB3_REG_SIM
 static i2c_master_bus_handle_t s_bus;
 static i2c_master_dev_handle_t s_dev;
+#endif
 static bme280_calib_t s_calib;
 static int32_t s_t_fine;
 
@@ -58,6 +64,10 @@ static int32_t s_t_fine;
 
 static esp_err_t reg_read(uint8_t reg, uint8_t *data, size_t len)
 {
+#if CONFIG_LAB3_REG_SIM
+    /* QEMU: no I2C bus -- the simulated register map answers */
+    return bme280_regsim_read(reg, data, len);
+#else
     (void)reg;
     (void)data;
     (void)len;
@@ -69,10 +79,14 @@ static esp_err_t reg_read(uint8_t reg, uint8_t *data, size_t len)
      *       s_dev, &reg, 1, data, len, I2C_TIMEOUT_MS);
      */
     return ESP_ERR_NOT_SUPPORTED;
+#endif
 }
 
 static esp_err_t reg_write(uint8_t reg, uint8_t val)
 {
+#if CONFIG_LAB3_REG_SIM
+    return bme280_regsim_write(reg, val);
+#else
     (void)reg;
     (void)val;
     /* TODO 1b: a register write is {reg, val} transmitted as one
@@ -82,6 +96,7 @@ static esp_err_t reg_write(uint8_t reg, uint8_t val)
      *                              I2C_TIMEOUT_MS);
      */
     return ESP_ERR_NOT_SUPPORTED;
+#endif
 }
 
 /* --------------------- calibration readout -------------------- */
@@ -133,7 +148,8 @@ static esp_err_t read_calibration(void)
  *
  * Once implemented, validate against the worked example in the
  * BMP280 datasheet, sec. 3.12 (same T/P formulas): dig_T1=27504,
- * dig_T2=26435, dig_T3=-1000, adc_T=519888 -> t_fine=128422, T=2508.
+ * dig_T2=26435, dig_T3=-1000, adc_T=519888 -> t_fine=128422,
+ * T=2508.
  * -------------------------------------------------------------- */
 
 static int32_t compensate_T(int32_t adc_T)
@@ -179,6 +195,8 @@ static uint32_t compensate_H(int32_t adc_H)
 
 esp_err_t bme280_init(void)
 {
+    esp_err_t err;
+#if !CONFIG_LAB3_REG_SIM
     i2c_master_bus_config_t bus_cfg = {
         .i2c_port = I2C_NUM_0,
         .sda_io_num = I2C_SDA_GPIO,
@@ -187,7 +205,7 @@ esp_err_t bme280_init(void)
         .glitch_ignore_cnt = 7,
         .flags.enable_internal_pullup = true,
     };
-    esp_err_t err = i2c_new_master_bus(&bus_cfg, &s_bus);
+    err = i2c_new_master_bus(&bus_cfg, &s_bus);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "i2c_new_master_bus failed: %s",
                  esp_err_to_name(err));
@@ -205,6 +223,7 @@ esp_err_t bme280_init(void)
                  esp_err_to_name(err));
         return err;
     }
+#endif
 
     uint8_t chip_id = 0;
     err = reg_read(BME280_REG_CHIP_ID, &chip_id, 1);
@@ -223,6 +242,17 @@ esp_err_t bme280_init(void)
     if (err != ESP_OK) {
         return err;
     }
+    /* T3 check: the unpacked constants (expected values for the
+     * simulated registers: manual, task T3) */
+    ESP_LOGI(TAG, "calib T: %u %d %d", s_calib.dig_T1,
+             s_calib.dig_T2, s_calib.dig_T3);
+    ESP_LOGI(TAG, "calib P: %u %d %d %d %d %d %d %d %d",
+             s_calib.dig_P1, s_calib.dig_P2, s_calib.dig_P3,
+             s_calib.dig_P4, s_calib.dig_P5, s_calib.dig_P6,
+             s_calib.dig_P7, s_calib.dig_P8, s_calib.dig_P9);
+    ESP_LOGI(TAG, "calib H: %u %d %u %d %d %d", s_calib.dig_H1,
+             s_calib.dig_H2, s_calib.dig_H3, s_calib.dig_H4,
+             s_calib.dig_H5, s_calib.dig_H6);
 
     /* Humidity oversampling x1. Must be written before
      * ctrl_meas. */
@@ -294,6 +324,18 @@ esp_err_t bme280_read(float *temp_c, float *press_hpa,
     uint32_t P = compensate_P(adc_P);
     uint32_t H = compensate_H(adc_H);
 
+    /* T4 check, once: raw values and integer results (expected
+     * values for the simulated registers: manual, task T4) */
+    static bool s_logged;
+    if (!s_logged) {
+        s_logged = true;
+        ESP_LOGI(TAG, "adc: T=%ld P=%ld H=%ld", (long)adc_T,
+                 (long)adc_P, (long)adc_H);
+        ESP_LOGI(TAG, "int: t_fine=%ld T=%ld P=%lu H=%lu",
+                 (long)s_t_fine, (long)T, (unsigned long)P,
+                 (unsigned long)H);
+    }
+
     if (temp_c) {
         *temp_c = T / 100.0f;
     }
@@ -305,5 +347,3 @@ esp_err_t bme280_read(float *temp_c, float *press_hpa,
     }
     return ESP_OK;
 }
-
-#endif /* !CONFIG_LAB_SIM_BME280 */

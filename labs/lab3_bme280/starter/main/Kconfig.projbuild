@@ -1,0 +1,15 @@
+menu "Lab 3 (BME280)"
+
+config LAB3_REG_SIM
+    bool "Simulated BME280 registers (QEMU) instead of the I2C bus"
+    default y
+    help
+        On (the default): main/bme280_i2c.c reads and writes the
+        simulated register map of component bme280_regsim instead
+        of the I2C bus, so the whole driver -- chip-id probe,
+        calibration unpacking, compensation -- runs in QEMU, with
+        fixed registers and known expected results.
+        Off (sdkconfig.hw, build directory build-hw): the real
+        sensor on the I2C bus, on the board.
+
+endmenu

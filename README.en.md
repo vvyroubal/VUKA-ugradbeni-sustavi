@@ -418,8 +418,8 @@ terminals, both in the `labs/lab2_gpio_irq/starter` directory:
    to `labs/lab2_gpio_irq/starter` and type the command terminal 1 printed:
    `riscv32-esp-elf-gdb build/lab2.elf -ex "target remote :1234"`.
 
-**Labs 3 and 4 on the board.** In the emulator Lab 3 uses a simulated sensor
-and Lab 4 a simulated ADC. The board variant is built in a **separate**
+**Labs 3 and 4 on the board.** In the emulator Lab 3 reads simulated sensor
+registers instead of the I2C bus, and Lab 4 uses a simulated ADC. The board variant is built in a **separate**
 `build-hw` directory, so that the QEMU build in `build/` stays intact. From
 the lab's `starter` directory:
 

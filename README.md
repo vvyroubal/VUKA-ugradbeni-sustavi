@@ -852,9 +852,11 @@ ne trebaju: snimke za LV3 dane su u `labs/lab3_bme280/captures`.
   sudo udevadm trigger
   ```
 - **Windows:** sa stranice <https://sigrok.org/wiki/Downloads> preuzmite
-  64-bitni instalacijski program PulseViewa. Analizatoru treba upravljački
-  program WinUSB, koji se postavlja alatom Zadig (instalira se uz PulseView i
-  nalazi u izborniku Start): s priključenim analizatorom u Zadigu odaberite
+  64-bitni instalacijski program PulseViewa. Program nije digitalno potpisan,
+  pa Windows pri pokretanju može prikazati upozorenje SmartScreen: *More info
+  → Run anyway*. Analizatoru treba upravljački program WinUSB, koji se
+  postavlja alatom Zadig (instalira se uz PulseView; u izborniku Start je
+  *Zadig (PulseView)*): s priključenim analizatorom u Zadigu odaberite
   *Options → List All Devices*, s popisa odaberite analizator, desno *WinUSB* i
   *Replace Driver*. Odaberite analizator, **nikako pločicu ESP32-C3**: njoj
   WinUSB uklanja port COM (vidi gore). Kod analizatora FX2 to ponekad treba
@@ -900,8 +902,10 @@ i faktor ispune svakog impulsa; iste vrijednosti možete očitati i pokazivačim
 **Pinovi iz emulatora (LV1 i LV2).** PulseView otvara i datoteke
 `build/gpio/gpioN.vcd` koje skripta `run_qemu.sh` stvara uz opciju
 `--gpio-vcd` (`run_qemu.ps1 -GpioVcd` na putu C): razinu svakog GPIO izlaza
-kroz vrijeme, zapisanu iz upisa programa u GPIO registre. Otvaraju se naredbom
-*Import → Value Change Dump*; za to analizator nije potreban.
+kroz vrijeme, zapisanu iz upisa programa u GPIO registre. Otvaraju se strelicom
+uz gumb *Open* (ikona mape na alatnoj traci) → *Import Value Change Dump data*:
+odaberite datoteku, a u prozoru s opcijama uvoza ostavite zadane vrijednosti i
+potvrdite s *OK*. Za to analizator nije potreban.
 
 ## Česti problemi
 

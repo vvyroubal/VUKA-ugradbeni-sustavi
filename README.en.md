@@ -871,8 +871,10 @@ do not need one in the emulator: the Lab 3 captures are provided in
   sudo udevadm trigger
   ```
 - **Windows:** download the 64-bit PulseView installer from
-  <https://sigrok.org/wiki/Downloads>. The analyser needs the WinUSB driver,
-  set with Zadig (installed with PulseView, in the Start menu): with the
+  <https://sigrok.org/wiki/Downloads>. It is not digitally signed, so Windows
+  may show a SmartScreen warning when you run it: *More info → Run anyway*.
+  The analyser needs the WinUSB driver, set with Zadig (installed with
+  PulseView; in the Start menu as *Zadig (PulseView)*): with the
   analyser plugged in, choose *Options → List All Devices* in Zadig, select
   the analyser, pick *WinUSB* on the right and *Replace Driver*. Select the
   analyser, **never the ESP32-C3 board**: WinUSB removes the board's COM port
@@ -921,7 +923,9 @@ with the cursors. For the submission attach a screenshot or the saved capture
 `build/gpio/gpioN.vcd` files that `run_qemu.sh` writes with the `--gpio-vcd`
 option (`run_qemu.ps1 -GpioVcd` on path C): the level of each GPIO output over
 time, recorded from the program's writes to the GPIO registers. Open them with
-*Import → Value Change Dump*; no analyser is needed for that.
+the arrow next to the *Open* button (folder icon on the toolbar) → *Import Value
+Change Dump data*: choose the file, keep the defaults in the import options
+window and confirm with *OK*. No analyser is needed for that.
 
 ## Troubleshooting
 

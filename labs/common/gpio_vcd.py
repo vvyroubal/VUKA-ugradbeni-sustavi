@@ -11,7 +11,8 @@ updates a model of the GPIO_OUT and GPIO_ENABLE registers, whether the
 program wrote them directly or through gpio_set_level(). Each pin that was
 ever an output gets <out_dir>/gpioN.vcd with its LOW/HIGH changes; time is
 in microseconds since QEMU's first traced write, i.e. roughly since boot.
-Open the files in PulseView (Import -> Value Change Dump) or GTKWave.
+Open the files in PulseView (arrow next to the Open toolbar button ->
+Import Value Change Dump data, default options) or GTKWave.
 
 Limits: only levels the program sets through the GPIO output registers are
 seen -- not inputs (QEMU does not drive them) and not signals a peripheral

@@ -7,15 +7,19 @@
 # which slot image becomes /dev/vda, and the target's ota-apply flips it (over
 # the /dev/vdc virtio device backed by this same file) to mark a new slot active.
 #
-# Usage:
-#   ota-boot-select.sh init            [--dir ARTIFACTS]   # make slots + bootenv=a
-#   ota-boot-select.sh get             [--dir ARTIFACTS]   # print active slot
-#   ota-boot-select.sh set <a|b>       [--dir ARTIFACTS]
-#   ota-boot-select.sh toggle          [--dir ARTIFACTS]
-#
 # `init` seeds both slots from artifacts/rootfs.ext4 (the freshly built image)
 # and sets slot A active — the starting point for the OTA cycle.
 set -euo pipefail
+
+usage() {  # printed when no valid command is given
+  cat <<'EOF'
+usage: ota-boot-select.sh COMMAND [--dir ARTIFACTS]
+  init     copy rootfs.ext4 into both slots, make slot a active
+  get      print the active slot
+  set a|b  make slot a or b active
+  toggle   make the other slot active
+EOF
+}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ART_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/artifacts"
@@ -66,5 +70,5 @@ case "$CMD" in
                    b) write_bootenv a; echo "ota-boot-select: active = a" ;;
                    *) echo "ota-boot-select: bad bootenv '$cur'" >&2; exit 2 ;; esac
     ;;
-  *) sed -n '9,15p' "$0"; exit 2 ;;
+  *) usage >&2; exit 2 ;;
 esac

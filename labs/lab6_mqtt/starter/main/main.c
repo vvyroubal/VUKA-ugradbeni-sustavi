@@ -9,20 +9,20 @@
  *     is 10.0.2.15, gateway 10.0.2.2).
  *   - Sensor bring-up: bme280_init() + a read loop producing T/P/H
  *     samples from the shared bme280_sim (same synthetic source as
- *     Lab 3).
+ *     Lab 5).
  *
  * What YOU must add (see the TODOs):
- *   1. TLS config: point esp-mqtt at the broker (address from
- *      CONFIG_LAB6_BROKER_HOST, port 8883; 10.0.2.2 under QEMU)
- *      and give it the CA certificate to verify it. The CA
- *      cert is embedded from main/certs/ca.crt (EMBED_TXTFILES in
- *      main/CMakeLists.txt) -- generate it first with
- *      broker/gen_certs.sh. Use the symbols declared below.
- *   2. Topic design: publish to "vuka/sensors/telemetry".
- *   3. Publish loop: every 2 s format one sample as JSON and
- *      publish it. Print "LAB6 OK connected=1" once the broker
- *      connects and "LAB6 OK published=<n>" per successful publish
- *      (these are what the smoke test greps for).
+ *   TODO 1 (TLS client config + start): point esp-mqtt at the
+ *      broker (address from CONFIG_LAB6_BROKER_HOST, port 8883;
+ *      10.0.2.2 under QEMU), give it the CA certificate to verify
+ *      it, then start the client. The CA cert is embedded from
+ *      main/certs/ca.crt (EMBED_TXTFILES in main/CMakeLists.txt)
+ *      -- generate it first with broker/gen_certs.sh.
+ *   TODO 2 (event handler): on MQTT_EVENT_CONNECTED print
+ *      "LAB6 OK connected=1".
+ *   TODO 3 (JSON payload + publish): every 2 s format one sample
+ *      as JSON, publish it to "vuka/sensors/telemetry" and print
+ *      "LAB6 OK published=<n>" (the smoke test greps for both).
  *
  * Reference: ESP-IDF esp-mqtt (esp_mqtt_client_*),
  * examples/protocols/mqtt/ssl.

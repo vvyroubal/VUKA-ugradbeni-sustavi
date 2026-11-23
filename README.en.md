@@ -25,6 +25,13 @@ separately, on the course pages. The target platform is the **ESP32-C3**
 (RISC-V); every lab can also be done without a board, in the **QEMU**
 emulator. The toolchain is **ESP-IDF v5.5** (a newer v5.5.x is also fine).
 
+**Where commands are typed.** Every block of commands in these instructions
+says where it goes: a *terminal* on Linux and macOS (on macOS, the Terminal
+app), the *Ubuntu terminal* in WSL2 on Windows, *PowerShell* on Windows, on
+path C the *ESP-IDF 5.5 PowerShell* shortcut, or the *container shell* opened
+by the `docker-shell` script. Copy commands line by line; a line ending in `\`
+(in PowerShell, in `` ` ``) continues on the next one.
+
 ## Which path to choose
 
 The instructions offer three paths:
@@ -59,7 +66,7 @@ in Labs 1–5 and for Lab 7, but not for Lab 6; the board is then flashed with
 | Building and the emulator, Labs 1–5 | yes | yes | yes | yes |
 | Lab 6 (MQTT over TLS) | yes | no — use WSL2 | yes (the broker still runs in Docker) | yes, with Mosquitto for Windows |
 | Lab 7 (Buildroot, embedded Linux) | yes | yes | Linux and WSL2 with extra packages; macOS via Docker | no |
-| Flashing the board | on Linux; on macOS `esptool` from the computer | `esptool` from Windows | yes | yes |
+| Flashing the board | on Linux; on macOS `esptool` from the computer; in WSL2 path B and `usbipd` | `esptool` from Windows | yes | yes |
 
 **Order.** On every path, go through these in turn:
 
@@ -293,7 +300,8 @@ the instructor). A 64-bit Windows 10 or 11 is required.
    idf.py build
    ../../common/run_qemu.ps1 build
    ```
-   `idf.py set-target esp32c3` is run only the first time. Success looks as on
+   `idf.py set-target esp32c3` is run only the first time, and only in Lab 1
+   (see *Working on a lab*). Success looks as on
    paths A and B: first the Espressif boot output (*bootloader*, chip
    information), then the program's output (for the unmodified Lab 1 starter
    the line `I (…) lab1: Ugradbeni racunalni sustavi -- Lab 1`), and after
@@ -395,7 +403,10 @@ bash ../../common/run_qemu.sh build        # emulator, 30 s
 `idf.py set-target esp32c3` selects the target chip and is run only the first
 time, because the choice is remembered in the `sdkconfig` file. If you run it
 again, `sdkconfig` is created anew and the changes made in `menuconfig` are
-lost. `idf.py build` builds the program into the `build/` directory.
+lost. The starters of all labs already set the target chip (in the
+`sdkconfig.defaults` file), so you run this command only in Lab 1, where it is
+part of task T1; do not run it in Labs 2–6. `idf.py build` builds the program
+into the `build/` directory.
 
 `run_qemu.sh` assembles the flash image (`build/flash.bin`) from the latest
 build and runs it in the emulator, so the newest program always runs. The
@@ -484,14 +495,19 @@ as described in *Flashing the board*, but from the `build-hw` directory (e.g.
 
 **Lab 6.** The order is:
 
-1. **Certificates**, from `labs/lab6_mqtt/starter`, on the computer or in the
+1. **On path A, the container shell first** (`./scripts/docker-shell.sh`);
+   leave it open while you work. The broker is started only after it: started
+   before it, the broker takes port 8883 on the computer and `docker-shell.sh`
+   cannot start (*Troubleshooting*).
+2. **Certificates**, from `labs/lab6_mqtt/starter`, on the computer or in the
    container shell: `bash ../broker/gen_certs.sh`.
-2. **The MQTT broker**, in a **terminal on the computer** (Linux, macOS,
+3. **The MQTT broker**, in a **terminal on the computer** (Linux, macOS,
    WSL2), not in the container shell, because the script calls `docker`
    itself. From the repository root: `bash labs/lab6_mqtt/broker/run_broker.sh`.
    The broker runs until you stop it with Ctrl-C, so open another terminal for
    the remaining steps.
-3. **The program**, in a terminal with ESP-IDF, from `labs/lab6_mqtt/starter`:
+4. **The program**, in a terminal with ESP-IDF (on path A, the shell from
+   step 1), from `labs/lab6_mqtt/starter`:
    `idf.py build`, then `bash ../../common/run_qemu_net.sh build`.
 
 The broker always runs in Docker (the official `eclipse-mosquitto` image), so
@@ -759,6 +775,12 @@ ESP-IDF 5.5 PowerShell shortcut):
 git pull
 ```
 
+`git pull` fetches from the remote repository the branch tracks. For the
+course repository this stays true after Lab 1, in which you rename the
+original remote to `kolegij` and add your own as `origin`: the branch still
+tracks `kolegij`, and you send your work with `git push origin main`.
+`git remote -v` shows which is which.
+
 If git does not finish but reports one of these messages:
 
 | Message | Cause and fix |
@@ -929,10 +951,18 @@ window and confirm with *OK*. No analyser is needed for that.
 
 ## Troubleshooting
 
-- **`idf.py: command not found`** — the environment is not active in this
-  terminal: `. ~/esp-idf/export.sh`.
-- **`qemu-system-riscv32 not on PATH`** — after installing QEMU you must run
-  `. ~/esp-idf/export.sh` again.
+- **`idf.py: command not found`** — on path A the command was typed in a
+  terminal on the computer, not in the container shell (the prompt does not
+  contain `/work`): run `./scripts/docker-shell.sh` and type the command there.
+  On path B the environment is not active in this terminal:
+  `. ~/esp-idf/export.sh`; activation applies only to the terminal it was run
+  in. For path C, see the item on the *ESP-IDF 5.5 PowerShell* shortcut below.
+- **`qemu-system-riscv32 not on PATH`** — on path A, as in the previous item:
+  type the command in the container shell. On path B, after installing QEMU
+  you must run `. ~/esp-idf/export.sh` again.
+- **`port is already allocated` when starting `docker-shell`** — port 8883 is
+  taken by the Lab 6 broker, started before the container shell. Stop it
+  (Ctrl-C in its terminal), open the shell, then start the broker again.
 - **`permission denied` when calling `docker` (Linux)** — the user is not in
   the `docker` group: `sudo usermod -aG docker $USER`, then log out and in
   (or `newgrp docker`).
@@ -954,6 +984,10 @@ window and confirm with *OK*. No analyser is needed for that.
   `sudo chown -R $USER .` in the repository root.
 - **`ModuleNotFoundError` when running `idf.py`** — another Python
   environment (venv or conda) is active; deactivate it before `export.sh`.
+- **Linux: `permission denied` on `/dev/ttyACM0`** — the user must be in the
+  `dialout` group (`uucp` on some distributions):
+  `sudo usermod -aG dialout $USER`, then log out and in (or
+  `newgrp dialout`). The QEMU path does not need this.
 - **Windows, path C: `running scripts is disabled on this system`** — the
   `.ps1` script was started in a regular PowerShell; run it in the
   *ESP-IDF 5.5 PowerShell* shortcut, which allows running scripts.

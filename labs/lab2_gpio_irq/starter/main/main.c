@@ -41,7 +41,7 @@
 
 static const char *TAG = "lab2";
 
-#define LED_GPIO    GPIO_NUM_8  /* onboard LED, SuperMini/DevKitM */
+#define LED_GPIO    GPIO_NUM_8  /* SuperMini LED; DevKitM: manual */
 #define BUTTON_GPIO GPIO_NUM_9  /* BOOT button, active low */
 #define DEBOUNCE_US (30 * 1000) /* 30 ms debounce window */
 

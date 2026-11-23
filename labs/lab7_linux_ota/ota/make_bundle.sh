@@ -11,14 +11,18 @@
 # The signature is what the target verifies (openssl dgst -sha256 -verify) against
 # the public key baked into its rootfs. Sign the IMAGE, not the download channel.
 #
-# Usage:
-#   make_bundle.sh --in BASE.ext4 --version X.Y.Z --slot a|b \
-#                  [--key PRIV.pem] [--out BUNDLE.tar]
-#
-# Defaults: --key ota/keys/demo_signing_key.INSECURE.pem  (the throwaway teaching
-# key; a real product keeps its private key offline / in an HSM and never ships
-# or commits it), --out artifacts/ota_vVERSION_slotSLOT.tar.
+# The default --key is the throwaway teaching key; a real product keeps its
+# private key offline / in an HSM and never ships or commits it.
 set -euo pipefail
+
+usage() {  # printed by -h / --help
+  cat <<'EOF'
+usage: make_bundle.sh --in BASE.ext4 --version X.Y.Z --slot a|b
+                      [--key PRIV.pem] [--out BUNDLE.tar]
+default key: ota/keys/demo_signing_key.INSECURE.pem
+default out: artifacts/ota_vVERSION_slotSLOT.tar
+EOF
+}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LAB_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -31,7 +35,7 @@ while [ $# -gt 0 ]; do
     --slot)    SLOT="$2"; shift 2 ;;
     --key)     KEY="$2"; shift 2 ;;
     --out)     OUT="$2"; shift 2 ;;
-    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
+    -h|--help) usage; exit 0 ;;
     *) echo "make_bundle.sh: unknown arg '$1'" >&2; exit 2 ;;
   esac
 done

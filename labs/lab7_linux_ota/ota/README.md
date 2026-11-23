@@ -8,9 +8,9 @@ device, not on your workstation.
 
 The whole scheme is **deliberately simple and fully inspectable** — every step is
 a few lines of shell you can read. It mirrors the *shape* of a real A/B OTA
-(sign the image, verify on-device, update the inactive slot, switch on reboot,
-roll back on failure) while honestly simplifying the parts a real bootloader
-owns. Those simplifications are called out below and in the manual.
+(sign the image, verify on-device, update the inactive slot, switch on reboot)
+while honestly simplifying the parts a real bootloader owns — there is, for
+example, no roll-back on a failed boot. Those simplifications are called out below and in the manual.
 
 ## Files
 
@@ -28,9 +28,9 @@ owns. Those simplifications are called out below and in the manual.
 
 | Device | Backing file | Meaning |
 |--------|--------------|---------|
-| `/dev/vda` | active slot (`rootfs_a` or `rootfs_b`) | the running root filesystem (read-only) |
+| `/dev/vda` | active slot (`rootfs_a` or `rootfs_b`) | the running root filesystem (mounted read-only by the kernel, then read-write by init) |
 | `/dev/vdb` | inactive slot | `ota-apply`'s write target |
-| `/dev/vdc` | `bootenv` (1 byte: `a`/`b`) | boot-select env — the "bootloader environment" stand-in |
+| `/dev/vdc` | `bootenv` (512 bytes, first byte `a`/`b`) | boot-select env — the "bootloader environment" stand-in |
 | `/dev/vdd` | an OTA bundle (optional) | passed with `LAB7_VDD=<bundle>` |
 
 Which physical file is `vda` vs `vdb` is decided by the **host** runner from the

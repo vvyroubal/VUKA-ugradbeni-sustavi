@@ -24,6 +24,13 @@ stranicama kolegija. Ciljna platforma je **ESP32-C3** (RISC-V); svaka vježba
 može se izvesti i bez pločice, u emulatoru **QEMU**. Alatni lanac je
 **ESP-IDF v5.5** (dopušten je i noviji v5.5.x).
 
+**Gdje se pišu naredbe.** Svaki blok naredbi u ovim uputama ima navedeno
+mjesto: *terminal* na Linuxu i macOS-u (na macOS-u aplikacija Terminal),
+*terminal Ubuntu* u WSL2 na Windowsu, *PowerShell* na Windowsu, na putu C
+prečac *ESP-IDF 5.5 PowerShell*, ili *ljuska kontejnera* koju otvara skripta
+`docker-shell`. Naredbe se kopiraju redak po redak; redak koji završava znakom
+`\` (u PowerShellu znakom `` ` ``) nastavlja se u sljedećem.
+
 ## Koji put odabrati
 
 Upute nude tri puta:
@@ -58,7 +65,7 @@ Windowsa. Što koji put pokriva:
 | Izgradnja i emulator, LV1–LV5 | da | da | da | da |
 | LV6 (MQTT preko TLS-a) | da | ne — upotrijebite WSL2 | da (posrednik ipak radi u Dockeru) | da, uz Mosquitto za Windows |
 | LV7 (Buildroot, ugradbeni Linux) | da | da | Linux i WSL2 uz dodatne pakete; macOS preko Dockera | ne |
-| Programiranje pločice | na Linuxu; na macOS-u `esptool` s računala | `esptool` iz Windowsa | da | da |
+| Programiranje pločice | na Linuxu; na macOS-u `esptool` s računala; u WSL2 put B i `usbipd` | `esptool` iz Windowsa | da | da |
 
 **Redoslijed.** Na svakom putu redom prođite:
 
@@ -289,7 +296,8 @@ računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban j
    idf.py build
    ../../common/run_qemu.ps1 build
    ```
-   `idf.py set-target esp32c3` izvodi se samo prvi put. Uspjeh izgleda kao na
+   `idf.py set-target esp32c3` izvodi se samo prvi put, i to samo u LV1 (vidi
+   *Rad na vježbi*). Uspjeh izgleda kao na
    putovima A i B: najprije Espressifov pozdravni ispis (*bootloader*, podaci o
    čipu), zatim ispis programa (za nepromijenjeni polazni projekt LV1 redak
    `I (…) lab1: Ugradbeni racunalni sustavi -- Lab 1`), a nakon 30 sekundi
@@ -390,8 +398,10 @@ bash ../../common/run_qemu.sh build        # emulator, 30 s
 
 `idf.py set-target esp32c3` odabire ciljni čip i izvodi se samo prvi put, jer
 se odabir pamti u datoteci `sdkconfig`. Pokrenete li ga ponovno, `sdkconfig`
-nastaje iznova i gube se promjene napravljene u `menuconfig`-u. `idf.py build`
-gradi program u direktorij `build/`.
+nastaje iznova i gube se promjene napravljene u `menuconfig`-u. Starteri svih
+vježbi već imaju zadan ciljni čip (u datoteci `sdkconfig.defaults`), pa ovu
+naredbu izvodite samo u LV1, gdje je dio zadatka T1; u LV2–LV6 je ne
+pokrećite. `idf.py build` gradi program u direktorij `build/`.
 
 `run_qemu.sh` iz zadnje izgradnje sastavlja sliku flash memorije
 (`build/flash.bin`) i pokreće je u emulatoru, pa se uvijek izvodi najnoviji
@@ -477,13 +487,18 @@ opisuje odjeljak *Programiranje pločice*, ali iz direktorija `build-hw`
 
 **LV6.** Redoslijed je ovaj:
 
-1. **Certifikati**, iz direktorija `labs/lab6_mqtt/starter`, na računalu ili
+1. **Na putu A najprije ljuska kontejnera** (`./scripts/docker-shell.sh`),
+   koju ostavite otvorenu dok radite. Posrednik se pokreće tek nakon nje:
+   pokrenut prije nje, zauzme port 8883 na računalu i `docker-shell.sh` se ne
+   može pokrenuti (*Česti problemi*).
+2. **Certifikati**, iz direktorija `labs/lab6_mqtt/starter`, na računalu ili
    u ljusci kontejnera: `bash ../broker/gen_certs.sh`.
-2. **Posrednik MQTT**, u **terminalu računala** (Linux, macOS, WSL2), ne u
+3. **Posrednik MQTT**, u **terminalu računala** (Linux, macOS, WSL2), ne u
    ljusci kontejnera, jer skripta sama poziva `docker`. Iz korijena
    repozitorija: `bash labs/lab6_mqtt/broker/run_broker.sh`. Posrednik radi
    dok ga ne zaustavite s Ctrl-C, pa za ostale korake otvorite drugi terminal.
-3. **Program**, u terminalu s ESP-IDF-om, iz `labs/lab6_mqtt/starter`:
+4. **Program**, u terminalu s ESP-IDF-om (na putu A u ljusci iz koraka 1), iz
+   `labs/lab6_mqtt/starter`:
    `idf.py build`, zatim `bash ../../common/run_qemu_net.sh build`.
 
 Posrednik uvijek radi u Dockeru (službena slika `eclipse-mosquitto`), pa i
@@ -744,6 +759,12 @@ prečacu ESP-IDF 5.5 PowerShell):
 git pull
 ```
 
+`git pull` dohvaća s udaljenog repozitorija koji grana prati. Za repozitorij
+kolegija to vrijedi i nakon LV1, u kojoj izvorni udaljeni repozitorij
+preimenujete u `kolegij`, a svoj dodate kao `origin`: grana i dalje prati
+`kolegij`, a svoj rad šaljete naredbom `git push origin main`. Naredbom
+`git remote -v` vidite koji je koji.
+
 Ako git ne završi, nego javi jednu od ovih poruka:
 
 | Poruka | Uzrok i rješenje |
@@ -909,10 +930,19 @@ potvrdite s *OK*. Za to analizator nije potreban.
 
 ## Česti problemi
 
-- **`idf.py: command not found`** — okruženje nije aktivirano u ovom
-  terminalu: `. ~/esp-idf/export.sh`.
-- **`qemu-system-riscv32 not on PATH`** — nakon instalacije QEMU-a treba
-  ponovno izvesti `. ~/esp-idf/export.sh`.
+- **`idf.py: command not found`** — na putu A naredba je upisana u terminal
+  računala, a ne u ljusku kontejnera (odzivnik ne sadrži `/work`): pokrenite
+  `./scripts/docker-shell.sh` i naredbu upišite u njoj. Na putu B okruženje
+  nije aktivirano u ovom terminalu: `. ~/esp-idf/export.sh`; aktivacija vrijedi
+  samo za terminal u kojem je pokrenuta. Za put C vidi stavku o prečacu
+  *ESP-IDF 5.5 PowerShell* niže.
+- **`qemu-system-riscv32 not on PATH`** — na putu A kao u prethodnoj stavci:
+  naredbu upišite u ljusku kontejnera. Na putu B nakon instalacije QEMU-a
+  treba ponovno izvesti `. ~/esp-idf/export.sh`.
+- **`port is already allocated` pri pokretanju `docker-shell`** — port 8883
+  zauzima posrednik LV6 pokrenut prije ljuske kontejnera. Zaustavite ga
+  (Ctrl-C u njegovu terminalu), otvorite ljusku, pa posrednik pokrenite
+  ponovno.
 - **`permission denied` pri pozivu `docker` (Linux)** — korisnik nije u grupi
   `docker`: `sudo usermod -aG docker $USER`, pa odjava i prijava (ili
   `newgrp docker`).
@@ -934,6 +964,10 @@ potvrdite s *OK*. Za to analizator nije potreban.
   `sudo chown -R $USER .` u korijenu repozitorija.
 - **`ModuleNotFoundError` pri pokretanju `idf.py`** — aktivna je neka druga
   Python okolina (venv ili conda); deaktivirajte je prije `export.sh`.
+- **Linux: `permission denied` na `/dev/ttyACM0`** — korisnik mora biti u
+  grupi `dialout` (na nekim distribucijama `uucp`):
+  `sudo usermod -aG dialout $USER`, pa odjava i prijava (ili
+  `newgrp dialout`). Put kroz QEMU to ne treba.
 - **Windows, put C: `running scripts is disabled on this system`** — skripta
   `.ps1` pokrenuta je u običnom PowerShellu; pokrenite je u prečacu
   *ESP-IDF 5.5 PowerShell*, koji pokretanje skripti dopušta.

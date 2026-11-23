@@ -14,18 +14,21 @@ fails with duplicate symbols.
 
 Selection is a single Kconfig bool, `CONFIG_LAB_SIM_ADC` (declared in this
 directory's `Kconfig`, default **y**), used as a whole-file guard at the top
-of each source file -- identical mechanism to `bme280_sim`/`bme280_i2c.c` in
-Lab 3 (see that component's README for the general explanation of why an
+of each source file -- identical mechanism to `bme280_sim` in Labs 5 and 6
+(see that component's README for the general explanation of why an
 undefined Kconfig macro reads as `0` in `#if`, making the two files mutually
 exclusive at compile time with no extra `#ifdef`/`#else` plumbing).
 
-- `CONFIG_LAB_SIM_ADC=y` (default, and what the lab4 solution's
+- `CONFIG_LAB_SIM_ADC=y` (default, and what the lab4 project's
   `sdkconfig.defaults` sets explicitly): `adc_sim.c` is live,
   `lab_adc_oneshot.c` is empty. This is what boots in QEMU.
-- `CONFIG_LAB_SIM_ADC` unset/n (lab4 solution's `sdkconfig.hw` fragment):
+- `CONFIG_LAB_SIM_ADC` unset/n (the lab4 project's `sdkconfig.hw` fragment):
   `lab_adc_oneshot.c` is live, `adc_sim.c` is empty. This is the
-  real-hardware path -- build with
-  `idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.hw" build`.
+  real-hardware path -- build it in its own build directory, as in
+  `sdkconfig.hw` and the Lab 4 manual:
+  `idf.py -B build-hw -D SDKCONFIG=build-hw/sdkconfig -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.hw" build`
+  (built in `build/`, the defaults list would be ignored and `adc_sim`
+  would silently stay in).
 
 `app_main()` in `main.c` calls only `lab_adc_init()`/`lab_adc_read_raw()`
 from `lab_adc.h` and never needs to know which implementation it is linked

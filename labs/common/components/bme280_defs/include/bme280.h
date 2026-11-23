@@ -1,17 +1,20 @@
 /*
- * bme280.h -- shared public API for the Lab 3 BME280 driver family.
+ * bme280.h -- shared public API of the BME280 sensor (Labs 3, 5, 6).
  *
- * Ugradbeni racunalni sustavi -- Lab 3: BME280 (I2C)
+ * Ugradbeni racunalni sustavi -- BME280 register map and driver API
  *
- * This header is the ONE contract both implementations must satisfy:
- *   - labs/common/components/bme280_sim   -- synthetic data (QEMU / CI path)
- *   - labs/lab3_bme280/starter/main/bme280_i2c.c (and the solution)
- *                                          -- real i2c_master driver (hardware path)
+ * This header is the ONE contract both implementations satisfy:
+ *   - Lab 3: your own driver, labs/lab3_bme280/starter/main/bme280_i2c.c.
+ *     Its reg_read()/reg_write() talk to the simulated registers of
+ *     component bme280_regsim in QEMU (CONFIG_LAB3_REG_SIM=y, the
+ *     default build/) or to the real sensor on the I2C bus on a board
+ *     (build-hw/, sdkconfig.hw). Lab 3 never uses bme280_sim.
+ *   - Labs 5 and 6: labs/common/components/bme280_sim replaces the whole
+ *     driver with synthetic values (CONFIG_LAB_SIM_BME280=y, see
+ *     labs/common/components/bme280_sim/Kconfig).
  *
- * Exactly one of the two is compiled into any given firmware image, selected
- * purely by the Kconfig option CONFIG_LAB_SIM_BME280 (see
- * labs/common/components/bme280_sim/Kconfig and the top of bme280_i2c.c) --
- * app_main() in main.c never knows or cares which one it is linked against.
+ * Exactly one of the two is compiled into a firmware image; app_main()
+ * in main.c never knows which one it is linked against.
  *
  * All register-map constants, offsets and the calibration struct's field
  * widths/signedness below are transcribed from the Bosch BME280 datasheet
@@ -116,14 +119,15 @@ typedef struct {
 } bme280_calib_t;
 
 /* ---------------------------------------------------------------------
- * Public API -- identical whether backed by bme280_sim or the real
- * i2c_master driver (main/bme280_i2c.c).
+ * Public API -- identical whether backed by the Lab 3 driver
+ * (main/bme280_i2c.c; registers from bme280_regsim in QEMU or from
+ * the I2C bus on a board) or by bme280_sim (Labs 5 and 6).
  * --------------------------------------------------------------------- */
 
-/* One-time bring-up: bus/device init (real driver) or PRNG/clock seed (sim),
- * chip-ID probe + calibration readout (real driver only). Returns ESP_OK on
- * success, ESP_ERR_NOT_FOUND if the chip-ID probe fails (real driver), or
- * the underlying I2C error otherwise. */
+/* One-time bring-up: bus/device init (Lab 3 driver) or PRNG/clock seed
+ * (sim), chip-ID probe + calibration readout (Lab 3 driver only).
+ * Returns ESP_OK on success, ESP_ERR_NOT_FOUND if the chip-ID probe
+ * fails (Lab 3 driver), or the underlying I2C error otherwise. */
 esp_err_t bme280_init(void);
 
 /* Blocking read of one T/H/P sample, in engineering units:

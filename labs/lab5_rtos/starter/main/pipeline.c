@@ -24,11 +24,11 @@
  * banner, but no "LAB5 OK ..." marker ever appears, until you
  * create both queues.
  *
- * app_main() talks to bme280.h's shared API only -- same
- * sim/hardware split as lab3 (see
+ * bme280_read() comes from the synthetic sensor bme280_sim, which
+ * replaces the whole BME280 driver (Lab 3 instead ran your own
+ * driver over simulated registers, bme280_regsim; see
  * labs/common/components/bme280_sim/README.md). Lab 5 is
- * QEMU-complete by design: only the sim path is ever exercised
- * here.
+ * QEMU-complete by design: there is no hardware path here.
  */
 #include "sdkconfig.h"
 #if CONFIG_LAB5_DEMO_PIPELINE

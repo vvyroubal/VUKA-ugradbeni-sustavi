@@ -5,9 +5,11 @@
 Repozitorij uz kolegij **Ugradbeni računalni sustavi** (Veleučilište u
 Karlovcu, Stručni diplomski studij Mehatronika). Sadrži sve što treba da na
 vlastitom računalu izgradite i pokrenete laboratorijske vježbe — na Linuxu,
-macOS-u ili Windowsu, s Dockerom ili bez njega. Ovo su sažete upute; iste
-korake, s objašnjenjima, opisuje priručnik **H1** (Instalacija alatnog lanca)
-na stranicama kolegija.
+macOS-u ili Windowsu, s Dockerom ili bez njega. Laboratorij ima računala s
+ESP-IDF-om i QEMU-om, a vlastito prijenosno računalo dopušteno je i
+preporučeno; instalacija prema ovim uputama služi za rad kod kuće (tjedni
+zadaci, projekt). Ovo su sažete upute; iste korake, s objašnjenjima, opisuje
+priručnik **H1** (Instalacija alatnog lanca) u sustavu za e-učenje kolegija.
 
 | Datoteka ili direktorij | Sadržaj |
 |---|---|
@@ -19,8 +21,8 @@ na stranicama kolegija.
 | `labs/lab6_mqtt/broker/` | MQTT posrednik i certifikati za LV6 |
 | `labs/lab7_linux_ota/` | Buildroot konfiguracija i OTA alati za LV7 |
 
-Priručnici vježbi, udžbenik i ostali dokumenti kolegija dijele se odvojeno, na
-stranicama kolegija. Ciljna platforma je **ESP32-C3** (RISC-V); svaka vježba
+Priručnici vježbi, udžbenik i ostali dokumenti kolegija dijele se odvojeno, kao
+PDF-ovi u sustavu za e-učenje kolegija. Ciljna platforma je **ESP32-C3** (RISC-V); svaka vježba
 može se izvesti i bez pločice, u emulatoru **QEMU**. Alatni lanac je
 **ESP-IDF v5.5** (dopušten je i noviji v5.5.x).
 

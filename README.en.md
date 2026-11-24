@@ -6,9 +6,11 @@ Companion repository for the course **Ugradbeni računalni sustavi / Embedded
 Computer Systems** (Karlovac University of Applied Sciences, Professional
 Graduate Study of Mechatronics). It contains everything you need to build and
 run the laboratory sessions on your own computer — on Linux, macOS or Windows,
-with or without Docker. These are condensed instructions; handout **H1**
-(Installing the Toolchain) on the course pages describes the same steps with
-explanations.
+with or without Docker. The laboratory has computers with ESP-IDF and QEMU,
+and your own laptop is allowed and recommended; installation following these
+instructions is for work at home (weekly assignments, project). These are
+condensed instructions; handout **H1** (Installing the Toolchain) in the course
+e-learning system describes the same steps with explanations.
 
 | File or directory | Contents |
 |---|---|
@@ -21,7 +23,7 @@ explanations.
 | `labs/lab7_linux_ota/` | Buildroot configuration and OTA tools for Lab 7 |
 
 The lab manuals, the textbook and the other course documents are distributed
-separately, on the course pages. The target platform is the **ESP32-C3**
+separately, as PDFs in the course e-learning system. The target platform is the **ESP32-C3**
 (RISC-V); every lab can also be done without a board, in the **QEMU**
 emulator. The toolchain is **ESP-IDF v5.5** (a newer v5.5.x is also fine).
 

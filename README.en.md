@@ -27,14 +27,67 @@ separately, as PDFs in the course e-learning system. The target platform is the 
 (RISC-V); every lab can also be done without a board, in the **QEMU**
 emulator. The toolchain is **ESP-IDF v5.5** (a newer v5.5.x is also fine).
 
+## Terminal basics
+
+The course tools run in a **terminal**, a window in which commands are typed as
+text. The commands are executed by a program called the **shell**: `bash` on
+Linux and in WSL2, `zsh` on macOS, PowerShell on Windows. To open a terminal:
+on Linux, the Terminal app from the application list (on Ubuntu, Ctrl-Alt-T);
+on macOS, Cmd-Space, then type `Terminal` and press Enter; on Windows,
+right-click the Start menu → **Terminal** (Windows 11) or **Windows
+PowerShell** (Windows 10).
+
 **Where commands are typed.** Every block of commands in these instructions
-says where it goes: a *terminal* on Linux and macOS (on macOS, the Terminal
-app), the *Ubuntu terminal* in WSL2 on Windows, *PowerShell* on Windows, on
-path C the *ESP-IDF 5.5 PowerShell* shortcut, or the *container shell* opened
-by the `docker-shell` script. Copy commands line by line; a line ending in `\`
-(in PowerShell, in `` ` ``) continues on the next one.
+says where it goes: a *terminal* on Linux and macOS, the *Ubuntu terminal* in
+WSL2 on Windows, *PowerShell* on Windows, on path C the *ESP-IDF 5.5
+PowerShell* shortcut, or the *container shell* opened by the `docker-shell`
+script (*Path A*).
+
+**Typing a command.** When it waits for a command, the shell prints a
+**prompt**, which also shows where you are: e.g. `name@computer:~$` in Ubuntu,
+`name@computer ~ %` on macOS, `PS C:\Users\name>` in PowerShell and `…:/work#`
+in the container shell. The command goes after the prompt (these instructions
+show it without one) and runs when you press **Enter**. To paste, use
+Ctrl-Shift-V on Linux, Cmd-V on macOS and a right click on Windows. Copy
+commands line by line; a line ending in `\` (in PowerShell, in `` ` ``)
+continues on the next one. **Ctrl-C** stops a command that is still running
+(on macOS too). Replace text in angle brackets, e.g. `<port>` or `<name>`,
+with your own value, **without the brackets**; the same holds for `COM<n>` and
+`XXXX`.
+
+**Directories.** The shell always works in some directory (the working
+directory). A new terminal starts in the user's home directory, written `~`
+for short. `pwd` prints the working directory, `ls` lists its contents,
+`cd <directory>` moves to another directory, `cd ..` to the parent and `cd ~`
+home; the same commands work in PowerShell. A path that does not start with
+`/` or `~` (on Windows, with a drive letter) is relative, i.e. taken from the
+working directory, so `cd labs/lab1_toolchain/starter` works only from the
+repository root. `./` denotes the working directory:
+`./scripts/docker-shell.sh` runs the script in its `scripts` subdirectory.
+
+**`sudo` and environment variables.** On Linux and in WSL2, `sudo` in front of
+a command runs it with administrator rights and asks for your password, which
+is not shown as you type. An environment variable is a named value that the
+shell passes to the programs it starts, e.g. `IDF_PATH` with the path to
+ESP-IDF (written `$IDF_PATH` in a command, `$env:IDF_PATH` in PowerShell). The
+`PATH` variable is the list of directories in which the shell looks for a
+program given by name only: a program "on `PATH`" runs by name from any
+directory, while for others the shell reports `command not found`. A variable
+set in front of a command, as in `URS_PORT=/dev/ttyACM0 ./scripts/docker-shell.sh`,
+applies to that command only.
 
 ## Which path to choose
+
+The choice rests on a few terms. The QEMU **emulator** is a program that
+imitates the ESP32-C3 chip on your computer, so every lab can be done without a
+board. **Docker** runs a **container**: an isolated Linux environment with the
+tools already installed, created from a prepared **image** (a template of the
+environment; the course image is called `embedded-course`); the tools in the
+container are the same on every computer. **WSL2** runs Linux (Ubuntu) inside
+Windows. On Windows, WSL2 and Docker Desktop need **virtualization**, the
+processor's ability to run another operating system; whether it is enabled is
+shown by Task Manager (Ctrl-Shift-Esc), *Performance* → *CPU*, line
+*Virtualization: Enabled*.
 
 The instructions offer three paths:
 
@@ -47,21 +100,19 @@ The instructions offer three paths:
   Docker do not work; ESP-IDF is installed directly in Windows, and the course
   scripts run in PowerShell versions of the same name (`.ps1`).
 
-The course scripts are written for `bash` on Linux (directly, in WSL2 or in the
-container), and path C has PowerShell versions of them; Git Bash and MSYS2 on
-Windows are not supported.
+**Which path to choose on your system:**
 
-| System | Recommended path | Board over USB |
-|---|---|---|
-| **Linux** | **path A** or path B | path A with `URS_PORT`, or path B |
-| **macOS** | **path A** (Docker Desktop) | `esptool` from macOS, or path B |
-| **Windows 10/11** | **WSL2** (Ubuntu), and inside it the Linux instructions: path A (Docker Desktop) or path B | in WSL2, path B + `usbipd` |
-| **Windows without virtualization** | **path C** (Labs 1–6) | directly, `COM<n>` |
+- **Linux:** path A (path B if you want the tools directly on the computer);
+- **macOS:** path A (Docker Desktop);
+- **Windows 10/11:** WSL2 with Ubuntu (*Step 0*), and path A inside it; if you
+  will flash the board, add path B in WSL2 as well (*Flashing the board*);
+- **Windows on which virtualization does not work** (checked above): path C.
 
 On Windows, path A can also be run straight from PowerShell
-(`docker-shell.ps1`), without Ubuntu in WSL2: it is enough for building and the emulator
-in Labs 1–5 and for Lab 7, but not for Lab 6; the board is then flashed with
-`esptool` from Windows. What each path covers:
+(`docker-shell.ps1`), without Ubuntu in WSL2. This is a secondary variant of
+path A: it is enough for building and the emulator in Labs 1–5 and for Lab 7,
+but not for Lab 6; the board is then flashed with `esptool` from Windows. What
+each path covers:
 
 | | A: Docker (Linux, WSL2, macOS) | A: Docker (Windows, PowerShell) | B: without Docker (Linux, WSL2, macOS) | C: Windows without virtualization |
 |---|---|---|---|---|
@@ -70,22 +121,45 @@ in Labs 1–5 and for Lab 7, but not for Lab 6; the board is then flashed with
 | Lab 7 (Buildroot, embedded Linux) | yes | yes | Linux and WSL2 with extra packages; macOS via Docker | no |
 | Flashing the board | on Linux; on macOS `esptool` from the computer; in WSL2 path B and `usbipd` | `esptool` from Windows | yes | yes |
 
-**Order.** On every path, go through these in turn:
+The course scripts are written for `bash` on Linux (directly, in WSL2 or in the
+container), and path C has PowerShell versions of them; Git Bash and MSYS2 on
+Windows are not supported.
+
+**Order.** These instructions have two parts. The first part, up to the
+section *Your own repository for submission*, is needed for Lab 1; on every
+path, go through these in turn:
 
 1. *Step 0*;
 2. the section of your path: *Path A*, *Path B* or *Path C*;
-3. *Checking* and *Working on a lab*; on path C these are steps 6 and 7 in the
-   *Path C* section;
-4. once the environment works, as needed, *Working in VS Code* and *Flashing
-   the board*.
+3. on paths A and B, *Checking* and *Working on a lab*; on path C these are
+   steps 6 and 7 in the *Path C* section;
+4. the PulseView program (*PulseView: viewing signals*);
+5. if you work in VS Code, opening the repository and the Ctrl-Shift-B task
+   (*Working in VS Code*);
+6. before submitting Lab 1, *Your own repository for submission*.
+
+The second part (*Part II: when you need it*) is read only when a lab needs it:
+
+| Lab | What to read before the session |
+|---|---|
+| Lab 2 | *Debugger: GDB attached to QEMU*, or *Lab-specific notes*, GDB from the terminal |
+| Labs 3, 4 | only with the board: *Flashing the board*, with *Labs 3 and 4 on the board* and *Logic analyser*; nothing new in the emulator |
+| Lab 5 | nothing new |
+| Lab 6 | *Lab-specific notes*, Lab 6: the MQTT tools on the computer and the order of work |
+| Lab 7 | *Lab-specific notes*, Lab 7; the first build takes 30–60 min, so start it before the session |
+
+When the course repository is updated during the semester, you get the new
+state as described in *Updating the repository*.
 
 ## Step 0: preparing the computer and getting the repository
 
 Every system needs two things: a **code editor**, because the labs ask you to
 change source code ([VS Code](https://code.visualstudio.com) is recommended,
 and any other will do; working in it is described in *Working in VS Code*),
-and **Git**, to get the repository. What else you need depends on the system
-and the path:
+and **Git**, to get the repository. To submit the labs you will also need a free
+GitHub account, which you open before your first submission (section *Your own
+repository for submission*). What else you need depends on the system and the
+path:
 
 | System | Install before you start | Administrator | Disk space |
 |---|---|---|---|
@@ -104,16 +178,18 @@ path A is the simplest choice there.
 **macOS.** Type `git --version` in Terminal; if the command does not exist,
 install it with `xcode-select --install`.
 
-**Windows** offers three options (see *Which path to choose*):
+**Windows** offers three options (see *Which path to choose*); read only the
+item of the one you chose:
 
 - **WSL2** (recommended; paths A and B as on Linux): in PowerShell started as
   administrator run `wsl --install`, restart the computer, open the **Ubuntu**
-  app and choose a Linux user name and password. Every further command is typed
+  app and choose a Linux user name and password (success: a prompt such as
+  `name@computer:~$`). Every further command is typed
   in the Ubuntu terminal, and the repository is cloned into the Linux file
   system (`~/`), never into `/mnt/c/...`. If virtualization is not enabled,
   enable it in the BIOS/UEFI (*Intel VT-x*, *AMD-V*); if the processor does not
   support it, choose path C. Git is already installed in Ubuntu.
-- **Docker from PowerShell** (path A without Ubuntu in WSL2): Git for Windows
+- **Docker from PowerShell** (a secondary variant of path A, without Ubuntu in WSL2): Git for Windows
   and Docker Desktop from the table; the repository is cloned in PowerShell
   (below).
 - **Path C** (no virtualization): the installation and getting the repository
@@ -136,7 +212,8 @@ For Docker from PowerShell, run the same three lines in a **new** PowerShell,
 opened after Git was installed. The `.gitattributes` file keeps Linux line
 endings in the scripts even when the repository is cloned by Git for Windows.
 All commands below are typed in the repository root
-(`~/VUKA-ugradbeni-sustavi`) unless stated otherwise.
+(`~/VUKA-ugradbeni-sustavi`) unless stated otherwise. Success: `ls` in it lists
+`Dockerfile`, `README.en.md`, `README.md`, `labs` and `scripts`.
 
 ## Path A: with Docker
 
@@ -148,11 +225,14 @@ All commands below are typed in the repository root
      sudo usermod -aG docker $USER
      ```
    - **macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-   - **Windows:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-     with the WSL2 backend (the default); the installer ends by asking you to
-     log out or restart the computer — do so. If you work in WSL2, enable
-     *Settings → Resources → WSL integration* for **Ubuntu** in Docker Desktop
-     (Docker from PowerShell does not need this step).
+   - **Windows with WSL2:** install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+     in Windows, with the WSL2 backend (the default); the installer ends by
+     asking you to log out or restart the computer — do so. Then enable
+     *Settings → Resources → WSL integration* for **Ubuntu** in Docker Desktop;
+     only then does `docker` work in the Ubuntu terminal, where you type all the
+     commands below.
+   - **Windows, Docker from PowerShell:** the same Docker Desktop, without the
+     *WSL integration* step; you type the commands below in PowerShell.
 
    On its first start Docker Desktop asks you to accept the terms of use and
    offers a Docker account sign-in; signing in is not needed (*Continue
@@ -223,7 +303,18 @@ bash scripts/verify.sh
 ```
 
 While cloning ESP-IDF, the warning `refs/tags/v5.5 ... is not a commit!` and
-the long message about a *detached HEAD* are expected. The installation uses
+the long message about a *detached HEAD* are expected. In `~/.espressif`,
+`install.sh` sets up a Python virtual environment (*venv*, a separate set of
+Python packages for ESP-IDF only); success is the end of the output,
+`All done! You can now run:` with the activation command. The leading dot and space in
+`. ~/esp-idf/export.sh` are part of the command: they run the script in the
+current shell, which keeps its settings (`IDF_PATH`, the toolchain on `PATH`),
+but only for that terminal; without the dot the terminal reports *permission
+denied*; successful activation prints `Done! You can now compile ESP-IDF
+projects.` If the emulator is already installed, `idf_tools.py` reports
+`Skipping qemu-riscv32@… (already installed)`. The check succeeds with the last
+line `verify.sh: PASS -- toolchain, build and QEMU all work`; if it is missing,
+see *Checking* and *Troubleshooting*. The installation uses
 **about 7 GB** (`~/esp-idf` 3.9 GB, `~/.espressif` 2.7 GB). In our test the
 build and QEMU also worked without the `ninja-build`, `gperf`, `ccache` and
 `dfu-util` packages (ESP-IDF brings its own tools); if you have no `sudo`,
@@ -250,15 +341,113 @@ bash scripts/verify.sh
 
 `coreutils` provides the `gtimeout` command the emulator scripts need.
 
+## Checking: `verify.sh`
+
+This section and the next apply to paths A and B; on path C, checking and
+working on the labs are described in the *Path C* section (steps 6 and 7).
+
+`bash scripts/verify.sh` (from the repository root, with the environment
+active; in the container it always is) checks `idf.py` and version v5.5,
+Espressif's `qemu-system-riscv32`, builds the `hello_world` example and boots
+it in the emulator. The first build takes a few minutes. The build and the
+logs are in the repository: `build/verify-hello_world.log` (build) and
+`build/verify-hello_world/qemu.log` (emulator). Success is the last line:
+
+```text
+verify.sh: PASS -- toolchain, build and QEMU all work
+```
+
+## Working on a lab
+
+**Starting each session.** Build and emulator commands are typed in a
+terminal where ESP-IDF is active, and the lab manuals start from the repository
+root. A new terminal does not start there (on Linux, macOS and in WSL2 it
+starts in `~`, and the path C shortcut in the ESP-IDF directory), so at the
+start of every session, in a new terminal, run the lines for your path:
+
+| Path | Commands | Afterwards |
+|---|---|---|
+| A (terminal, PowerShell) | `cd ~/VUKA-ugradbeni-sustavi`, then `./scripts/docker-shell.sh` (in PowerShell, the command from *Path A*) | container shell, root `/work` |
+| B (terminal) | `. ~/esp-idf/export.sh`, then `cd ~/VUKA-ugradbeni-sustavi` | the prompt shows the repository name |
+| C (ESP-IDF 5.5 PowerShell shortcut) | `cd C:\vuka\VUKA-ugradbeni-sustavi` | the prompt shows the repository name |
+
+On path C the course scripts have a `.ps1` version of the same name (table in
+section *Path C*), and the first run is step 7 in that section.
+
+**Building and the emulator.** Using Lab 1 as the example, on paths A and B
+(for path C see section *Path C*):
+
+```sh
+cd labs/lab1_toolchain/starter
+idf.py set-target esp32c3                  # first time only
+idf.py build
+bash ../../common/run_qemu.sh build        # emulator, 30 s
+```
+
+`idf.py set-target esp32c3` selects the target chip and is run only the first
+time, because the choice is remembered in the `sdkconfig` file. If you run it
+again, `sdkconfig` is created anew and the changes made in `menuconfig` are
+lost. The starters of all labs already set the target chip (in the
+`sdkconfig.defaults` file), so you run this command only in Lab 1, where it is
+part of task T1; do not run it in Labs 2–6. `idf.py build` builds the program
+into the `build/` directory.
+
+`run_qemu.sh` assembles the flash image (`build/flash.bin`) from the latest
+build and runs it in the emulator, so the newest program always runs. Success
+is Espressif's start-up output (the *bootloader*, chip information) followed by
+the program's output; for the unmodified Lab 1 starter that is the line
+`I (…) lab1: Ugradbeni racunalni sustavi -- Lab 1`. The emulator stops by
+itself after 30 s; a second argument sets a different time
+(e.g. `run_qemu.sh build 60`). The final line
+`run_qemu.sh: timeout (30s) reached after output was produced — treating as success`
+means everything is fine. To stop the emulator earlier press **Ctrl-A, then
+X**. The whole output is also saved to `build/qemu.log`.
+
+If you build the same project alternately on path A and on path B, run
+`idf.py fullclean` before switching: the `build/` directory remembers the
+project's path, and inside the container that path is different
+(`/work/...`).
+
+| Lab | Directory | Note |
+|---|---|---|
+| Lab 1 | `labs/lab1_toolchain/` | toolchain, first build |
+| Lab 2 | `labs/lab2_gpio_irq/` | registers, interrupts, GPTimer; GDB in a second terminal |
+| Lab 3 | `labs/lab3_bme280/` | I2C and the BME280; signal captures in `captures/` |
+| Lab 4 | `labs/lab4_adc_pwm/` | ADC and PWM |
+| Lab 5 | `labs/lab5_rtos/` | FreeRTOS |
+| Lab 6 | `labs/lab6_mqtt/` | MQTT over TLS; networked emulator `run_qemu_net.sh` |
+| Lab 7 | `labs/lab7_linux_ota/` | Buildroot and OTA; the first build takes 30–60 min |
+
+What to complete in a lab and how it is checked is described in the lab's
+manual.
+
+**Where the files are.** You edit the code and open the files to submit (e.g.
+`build/qemu.log`) on your computer, in the repository directory. On path A
+this is the same directory the container sees as `/work`: whatever a build in
+the container creates is at once on the computer too. On Linux and macOS the
+repository is in `~/VUKA-ugradbeni-sustavi`, on path C in
+`C:\vuka\VUKA-ugradbeni-sustavi`. In WSL2 the repository is in the Linux file
+system, so Windows programs (the browser, PulseView) do not see it under `C:`:
+in the Ubuntu terminal, in the directory you need, the command `explorer.exe .`
+opens that directory in Windows Explorer (the address starts with
+`\\wsl.localhost\Ubuntu` or `\\wsl$\Ubuntu`), from where files can be opened and
+attached.
+
 ## Path C: Windows without virtualization (no WSL2, no Docker)
+
+On paths A and B, skip this section and continue with *PulseView: viewing
+signals*.
 
 For computers on which WSL2 and Docker do not work because the processor does
 not support virtualization. First check whether it is merely switched off in the
 BIOS/UEFI (*Intel VT-x* or *AMD-V*) — if it can be switched on, follow the WSL2
 instructions. The QEMU emulator does not need virtualization (it emulates the
 chip in software), so this path covers Labs 1–6 and the board; Lab 7 (Buildroot)
-needs Linux, so do it on a computer with WSL2, Docker or Linux (arrange it with
-the instructor). A 64-bit Windows 10 or 11 is required.
+needs Linux, so do it on a computer with WSL2, Docker or Linux. Contact the
+instructor as soon as you choose path C and agree on which computer you will
+use for Lab 7 (week 13): its first build (30–60 min) has to be started before
+the session (*Lab-specific notes*, Lab 7). A 64-bit Windows 10 or 11 is
+required.
 
 1. **Git for Windows** (<https://git-scm.com/download/win> or
    `winget install Git.Git`); it also brings `openssl`, which the
@@ -272,6 +461,7 @@ the instructor). A 64-bit Windows 10 or 11 is required.
    ```powershell
    python $env:IDF_PATH\tools\idf_tools.py install qemu-riscv32
    ```
+   Whether the shortcut finds the emulator is checked by step 6.
 4. Clone the repository into a path without spaces or diacritics (a user folder
    like `C:\Users\Ivan Čović` does not suit ESP-IDF):
    ```powershell
@@ -349,238 +539,48 @@ directory.
 On path C, type a command that the manual continues with `\` on one line.
 
 For a quick try, ESP-IDF's own `idf.py qemu monitor` works too (it builds,
-runs and shows the output; leave with Ctrl-]).
+runs and shows the output; leave with Ctrl-]). Lab 6 on path C is described in
+*Lab-specific notes*, and the board in *Flashing the board*.
 
-**Lab 6:** the emulator reaches the broker (`run_broker.ps1`) at
-`10.0.2.2:8883`, tools on the computer at `127.0.0.1:8883`. If Windows asks,
-allow access on private networks. `mosquitto_sub` and `mosquitto_pub` are in
-`C:\Program Files\mosquitto`, so the Lab 6 manual's command, from
-`labs\lab6_mqtt\starter`, reads:
-```powershell
-& "C:\Program Files\mosquitto\mosquitto_sub.exe" -h 127.0.0.1 -p 8883 --cafile ../broker/certs/ca.crt -t "vuka/sensors/#" -v
-```
 
-**The board:** `idf.py -p COM<n> flash monitor`, with the port from Device Manager.
+## PulseView: viewing signals
 
-## Checking: `verify.sh`
+The free PulseView program (sigrok project) shows digital signals over time.
+In Labs 1 and 2 you use it to open the `build/gpio/gpioN.vcd` files from the
+emulator, and in Labs 3 and 4 the logic analyser's captures (*Logic analyser*,
+below). Install it before Lab 1:
 
-This section and the next apply to paths A and B; on path C, checking and
-working on the labs are described in the *Path C* section (steps 6 and 7).
+- **Linux (Debian, Ubuntu):** `sudo apt install pulseview`.
+- **macOS:** download PulseView (`.dmg`) from
+  <https://sigrok.org/wiki/Downloads> and drag the app into *Applications*. It
+  is a build for x86-64 processors; on a Mac with Apple silicon it runs through
+  Rosetta 2, which macOS offers to install on first launch. If macOS refuses to
+  open the app, open it the first time with a right click → *Open*.
+- **Windows (also with WSL2):** download the 64-bit PulseView installer from
+  the same page. The program is not digitally signed, so Windows may show a
+  SmartScreen warning when you run it: *More info → Run anyway*.
 
-`bash scripts/verify.sh` (from the repository root, with the environment
-active; in the container it always is) checks `idf.py` and version v5.5,
-Espressif's `qemu-system-riscv32`, builds the `hello_world` example and boots
-it in the emulator. The first build takes a few minutes. The build and the
-logs are in the repository: `build/verify-hello_world.log` (build) and
-`build/verify-hello_world/qemu.log` (emulator). Success is the last line:
-
-```text
-verify.sh: PASS -- toolchain, build and QEMU all work
-```
-
-## Working on a lab
-
-**A terminal with ESP-IDF.** Build and emulator commands are typed in a
-terminal where ESP-IDF is active. How you open one depends on the path:
-
-- **path A:** from the repository root run `./scripts/docker-shell.sh`
-  (on Windows from PowerShell, `docker-shell.ps1`, see *Path A*). It opens a
-  shell in the container, with the repository under `/work`; all following
-  commands are typed there.
-- **path B:** in every new terminal, first run `. ~/esp-idf/export.sh`.
-- **path C:** open the **ESP-IDF 5.5 PowerShell** shortcut. On this path the
-  course scripts have a `.ps1` version of the same name (table in section
-  *Path C*), and the first run is step 7 in that section.
-
-**Building and the emulator.** Using Lab 1 as the example, on paths A and B
-(for path C see section *Path C*):
-
-```sh
-cd labs/lab1_toolchain/starter
-idf.py set-target esp32c3                  # first time only
-idf.py build
-bash ../../common/run_qemu.sh build        # emulator, 30 s
-```
-
-`idf.py set-target esp32c3` selects the target chip and is run only the first
-time, because the choice is remembered in the `sdkconfig` file. If you run it
-again, `sdkconfig` is created anew and the changes made in `menuconfig` are
-lost. The starters of all labs already set the target chip (in the
-`sdkconfig.defaults` file), so you run this command only in Lab 1, where it is
-part of task T1; do not run it in Labs 2–6. `idf.py build` builds the program
-into the `build/` directory.
-
-`run_qemu.sh` assembles the flash image (`build/flash.bin`) from the latest
-build and runs it in the emulator, so the newest program always runs. The
-emulator stops by itself after 30 s; a second argument sets a different time
-(e.g. `run_qemu.sh build 60`). The final line
-`run_qemu.sh: timeout (30s) reached after output was produced — treating as success`
-means everything is fine. To stop the emulator earlier press **Ctrl-A, then
-X**. The whole output is also saved to `build/qemu.log`.
-
-If you build the same project alternately on path A and on path B, run
-`idf.py fullclean` before switching: the `build/` directory remembers the
-project's path, and inside the container that path is different
-(`/work/...`).
-
-| Lab | Directory | Note |
-|---|---|---|
-| Lab 1 | `labs/lab1_toolchain/` | toolchain, first build |
-| Lab 2 | `labs/lab2_gpio_irq/` | registers, interrupts, GPTimer; GDB in a second terminal |
-| Lab 3 | `labs/lab3_bme280/` | I2C and the BME280; signal captures in `captures/` |
-| Lab 4 | `labs/lab4_adc_pwm/` | ADC and PWM |
-| Lab 5 | `labs/lab5_rtos/` | FreeRTOS |
-| Lab 6 | `labs/lab6_mqtt/` | MQTT over TLS; networked emulator `run_qemu_net.sh` |
-| Lab 7 | `labs/lab7_linux_ota/` | Buildroot and OTA; the first build takes 30–60 min |
-
-What to complete in a lab and how it is checked is described in the lab's
-manual.
-
-**GDB from the terminal (Lab 2).** In VS Code the debugger attaches with F5
-(section *Debugger: GDB attached to QEMU*). Without VS Code you need two
-terminals, both in the `labs/lab2_gpio_irq/starter` directory:
-
-1. **Terminal 1 runs QEMU waiting for the debugger:**
-   `bash ../../common/run_qemu_gdb.sh build` (path C:
-   `../../common/run_qemu_gdb.ps1 build`). The script prints the command to
-   connect with and waits.
-2. **Terminal 2 runs GDB.** Open a second terminal with ESP-IDF active: on
-   path A run `./scripts/docker-shell.sh` again, which attaches to the same
-   container; on path B run `. ~/esp-idf/export.sh` in a new terminal; on
-   path C open another **ESP-IDF 5.5 PowerShell** shortcut window. A new
-   terminal does not start in the lab directory, so change into it by its full
-   path:
-   ```sh
-   cd /work/labs/lab2_gpio_irq/starter                         # path A (container)
-   cd ~/VUKA-ugradbeni-sustavi/labs/lab2_gpio_irq/starter      # path B
-   cd C:\vuka\VUKA-ugradbeni-sustavi\labs\lab2_gpio_irq\starter  # path C
-   ```
-   Then type the command terminal 1 printed:
-   `riscv32-esp-elf-gdb build/lab2.elf -ex "target remote :1234"`.
-
-The connection works when GDB prints:
-
-```text
-Remote debugging using :1234
-0x40000000 in ?? ()
-(gdb)
-```
-
-The processor is halted at the first ROM instruction (address `0x40000000`,
-for which GDB has no function name); the program is not running yet and
-terminal 1 prints nothing. You type the commands from the Lab 2 manual
-(`break`, `continue` …) after the `(gdb)` prompt; the program's output appears
-in terminal 1. If GDB reports `Connection refused`, terminal 1 is not running a
-waiting `run_qemu_gdb.sh` (perhaps `run_qemu.sh` was started instead, or the
-emulator has already finished).
-
-**Labs 3 and 4 on the board.** In the emulator Lab 3 reads simulated sensor
-registers instead of the I2C bus, and Lab 4 uses a simulated ADC. The board variant is built in a **separate**
-`build-hw` directory, so that the QEMU build in `build/` stays intact. From
-the lab's `starter` directory:
-
-```sh
-idf.py -B build-hw -D SDKCONFIG=build-hw/sdkconfig -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.hw" build
-idf.py -B build-hw -D SDKCONFIG=build-hw/sdkconfig -p <port> flash monitor
-```
-
-A separate directory is needed because `sdkconfig.defaults` and
-`sdkconfig.hw` only apply when an `sdkconfig` is created, and `idf.py`
-remembers the list of those files in the build directory. If you build the
-board variant in `build/`, the program still uses the simulator, without any
-message saying so, and going back to QEMU no longer works properly either.
-
-With Docker on macOS and Windows the container cannot see the board: run the
-first command in the container, then flash with `esptool` from the computer,
-as described in *Flashing the board*, but from the `build-hw` directory (e.g.
-`labs/lab3_bme280/starter/build-hw`), not from `build`.
-
-**Lab 6.** The order is:
-
-1. **On path A, the container shell first** (`./scripts/docker-shell.sh`);
-   leave it open while you work. The broker is started only after it: started
-   before it, the broker takes port 8883 on the computer and `docker-shell.sh`
-   cannot start (*Troubleshooting*).
-2. **Certificates**, from `labs/lab6_mqtt/starter`, on the computer or in the
-   container shell: `bash ../broker/gen_certs.sh`.
-3. **The MQTT broker**, in a **terminal on the computer** (Linux, macOS,
-   WSL2), not in the container shell, because the script calls `docker`
-   itself. From the repository root: `bash labs/lab6_mqtt/broker/run_broker.sh`.
-   The broker runs until you stop it with Ctrl-C, so open another terminal for
-   the remaining steps.
-4. **The program**, in a terminal with ESP-IDF (on path A, the shell from
-   step 1), from `labs/lab6_mqtt/starter`:
-   `idf.py build`, then `bash ../../common/run_qemu_net.sh build`.
-
-The broker always runs in Docker (the official `eclipse-mosquitto` image), so
-path B needs Docker for Lab 6 too. If the course container
-(`vuka-ugradbeni-sustavi`) is running, the broker joins its network: QEMU in
-the container reaches it at `10.0.2.2:8883`, and tools on the computer at
-`127.0.0.1:8883`. Without the course container (path B) the broker publishes
-port 8883 directly on the computer. With Docker from PowerShell Lab 6 is not
-possible, because the scripts need `bash`: do it in WSL2 or on path C.
-
-**Lab 7.** Buildroot is easiest to build in the course container. The commands
-below are typed in a **terminal on the computer**, from the repository root,
-not in the `docker-shell` shell, because they start the container themselves.
-In VS Code the task *LV7: izgradnja Buildroota* (*Terminal → Run Task…*) does
-the same and picks the method itself: in a window attached to the container it
-builds there (on macOS and Windows on the `lab7_br` volume, which
-`docker-shell` mounts at `/br`), and in a regular window it starts the course
-container. On Linux without the course image it builds directly, with the
-packages listed below. Lab 7 is not possible on path C.
-
-**Linux and WSL2** (in WSL2 also when Docker comes from Docker Desktop) — with
-the same script as the other labs. The container
-then runs as your user, so the build files belong to you (a plain `docker run`
-without `--user` would build as root, and you could not delete those files
-without `sudo`):
-```sh
-./scripts/docker-shell.sh make -C labs/lab7_linux_ota -f Makefile.buildroot all
-```
-
-**macOS** (Docker Desktop) — building on the named volume `lab7_br`:
-```sh
-docker run --rm -v "$PWD:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
-```
-
-**Windows without Ubuntu in WSL2** (Docker Desktop, PowerShell) — the same
-command, on one line:
-```powershell
-docker run --rm -v "${PWD}:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
-```
-
-**Without Docker** (Linux and WSL2 only) you also need the packages
-`sudo apt-get install -y make gcc g++ patch cpio unzip rsync bc file wget qemu-system-misc`,
-and the build is then run directly:
-`make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
-
-Whichever way you build, the build has succeeded when the output ends with a
-list of the built files (sizes and dates differ):
-
-```text
-== artifacts ready:
-total ...
-...  Image
-...  fw_jump.bin
-...  rootfs.ext4
-make: Leaving directory '.../labs/lab7_linux_ota'
-```
-
-The files are in the `labs/lab7_linux_ota/artifacts` directory. If the output
-ends with a line such as `make: *** […] Error 2` and there is no
-`== artifacts ready:` line, the build failed; running the same command again
-continues where it stopped.
+**Pins from the emulator (Labs 1 and 2).** With the `--gpio-vcd` option
+(`run_qemu.ps1 -GpioVcd` on path C) the `run_qemu.sh` script creates the
+`build/gpio/gpioN.vcd` files: the level of every GPIO output over time,
+recorded from the program's writes to the GPIO registers. In PulseView, open
+them with the arrow next to the *Open* button (folder icon on the toolbar) →
+*Import Value Change Dump data*: choose the file, leave the import options at
+their defaults and confirm with *OK*. No analyser is needed for this.
 
 ## Working in VS Code
 
 The repository contains VS Code settings (`.vscode/`): recommended extensions,
 tasks for building and the emulator, debugger configurations and
-code-completion settings. VS Code must run **where ESP-IDF is**, so how you
-open the repository depends on the path:
+code-completion settings. How you open the repository depends on the path:
 
-- **Path A (Docker, all systems).** The tools exist only in the container, so
-  VS Code attaches to it:
+- **Path A (Docker, all systems).** For building and the emulator (enough for
+  Lab 1), open the repository on your computer: on Linux and macOS *File → Open
+  Folder* → the repository root, in WSL2 as on path B in WSL2 (below), and with
+  Docker from PowerShell *File → Open Folder*. The Ctrl-Shift-B task then builds
+  and runs the lab in the course container by itself. The debugger (Lab 2) and
+  code completion work only where ESP-IDF is, i.e. in the container, so for
+  them attach VS Code to the container:
   1. First time only: in VS Code open the *Extensions* view (Ctrl-Shift-X),
      search for *Dev Containers* (publisher Microsoft) and click *Install*.
      Without this extension the command in step 3 does not exist.
@@ -592,7 +592,8 @@ open the repository depends on the path:
   4. In the new window choose *File → Open Folder* → `/work`. The bottom-left
      corner of the window shows *Container …*.
 
-  Repeat steps 2–4 at the start of every session.
+  Repeat steps 2–4 at the start of every session in which you need the
+  debugger or code completion.
 - **Path B, Linux and macOS.** *File → Open Folder* → the repository root.
 - **Path B, WSL2.** In the Ubuntu terminal, from the repository root, type
   `code .`. VS Code is installed on Windows, and the *WSL* extension connects
@@ -602,8 +603,9 @@ open the repository depends on the path:
 When asked whether you trust the authors of the folder, answer *Yes, I trust
 the authors*: in *Restricted Mode* the tasks do not run. VS Code then offers
 the recommended extensions. *C/C++* is needed on every path, *WSL* only for
-WSL2 and *Dev Containers* only for path A. You can decline the *C/C++
-Extension Pack* offer. On path A and in WSL2 the *C/C++* extension must be
+WSL2 and *Dev Containers* only for attaching to the container (path A). You
+can decline the *C/C++ Extension Pack* offer. In a window attached to the
+container and in WSL2 the *C/C++* extension must be
 installed **in the container** or **in WSL**: in the *Extensions* view
 (Ctrl-Shift-X), click *Install in Container…* or *Install in WSL: Ubuntu* for
 *C/C++*. Espressif's *ESP-IDF* extension is not needed; do not install it: it
@@ -635,7 +637,7 @@ stops with Ctrl-A, then X on macOS too, and the monitor with Ctrl-].
 All tasks are under *Terminal → Run Task…*. Tasks without a lab in their name
 are shared by Labs 1–6: you choose the lab from the list that appears **after**
 choosing the task. The debugger is not in that menu but in the *Run and Debug*
-view (section *Debugger*, below).
+view (section *Debugger*, in the second part).
 
 | Task | What it does |
 |---|---|
@@ -646,9 +648,12 @@ view (section *Debugger*, below).
 | idf.py reconfigure | after a new `Kconfig.projbuild` (Labs 1 and 4) |
 | idf.py fullclean | when you build the same project alternately with and without Docker |
 | QEMU for GDB, waits for the debugger | the latest build in an emulator that waits for GDB (section *Debugger*) |
-| LV7: Buildroot build | builds Lab 7 (section *Working on a lab*, Lab 7) |
-| LV1, LV2: build, QEMU and pin VCDs | build, then `run_qemu.sh --gpio-vcd`: `build/gpio/gpioN.vcd` next to `qemu.log`, for PulseView (section *Logic analyser*) |
+| LV7: Buildroot build | builds Lab 7 (section *Lab-specific notes*, Lab 7) |
+| LV1, LV2: build, QEMU and pin VCDs | build, then `run_qemu.sh --gpio-vcd`: `build/gpio/gpioN.vcd` next to `qemu.log`, for PulseView (section *PulseView*) |
 | LV1–LV6: build and QEMU for GDB | builds the lab, then an emulator that waits for GDB; F5 starts them too (section *Debugger*) |
+
+In the task list the English name follows the Croatian one after a slash, e.g.
+*Izgradnja i QEMU / Build and run in QEMU*.
 
 The tasks find the environment by themselves (the `scripts/vscode-task.sh`
 script, `.ps1` on Windows). They try, in order, an active ESP-IDF (also in the
@@ -671,7 +676,66 @@ compile_commands.json* for labs not yet built). On path A the paths come from th
 container (`/work/...`), so code completion works only in the window attached to
 the container.
 
-### Debugger: GDB attached to QEMU
+## Your own repository for submission
+
+You submit lab work as a link to your own private repository on GitHub. Git
+keeps the history of files as a series of commits (snapshots of the files); GitHub is the
+server that holds this history and from which the instructor reads it. You type
+the commands of this section where you type `git pull` (section *Updating the
+repository*): in a host terminal, from the root of the course repository.
+
+**Once, before the first submission (Lab 1):**
+
+1. At <https://github.com> create a free account, if you do not have one, and
+   a new **private** repository **without** any initial files (no README,
+   `.gitignore` or licence), because git would otherwise reject the first
+   push.
+2. In that repository open *Settings* → *Collaborators* → *Add people* and add
+   the instructor (the username is given in the Lab 1 manual, section
+   *Submission*).
+3. Enter the name and e-mail address git signs your commits with; without
+   them the first `git commit` stops with the message
+   `Please tell me who you are`:
+
+   ```sh
+   git config --global user.name "First Last"
+   git config --global user.email "your@address"
+   ```
+
+4. Rename the original remote to `kolegij` and add your own as `origin`
+   (`<name>` is your GitHub username, `<repo>` the name of the new
+   repository):
+
+   ```sh
+   git remote rename origin kolegij
+   git remote add origin https://github.com/<name>/<repo>.git
+   ```
+
+**At every submission** (example for Lab 1):
+
+```sh
+git add labs/lab1_toolchain/starter/main
+git commit -m "Lab 1"
+git push origin main
+```
+
+`git add` selects the changed files that go into the next commit,
+`git commit` stores the commit with a message in the local history, and
+`git push origin main` sends the new history of the `main` branch to your
+repository on GitHub. On the first push git asks you to sign in to GitHub:
+depending on the system a browser opens or the terminal asks for a username
+and password. GitHub does not accept the account password there; enter a
+personal access token instead (on GitHub *Settings* → *Developer settings* →
+*Personal access tokens*) with write access to your repository. Do not add
+`-u`: the branch then keeps tracking `kolegij`, so `git pull` still brings the
+course updates. Check on GitHub that the files have arrived.
+
+## Part II: when you need it
+
+The sections from here to the end are needed only for particular labs (the table
+in *Which path to choose*, **Order**).
+
+## Debugger: GDB attached to QEMU
 
 The debugger consists of two programs running at the same time, connected
 through network port **1234**:
@@ -763,8 +827,144 @@ line of `app_main`. In Lab 5 `app_main` is in the file of the demo chosen in
 | the program does not stop, there is no error, and *Call Stack* is empty | The debugger is not attached: the *QEMU for GDB* or *LV*n*: build and QEMU for GDB* task run from *Run Task* only starts an emulator that waits. Attach the debugger: *Run and Debug* → configuration → F5 (step 4). |
 | `port 1234 is already in use` in the task tab | An old emulator is still waiting: close its task tab (the bin icon) or press Ctrl-A, then X in it, then F5 again. |
 
-Without VS Code the same is done from two terminals (section *Working on a
-lab*, *GDB from the terminal*).
+Without VS Code the same is done from two terminals (section *Lab-specific
+notes*, *GDB from the terminal*).
+
+## Lab-specific notes
+
+**GDB from the terminal (Lab 2).** In VS Code the debugger attaches with F5
+(section *Debugger: GDB attached to QEMU*). Without VS Code you need two
+terminals, both in the `labs/lab2_gpio_irq/starter` directory:
+
+1. **Terminal 1 runs QEMU waiting for the debugger:**
+   `bash ../../common/run_qemu_gdb.sh build` (path C:
+   `../../common/run_qemu_gdb.ps1 build`). The script prints the command to
+   connect with and waits.
+2. **Terminal 2 runs GDB.** Open a second terminal with ESP-IDF active: on
+   path A run `./scripts/docker-shell.sh` again, which attaches to the same
+   container; on path B run `. ~/esp-idf/export.sh` in a new terminal; on
+   path C open another **ESP-IDF 5.5 PowerShell** shortcut window. A new
+   terminal does not start in the lab directory, so change into it by its full
+   path:
+   ```sh
+   cd /work/labs/lab2_gpio_irq/starter                         # path A (container)
+   cd ~/VUKA-ugradbeni-sustavi/labs/lab2_gpio_irq/starter      # path B
+   cd C:\vuka\VUKA-ugradbeni-sustavi\labs\lab2_gpio_irq\starter  # path C
+   ```
+   Then type the command terminal 1 printed:
+   `riscv32-esp-elf-gdb build/lab2.elf -ex "target remote :1234"`.
+
+The connection works when GDB prints:
+
+```text
+Remote debugging using :1234
+0x40000000 in ?? ()
+(gdb)
+```
+
+The processor is halted at the first ROM instruction (address `0x40000000`,
+for which GDB has no function name); the program is not running yet and
+terminal 1 prints nothing. You type the commands from the Lab 2 manual
+(`break`, `continue` …) after the `(gdb)` prompt; the program's output appears
+in terminal 1. If GDB reports `Connection refused`, terminal 1 is not running a
+waiting `run_qemu_gdb.sh` (perhaps `run_qemu.sh` was started instead, or the
+emulator has already finished).
+
+**Lab 6.** On paths A and B you run the `mosquitto_sub` and `mosquitto_pub`
+tools in a terminal on the computer (the course container does not have them),
+so install them once, before Lab 6: on Linux (Debian, Ubuntu) and in WSL2
+`sudo apt-get install -y mosquitto-clients`, on macOS `brew install mosquitto`
+([Homebrew](https://brew.sh), if you do not have it yet). The command
+`mosquitto_sub --help` then prints `mosquitto_sub is a simple mqtt client …`.
+On path C the tools come with Mosquitto for Windows (*Path C*). The order of
+work is:
+
+1. **On path A, the container shell first** (`./scripts/docker-shell.sh`);
+   leave it open while you work. The broker is started only after it: started
+   before it, the broker takes port 8883 on the computer and `docker-shell.sh`
+   cannot start (*Troubleshooting*).
+2. **Certificates**, from `labs/lab6_mqtt/starter`, on the computer or in the
+   container shell: `bash ../broker/gen_certs.sh`.
+3. **The MQTT broker**, in a **terminal on the computer** (Linux, macOS,
+   WSL2), not in the container shell, because the script calls `docker`
+   itself. From the repository root: `bash labs/lab6_mqtt/broker/run_broker.sh`.
+   The broker runs until you stop it with Ctrl-C, so open another terminal for
+   the remaining steps.
+4. **The program**, in a terminal with ESP-IDF (on path A, the shell from
+   step 1), from `labs/lab6_mqtt/starter`:
+   `idf.py build`, then `bash ../../common/run_qemu_net.sh build`.
+
+The broker always runs in Docker (the official `eclipse-mosquitto` image), so
+path B needs Docker for Lab 6 too. If the course container
+(`vuka-ugradbeni-sustavi`) is running, the broker joins its network: QEMU in
+the container reaches it at `10.0.2.2:8883`, and tools on the computer at
+`127.0.0.1:8883`. Without the course container (path B) the broker publishes
+port 8883 directly on the computer. With Docker from PowerShell Lab 6 is not
+possible, because the scripts need `bash`: do it in WSL2 or on path C.
+
+**Lab 7.** Buildroot is easiest to build in the course container. The commands
+below are typed in a **terminal on the computer**, from the repository root,
+not in the `docker-shell` shell, because they start the container themselves.
+In VS Code the task *LV7: izgradnja Buildroota* (*Terminal → Run Task…*) does
+the same and picks the method itself: in a window attached to the container it
+builds there (on macOS and Windows on the `lab7_br` volume, which
+`docker-shell` mounts at `/br`), and in a regular window it starts the course
+container. On Linux without the course image it builds directly, with the
+packages listed below. Lab 7 is not possible on path C; agree with the
+instructor on which computer you will do it (*Path C*).
+
+**Linux and WSL2** (in WSL2 also when Docker comes from Docker Desktop) — with
+the same script as the other labs. The container
+then runs as your user, so the build files belong to you (a plain `docker run`
+without `--user` would build as root, and you could not delete those files
+without `sudo`):
+```sh
+./scripts/docker-shell.sh make -C labs/lab7_linux_ota -f Makefile.buildroot all
+```
+
+**macOS** (Docker Desktop) — building on the named volume `lab7_br`:
+```sh
+docker run --rm -v "$PWD:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
+```
+
+**Windows without Ubuntu in WSL2** (Docker Desktop, PowerShell) — the same
+command, on one line:
+```powershell
+docker run --rm -v "${PWD}:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
+```
+
+**Without Docker** (Linux and WSL2 only) you also need the packages
+`sudo apt-get install -y make gcc g++ patch cpio unzip rsync bc file wget qemu-system-misc`,
+and the build is then run directly:
+`make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
+
+Whichever way you build, the build has succeeded when the output ends with a
+list of the built files (sizes and dates differ):
+
+```text
+== artifacts ready:
+total ...
+...  Image
+...  fw_jump.bin
+...  rootfs.ext4
+make: Leaving directory '.../labs/lab7_linux_ota'
+```
+
+The files are in the `labs/lab7_linux_ota/artifacts` directory. If the output
+ends with a line such as `make: *** […] Error 2` and there is no
+`== artifacts ready:` line, the build failed; running the same command again
+continues where it stopped.
+
+**Lab 6 on path C.** The certificates are created by `../broker/gen_certs.ps1`
+and the broker is started by `../broker/run_broker.ps1`, in a separate shortcut
+window (the command table in *Path C*). The emulator reaches the broker at
+`10.0.2.2:8883`, tools on the computer at `127.0.0.1:8883`. If Windows asks,
+allow access on private networks. `mosquitto_sub` and `mosquitto_pub` are in
+`C:\Program Files\mosquitto`, so the Lab 6 manual's command, from
+`labs\lab6_mqtt\starter`, reads:
+```powershell
+& "C:\Program Files\mosquitto\mosquitto_sub.exe" -h 127.0.0.1 -p 8883 --cafile ../broker/certs/ca.crt -t "vuka/sensors/#" -v
+```
 
 ## Updating the repository
 
@@ -777,9 +977,11 @@ ESP-IDF 5.5 PowerShell shortcut):
 git pull
 ```
 
-`git pull` fetches from the remote repository the branch tracks. For the
-course repository this stays true after Lab 1, in which you rename the
-original remote to `kolegij` and add your own as `origin`: the branch still
+If there is nothing new, git prints `Already up to date.` `git pull` fetches
+from the remote repository the branch tracks. For the
+course repository this stays true after you have renamed the original remote
+to `kolegij` and added your own as `origin` (section *Your own repository for
+submission*): the branch still
 tracks `kolegij`, and you send your work with `git push origin main`.
 `git remote -v` shows which is which.
 
@@ -823,7 +1025,7 @@ idf.py -p <port> flash monitor      # leave the monitor: Ctrl-]
 | Linux, Docker | `/dev/ttyACM0` | `URS_PORT=/dev/ttyACM0 ./scripts/docker-shell.sh` (a new container: leave the previous one first), then in it `idf.py -p /dev/ttyACM0 flash monitor` |
 | WSL2 | `/dev/ttyACM0` | installation without Docker in WSL2, board forwarded with `usbipd` (below) and the `dialout` group |
 | macOS | `/dev/cu.usbmodem*` | `esptool` (below) or the installation without Docker |
-| Windows, path C | `COM<n>` | Device Manager → *USB Serial Device (COMn)* |
+| Windows, path C | `COM<n>` | in the *ESP-IDF 5.5 PowerShell* shortcut, from the project directory, `idf.py -p COM<n> flash monitor`; port from Device Manager → *USB Serial Device (COMn)*; the board is seen directly |
 | Windows, Docker from PowerShell | `COM<n>` | `esptool` from Windows (below) |
 | Docker Desktop (macOS, Windows) | — | USB devices are not passed into the container |
 
@@ -869,16 +1071,39 @@ Then, in the project's build directory (e.g. `labs/lab1_toolchain/starter/build`
 
 `ls /dev/cu.usbmodem*` shows the port name.
 
+### Labs 3 and 4 on the board
+
+In the emulator Lab 3 reads simulated sensor
+registers instead of the I2C bus, and Lab 4 uses a simulated ADC. The board variant is built in a **separate**
+`build-hw` directory, so that the QEMU build in `build/` stays intact. From
+the lab's `starter` directory:
+
+```sh
+idf.py -B build-hw -D SDKCONFIG=build-hw/sdkconfig -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.hw" build
+idf.py -B build-hw -D SDKCONFIG=build-hw/sdkconfig -p <port> flash monitor
+```
+
+A separate directory is needed because `sdkconfig.defaults` and
+`sdkconfig.hw` only apply when an `sdkconfig` is created, and `idf.py`
+remembers the list of those files in the build directory. If you build the
+board variant in `build/`, the program still uses the simulator, without any
+message saying so, and going back to QEMU no longer works properly either.
+
+With Docker on macOS and Windows the container cannot see the board: run the
+first command in the container, then flash with `esptool` from the computer,
+as described above, but from the `build-hw` directory (e.g.
+`labs/lab3_bme280/starter/build-hw`), not from `build`.
+
 ### Logic analyser (Labs 3 and 4)
 
 The bench has logic analysers built around a Cypress FX2 chip (eight channels,
-up to 24 MHz), used with the free PulseView program of the sigrok project. You
-do not need one in the emulator: the Lab 3 captures are provided in
-`labs/lab3_bme280/captures`.
+up to 24 MHz), used with the PulseView program (*PulseView: viewing
+signals*). You do not need one in the emulator: the Lab 3 captures are
+provided in `labs/lab3_bme280/captures`.
 
-**Installation.**
+**Installation.** Besides PulseView, the analyser needs:
 
-- **Linux (Debian, Ubuntu):** `sudo apt install pulseview sigrok-firmware-fx2lafw`,
+- **Linux (Debian, Ubuntu):** `sudo apt install sigrok-firmware-fx2lafw`,
   then unplug the analyser and plug it in again. If PulseView does not find it
   or reports no access, the udev rules are missing. They are the files
   `contrib/60-libsigrok.rules` and `contrib/61-libsigrok-uaccess.rules` from the
@@ -894,10 +1119,8 @@ do not need one in the emulator: the Lab 3 captures are provided in
   sudo udevadm control --reload-rules
   sudo udevadm trigger
   ```
-- **Windows:** download the 64-bit PulseView installer from
-  <https://sigrok.org/wiki/Downloads>. It is not digitally signed, so Windows
-  may show a SmartScreen warning when you run it: *More info → Run anyway*.
-  The analyser needs the WinUSB driver, set with Zadig (installed with
+- **macOS:** nothing more.
+- **Windows:** the analyser needs the WinUSB driver, set with Zadig (installed with
   PulseView; in the Start menu as *Zadig (PulseView)*): with the
   analyser plugged in, choose *Options → List All Devices* in Zadig, select
   the analyser, pick *WinUSB* on the right and *Replace Driver*. Select the
@@ -905,11 +1128,6 @@ do not need one in the emulator: the Lab 3 captures are provided in
   (see above). An FX2 analyser sometimes needs this twice, because once
   PulseView has uploaded its firmware it shows up as a different device. The
   setting applies only to the USB port it was made on.
-- **macOS:** download PulseView (`.dmg`) from the same page and drag the
-  application to *Applications*. It is an x86-64 build; on a Mac with Apple
-  silicon it runs through Rosetta 2, which macOS offers to install on first
-  launch. If macOS refuses to open it, open it the first time with a
-  right-click → *Open*.
 
 **Wiring.** The analyser only listens. First connect its GND to the board's
 GND, because without a common ground the capture is meaningless. Then for
@@ -943,14 +1161,6 @@ shows the period and duty cycle of every pulse; you can read the same values
 with the cursors. For the submission attach a screenshot or the saved capture
 (*File → Save*, a `.sr` file).
 
-**Pins from the emulator (Labs 1 and 2).** PulseView also opens the
-`build/gpio/gpioN.vcd` files that `run_qemu.sh` writes with the `--gpio-vcd`
-option (`run_qemu.ps1 -GpioVcd` on path C): the level of each GPIO output over
-time, recorded from the program's writes to the GPIO registers. Open them with
-the arrow next to the *Open* button (folder icon on the toolbar) → *Import Value
-Change Dump data*: choose the file, keep the defaults in the import options
-window and confirm with *OK*. No analyser is needed for that.
-
 ## Troubleshooting
 
 - **`idf.py: command not found`** — on path A the command was typed in a
@@ -962,6 +1172,19 @@ window and confirm with *OK*. No analyser is needed for that.
 - **`qemu-system-riscv32 not on PATH`** — on path A, as in the previous item:
   type the command in the container shell. On path B, after installing QEMU
   you must run `. ~/esp-idf/export.sh` again.
+- **`verify.sh: FAIL -- expected ESP-IDF v5.5, got: …`** (on path C
+  `verify.ps1`) — an ESP-IDF of another version is active. On path B, ESP-IDF
+  was not cloned with `-b v5.5`: delete `~/esp-idf` and repeat path B from
+  cloning ESP-IDF. On path C, install the *ESP-IDF Tools Installer* version v5.5
+  (step 2).
+- **`verify.sh: FAIL -- this qemu-system-riscv32 has no esp32c3 machine`** —
+  the QEMU on `PATH` is the system package, not Espressif's: install
+  Espressif's (path B, step 4) and activate the environment again.
+- **`verify.sh: FAIL -- build failed`, `QEMU run failed` or `'Hello world!'
+  not found`** — the message names the log: `build/verify-hello_world.log` for
+  the build (the script also prints its last 20 lines itself), or
+  `build/verify-hello_world/qemu.log` for the emulator. Look at the last lines
+  of the log and bring them to the instructor.
 - **`port is already allocated` when starting `docker-shell`** — port 8883 is
   taken by the Lab 6 broker, started before the container shell. Stop it
   (Ctrl-C in its terminal), open the shell, then start the broker again.

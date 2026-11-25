@@ -16,7 +16,7 @@
  * that's peripheral-init plumbing, not this lab's learning
  * objective):
  *
- *   TODO 1 (manual T1): sample standard deviation + 16-bin
+ *   TODO 1 (manual T1): standard deviation (divide by N) + 16-bin
  *           histogram over the observed min..max range.
  *   TODO 2 (manual T2): two-point calibration formula (gain/offset
  *           from Kconfig).
@@ -25,8 +25,8 @@
  *
  * Everything else (sampling loop, histogram printout,
  * LEDC/esp_timer bring-up, the "LAB4 OK ..." log lines) is given --
- * this boots and prints a banner out of the box; the three
- * "LAB4 OK ..." markers only carry correct values once the TODOs
+ * this boots and prints a banner out of the box; the
+ * "LAB4 OK ..." lines only carry correct values once the TODOs
  * above are filled in.
  */
 #include <math.h>
@@ -173,7 +173,7 @@ void app_main(void)
 
     double mean = (double)sum / NUM_SAMPLES;
 
-    /* TODO 1: compute the sample standard deviation and the 16-bin
+    /* TODO 1: compute the standard deviation and the 16-bin
      * histogram over the OBSERVED [raw_min, raw_max) range
      * (manual, T1):
      *   - sd = sqrt( sum((x_i - mean)^2) / NUM_SAMPLES )

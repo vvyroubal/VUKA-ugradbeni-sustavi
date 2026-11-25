@@ -26,14 +26,63 @@ PDF-ovi u sustavu za e-učenje kolegija. Ciljna platforma je **ESP32-C3** (RISC-
 može se izvesti i bez pločice, u emulatoru **QEMU**. Alatni lanac je
 **ESP-IDF v5.5** (dopušten je i noviji v5.5.x).
 
+## Osnove rada u terminalu
+
+Alati kolegija pokreću se u **terminalu**, prozoru u koji se naredbe upisuju
+kao tekst. Naredbe izvodi program koji se zove **ljuska** (*shell*): `bash` na
+Linuxu i u WSL2, `zsh` na macOS-u, PowerShell na Windowsu. Terminal se otvara
+ovako: na Linuxu aplikacija Terminal iz popisa aplikacija (na Ubuntuu
+Ctrl-Alt-T), na macOS-u Cmd-razmaknica, zatim upišite `Terminal` i pritisnite
+Enter, a na Windowsu desni klik na izbornik Start → **Terminal** (Windows 11)
+odnosno **Windows PowerShell** (Windows 10).
+
 **Gdje se pišu naredbe.** Svaki blok naredbi u ovim uputama ima navedeno
-mjesto: *terminal* na Linuxu i macOS-u (na macOS-u aplikacija Terminal),
-*terminal Ubuntu* u WSL2 na Windowsu, *PowerShell* na Windowsu, na putu C
-prečac *ESP-IDF 5.5 PowerShell*, ili *ljuska kontejnera* koju otvara skripta
-`docker-shell`. Naredbe se kopiraju redak po redak; redak koji završava znakom
-`\` (u PowerShellu znakom `` ` ``) nastavlja se u sljedećem.
+mjesto: *terminal* na Linuxu i macOS-u, *terminal Ubuntu* u WSL2 na Windowsu,
+*PowerShell* na Windowsu, na putu C prečac *ESP-IDF 5.5 PowerShell*, ili
+*ljuska kontejnera* koju otvara skripta `docker-shell` (*Put A*).
+
+**Upis naredbe.** Kad čeka naredbu, ljuska ispisuje **odzivnik** (*prompt*),
+koji pokazuje i gdje ste: npr. `ime@računalo:~$` u Ubuntuu, `ime@računalo ~ %`
+na macOS-u, `PS C:\Users\ime>` u PowerShellu i `…:/work#` u ljusci kontejnera.
+Naredba se piše iza odzivnika (u uputama je navedena bez njega) i izvodi tipkom
+**Enter**. Zalijepiti je možete s Ctrl-Shift-V na Linuxu, Cmd-V na macOS-u i
+desnim klikom mišem na Windowsu. Naredbe se kopiraju redak po redak; redak koji
+završava znakom `\` (u PowerShellu znakom `` ` ``) nastavlja se u sljedećem.
+Naredbu koja još radi prekida **Ctrl-C** (i na macOS-u). Tekst u izlomljenim
+zagradama, npr. `<port>` ili `<ime>`, zamijenite vlastitom vrijednošću, **bez
+zagrada**; isto vrijedi za `COM<n>` i `XXXX`.
+
+**Direktoriji.** Ljuska uvijek radi u nekom direktoriju (radnom direktoriju).
+Novi terminal počinje u osobnom direktoriju korisnika, koji se kraće piše `~`.
+Naredba `pwd` ispisuje radni direktorij, `ls` njegov sadržaj, `cd <direktorij>`
+prelazi u drugi direktorij, `cd ..` u nadređeni, a `cd ~` u osobni; iste
+naredbe rade i u PowerShellu. Putanja koja ne počinje znakom `/` ili `~` (na
+Windowsu slovom diska) relativna je, tj. računa se od radnog direktorija, pa
+`cd labs/lab1_toolchain/starter` radi samo iz korijena repozitorija. `./`
+označava radni direktorij: `./scripts/docker-shell.sh` pokreće skriptu iz
+njegova poddirektorija `scripts`.
+
+**`sudo` i varijable okruženja.** Na Linuxu i u WSL2 `sudo` ispred naredbe
+izvodi je s administratorskim pravima i traži vašu lozinku, koja se pri upisu
+ne prikazuje. Varijabla okruženja imenovana je vrijednost koju ljuska predaje
+programima koje pokreće, npr. `IDF_PATH` s putanjom do ESP-IDF-a (u naredbi
+`$IDF_PATH`, u PowerShellu `$env:IDF_PATH`). Varijabla `PATH` popis je
+direktorija u kojima ljuska traži program zadan samo imenom: program „na
+`PATH`-u” pokreće se imenom iz bilo kojeg direktorija, a za ostale ljuska javlja
+`command not found`. Varijabla zadana ispred naredbe, kao u
+`URS_PORT=/dev/ttyACM0 ./scripts/docker-shell.sh`, vrijedi samo za tu naredbu.
 
 ## Koji put odabrati
+
+Izbor ovisi o nekoliko pojmova. **Emulator** QEMU program je koji na računalu
+oponaša čip ESP32-C3, pa se svaka vježba može izvesti i bez pločice. **Docker**
+pokreće **kontejner**, izolirano Linuxovo okruženje s već instaliranim alatima,
+nastalo iz pripremljene **slike** (predloška okruženja; slika kolegija zove se
+`embedded-course`); alati u kontejneru isti su na svakom računalu. **WSL2**
+pokreće Linux (Ubuntu) unutar Windowsa. Na Windowsu WSL2 i Docker Desktop
+trebaju **virtualizaciju**, mogućnost procesora da izvodi još jedan operacijski
+sustav; je li uključena, pokazuje Upravitelj zadataka (Ctrl-Shift-Esc),
+*Performance* → *CPU*, redak *Virtualization: Enabled*.
 
 Upute nude tri puta:
 
@@ -46,21 +95,18 @@ Upute nude tri puta:
   ne rade; ESP-IDF se instalira izravno u Windows, a skripte kolegija pokreću se
   u PowerShell inačicama istog imena (`.ps1`).
 
-Skripte kolegija pisane su za `bash` na Linuxu (izravno, u WSL2 ili u
-kontejneru), a za put C postoje njihove PowerShell inačice; Git Bash i MSYS2 na
-Windowsu nisu podržani.
+**Koji put odabrati na svom sustavu:**
 
-| Sustav | Preporučeni put | Pločica preko USB-a |
-|---|---|---|
-| **Linux** | **put A** ili put B | put A uz `URS_PORT` ili put B |
-| **macOS** | **put A** (Docker Desktop) | `esptool` s macOS-a ili put B |
-| **Windows 10/11** | **WSL2** (Ubuntu), a u njemu upute za Linux: put A (Docker Desktop) ili put B | u WSL2, put B + `usbipd` |
-| **Windows bez virtualizacije** | **put C** (LV1–LV6) | izravno, `COM<n>` |
+- **Linux:** put A (put B ako alate želite izravno na računalu);
+- **macOS:** put A (Docker Desktop);
+- **Windows 10/11:** WSL2 s Ubuntuom (*Korak 0*), a u njemu put A; ako ćete
+  programirati pločicu, u WSL2 dodajte i put B (*Programiranje pločice*);
+- **Windows na kojem virtualizacija ne radi** (provjera gore): put C.
 
 Na Windowsu se put A može izvesti i izravno iz PowerShella
-(`docker-shell.ps1`), bez Ubuntua u WSL2: dovoljan je za izgradnju i emulator u LV1–LV5
-i za LV7, ali ne i za LV6; pločica se tada programira alatom `esptool` iz
-Windowsa. Što koji put pokriva:
+(`docker-shell.ps1`), bez Ubuntua u WSL2. To je sporedna inačica puta A:
+dovoljna je za izgradnju i emulator u LV1–LV5 i za LV7, ali ne i za LV6;
+pločica se tada programira alatom `esptool` iz Windowsa. Što koji put pokriva:
 
 | | A: Docker (Linux, WSL2, macOS) | A: Docker (Windows, PowerShell) | B: bez Dockera (Linux, WSL2, macOS) | C: Windows bez virtualizacije |
 |---|---|---|---|---|
@@ -69,21 +115,43 @@ Windowsa. Što koji put pokriva:
 | LV7 (Buildroot, ugradbeni Linux) | da | da | Linux i WSL2 uz dodatne pakete; macOS preko Dockera | ne |
 | Programiranje pločice | na Linuxu; na macOS-u `esptool` s računala; u WSL2 put B i `usbipd` | `esptool` iz Windowsa | da | da |
 
-**Redoslijed.** Na svakom putu redom prođite:
+Skripte kolegija pisane su za `bash` na Linuxu (izravno, u WSL2 ili u
+kontejneru), a za put C postoje njihove PowerShell inačice; Git Bash i MSYS2 na
+Windowsu nisu podržani.
+
+**Redoslijed.** Upute imaju dva dijela. Prvi dio, do odjeljka *Vlastiti
+repozitorij za predaju*, treba za LV1; na svakom putu redom prođite:
 
 1. *Korak 0*;
 2. odjeljak svojega puta: *Put A*, *Put B* ili *Put C*;
-3. *Provjera* i *Rad na vježbi*; na putu C to su koraci 6 i 7 u odjeljku
-   *Put C*;
-4. kad okruženje radi, prema potrebi *Rad u VS Codeu* i *Programiranje
-   pločice*.
+3. na putovima A i B *Provjera* i *Rad na vježbi*; na putu C to su koraci 6
+   i 7 u odjeljku *Put C*;
+4. program PulseView (*PulseView: pregled signala*);
+5. ako radite u VS Codeu, otvaranje repozitorija i zadatak Ctrl-Shift-B
+   (*Rad u VS Codeu*);
+6. prije predaje LV1 *Vlastiti repozitorij za predaju*.
+
+Drugi dio (*Dio II: kad zatreba*) čitate tek kad ga zatreba neka vježba:
+
+| Vježba | Što pročitati prije termina |
+|---|---|
+| LV2 | *Debugger: GDB spojen na QEMU* ili *Posebnosti pojedinih vježbi*, GDB iz terminala |
+| LV3, LV4 | samo uz pločicu: *Programiranje pločice*, s *LV3 i LV4 na pločici* i *Logički analizator*; u emulatoru ništa novo |
+| LV5 | ništa novo |
+| LV6 | *Posebnosti pojedinih vježbi*, LV6: alati MQTT na računalu i redoslijed rada |
+| LV7 | *Posebnosti pojedinih vježbi*, LV7; prva izgradnja traje 30–60 min, pa je pokrenite prije termina |
+
+Kad se repozitorij kolegija tijekom semestra dopuni, novo stanje preuzimate
+prema odjeljku *Ažuriranje repozitorija*.
 
 ## Korak 0: priprema računala i preuzimanje repozitorija
 
 Na svakom sustavu trebate dvoje: **uređivač koda**, jer vježbe traže izmjene
 izvornog koda (preporučen je [VS Code](https://code.visualstudio.com), a
 odgovara i bilo koji drugi; rad u njemu opisuje odjeljak *Rad u VS Codeu*), i
-**Git**, kojim preuzimate repozitorij. Što još treba, ovisi o sustavu i putu:
+**Git**, kojim preuzimate repozitorij. Za predaju vježbi trebat će vam još
+besplatan račun na GitHubu, koji otvarate prije prve predaje (odjeljak
+*Vlastiti repozitorij za predaju*). Što još treba, ovisi o sustavu i putu:
 
 | Sustav | Instalirajte prije početka | Administrator | Prostor |
 |---|---|---|---|
@@ -102,16 +170,17 @@ ondje je najjednostavniji put A.
 **macOS.** U Terminalu upišite `git --version`; ako naredba ne postoji,
 instalirajte je s `xcode-select --install`.
 
-**Windows** nudi tri mogućnosti (vidi *Koji put odabrati*):
+**Windows** nudi tri mogućnosti (vidi *Koji put odabrati*); pročitajte samo
+stavku one koju ste odabrali:
 
 - **WSL2** (preporučeno; putovi A i B kao na Linuxu): u PowerShellu pokrenutom
   kao administrator izvedite `wsl --install`, ponovno pokrenite računalo,
-  otvorite aplikaciju **Ubuntu** i zadajte korisničko ime i lozinku za Linux.
-  Sve daljnje naredbe pišu se u terminalu Ubuntu, a repozitorij klonirajte u
+  otvorite aplikaciju **Ubuntu** i zadajte korisničko ime i lozinku za Linux
+  (uspjeh: odzivnik oblika `ime@računalo:~$`). Sve daljnje naredbe pišu se u terminalu Ubuntu, a repozitorij klonirajte u
   Linuxov datotečni sustav (`~/`), nikako u `/mnt/c/...`. Ako virtualizacija
   nije uključena, uključite je u BIOS-u/UEFI-ju (*Intel VT-x*, *AMD-V*); ako je
   procesor ne podržava, odaberite put C. Git je u Ubuntuu već instaliran.
-- **Docker iz PowerShella** (put A bez Ubuntua u WSL2): Git za Windows i Docker
+- **Docker iz PowerShella** (sporedna inačica puta A, bez Ubuntua u WSL2): Git za Windows i Docker
   Desktop iz tablice; repozitorij se klonira u PowerShellu (niže).
 - **Put C** (bez virtualizacije): instalaciju i preuzimanje repozitorija opisuje
   odjeljak *Put C*; od ovog odjeljka za njega vrijede samo tablica i uređivač
@@ -133,7 +202,8 @@ Za Docker iz PowerShella izvedite ista tri retka u **novom** PowerShellu,
 otvorenom nakon instalacije Gita. Datoteka `.gitattributes` čuva Linuxove
 završetke redaka u skriptama i kad repozitorij klonira Git za Windows. Sve
 naredbe u nastavku pišu se iz korijena repozitorija
-(`~/VUKA-ugradbeni-sustavi`), osim ako piše drukčije.
+(`~/VUKA-ugradbeni-sustavi`), osim ako piše drukčije. Uspjeh: `ls` u njemu
+ispisuje `Dockerfile`, `README.en.md`, `README.md`, `labs` i `scripts`.
 
 ## Put A: s Dockerom
 
@@ -145,12 +215,14 @@ naredbe u nastavku pišu se iz korijena repozitorija
      sudo usermod -aG docker $USER
      ```
    - **macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-   - **Windows:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-     s WSL2 pozadinom (zadano); instalacijski program na kraju traži odjavu
-     ili ponovno pokretanje računala — učinite to. Radite li u WSL2, u Docker
-     Desktopu uključite
-     *Settings → Resources → WSL integration* za **Ubuntu** (za Docker iz
-     PowerShella taj korak ne treba).
+   - **Windows s WSL2:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+     instalirajte u Windowsu, s WSL2 pozadinom (zadano); instalacijski program
+     na kraju traži odjavu ili ponovno pokretanje računala — učinite to. Zatim
+     u Docker Desktopu uključite *Settings → Resources → WSL integration* za
+     **Ubuntu**; tek tada `docker` radi u terminalu Ubuntu, u kojem pišete sve
+     naredbe u nastavku.
+   - **Windows, Docker iz PowerShella:** isti Docker Desktop, bez koraka *WSL
+     integration*; naredbe u nastavku pišete u PowerShellu.
 
    Pri prvom pokretanju Docker Desktop traži prihvaćanje uvjeta korištenja i
    nudi prijavu na Docker račun; prijava nije potrebna (*Continue without
@@ -219,7 +291,17 @@ bash scripts/verify.sh
 ```
 
 Pri kloniranju ESP-IDF-a upozorenje `refs/tags/v5.5 ... is not a commit!` i
-dulja poruka o stanju *detached HEAD* su očekivani. Instalacija zauzima
+dulja poruka o stanju *detached HEAD* su očekivani. `install.sh` u
+`~/.espressif` postavlja Python virtualnu okolinu (*venv*, zaseban skup Python
+paketa samo za ESP-IDF); uspjeh je kraj ispisa `All done! You can now run:`
+s naredbom za aktivaciju. Početna točka i razmak u `. ~/esp-idf/export.sh` dio
+su naredbe: skripta se tako izvodi u tekućoj ljusci i u njoj ostavlja postavke
+(`IDF_PATH`, alatni lanac na `PATH`-u), ali samo za taj terminal; bez točke
+terminal javlja *permission denied*; uspjeh aktivacije je redak `Done! You can
+now compile ESP-IDF projects.` Ako je emulator već instaliran, `idf_tools.py`
+javlja `Skipping qemu-riscv32@… (already installed)`. Uspjeh provjere je zadnji
+redak `verify.sh: PASS -- toolchain, build and QEMU all work`; ako ga nema, vidi
+*Provjera* i *Česti problemi*. Instalacija zauzima
 **oko 7 GB** (`~/esp-idf` 3,9 GB, `~/.espressif` 2,7 GB). Izgradnja i QEMU
 radili su u našem testu i bez paketa `ninja-build`, `gperf`, `ccache` i
 `dfu-util` (ESP-IDF donosi vlastite alate); ako nemate `sudo`, najvažnije su
@@ -246,15 +328,108 @@ bash scripts/verify.sh
 
 `coreutils` donosi naredbu `gtimeout`, koju trebaju skripte za emulator.
 
+## Provjera: `verify.sh`
+
+Ovaj i sljedeći odjeljak vrijede za putove A i B; na putu C provjeru i rad na
+vježbama opisuje odjeljak *Put C* (koraci 6 i 7).
+
+`bash scripts/verify.sh` (iz korijena repozitorija, s aktivnim okruženjem;
+u kontejneru je uvijek aktivno) provjerava `idf.py` i verziju v5.5,
+Espressifov `qemu-system-riscv32`, izgrađuje primjer `hello_world` i pokreće
+ga u emulatoru. Prva izgradnja traje nekoliko minuta. Izgradnja i zapisnici
+nalaze se u repozitoriju: `build/verify-hello_world.log` (izgradnja) i
+`build/verify-hello_world/qemu.log` (emulator). Uspjeh je zadnji redak:
+
+```text
+verify.sh: PASS -- toolchain, build and QEMU all work
+```
+
+## Rad na vježbi
+
+**Početak svakog rada.** Naredbe za izgradnju i emulator pišu se u terminalu
+u kojem je ESP-IDF aktivan, a priručnici vježbi polaze od korijena
+repozitorija. Novi terminal ne počinje ondje (na Linuxu, macOS-u i u WSL2
+počinje u `~`, a prečac na putu C u direktoriju ESP-IDF-a), pa na početku
+svakog rada, u novom terminalu, izvedite retke svojega puta:
+
+| Put | Naredbe | Nakon toga |
+|---|---|---|
+| A (terminal, PowerShell) | `cd ~/VUKA-ugradbeni-sustavi`, zatim `./scripts/docker-shell.sh` (u PowerShellu naredba iz *Put A*) | ljuska kontejnera, korijen `/work` |
+| B (terminal) | `. ~/esp-idf/export.sh`, zatim `cd ~/VUKA-ugradbeni-sustavi` | odzivnik sadrži ime repozitorija |
+| C (prečac ESP-IDF 5.5 PowerShell) | `cd C:\vuka\VUKA-ugradbeni-sustavi` | odzivnik sadrži ime repozitorija |
+
+Na putu C skripte kolegija imaju istoimenu inačicu `.ps1` (tablica u odjeljku
+*Put C*), a prvo pokretanje opisuje korak 7 u tom odjeljku.
+
+**Izgradnja i emulator.** Na primjeru LV1, na putovima A i B (za put C vidi
+odjeljak *Put C*):
+
+```sh
+cd labs/lab1_toolchain/starter
+idf.py set-target esp32c3                  # samo prvi put
+idf.py build
+bash ../../common/run_qemu.sh build        # emulator, 30 s
+```
+
+`idf.py set-target esp32c3` odabire ciljni čip i izvodi se samo prvi put, jer
+se odabir pamti u datoteci `sdkconfig`. Pokrenete li ga ponovno, `sdkconfig`
+nastaje iznova i gube se promjene napravljene u `menuconfig`-u. Starteri svih
+vježbi već imaju zadan ciljni čip (u datoteci `sdkconfig.defaults`), pa ovu
+naredbu izvodite samo u LV1, gdje je dio zadatka T1; u LV2–LV6 je ne
+pokrećite. `idf.py build` gradi program u direktorij `build/`.
+
+`run_qemu.sh` iz zadnje izgradnje sastavlja sliku flash memorije
+(`build/flash.bin`) i pokreće je u emulatoru, pa se uvijek izvodi najnoviji
+program. Uspjeh je Espressifov pozdravni ispis (*bootloader*, podaci o čipu),
+a zatim ispis programa; za nepromijenjeni polazni projekt LV1 to je redak
+`I (…) lab1: Ugradbeni racunalni sustavi -- Lab 1`. Emulator se sam zaustavlja
+nakon 30 s; drugim argumentom zadaje se
+drukčije vrijeme (npr. `run_qemu.sh build 60`). Završni redak
+`run_qemu.sh: timeout (30s) reached after output was produced — treating as success`
+znači da je sve u redu. Želite li ga zaustaviti prije, pritisnite **Ctrl-A, a
+zatim X**. Cijeli ispis sprema se i u `build/qemu.log`.
+
+Gradite li isti projekt naizmjence na putu A i na putu B, prije promjene puta
+izvedite `idf.py fullclean`: direktorij `build/` pamti putanju projekta, a ona
+je u kontejneru drukčija (`/work/...`).
+
+| Vježba | Direktorij | Napomena |
+|---|---|---|
+| LV1 | `labs/lab1_toolchain/` | alatni lanac, prva izgradnja |
+| LV2 | `labs/lab2_gpio_irq/` | registri, prekidi, GPTimer; GDB u drugom terminalu |
+| LV3 | `labs/lab3_bme280/` | I2C i BME280; snimke signala u `captures/` |
+| LV4 | `labs/lab4_adc_pwm/` | ADC i PWM |
+| LV5 | `labs/lab5_rtos/` | FreeRTOS |
+| LV6 | `labs/lab6_mqtt/` | MQTT preko TLS-a; emulator s mrežom `run_qemu_net.sh` |
+| LV7 | `labs/lab7_linux_ota/` | Buildroot i OTA; prva izgradnja traje 30–60 min |
+
+Što u vježbi treba dovršiti i kako se to provjerava, opisuje priručnik vježbe.
+
+**Gdje su datoteke.** Kôd uređujete i datoteke za predaju (npr.
+`build/qemu.log`) otvarate na računalu, u direktoriju repozitorija. Na putu A
+to je isti direktorij koji kontejner vidi kao `/work`: što izgradnja u
+kontejneru stvori, odmah je i na računalu. Na Linuxu i macOS-u repozitorij je u
+`~/VUKA-ugradbeni-sustavi`, na putu C u `C:\vuka\VUKA-ugradbeni-sustavi`. U WSL2
+repozitorij je u Linuxovu datotečnom sustavu, pa ga Windowsovi programi
+(preglednik, PulseView) ne vide pod `C:`: u terminalu Ubuntu, u direktoriju
+koji vas zanima, naredba `explorer.exe .` otvara taj direktorij u Windowsovu
+Exploreru (adresa počinje s `\\wsl.localhost\Ubuntu` ili `\\wsl$\Ubuntu`),
+odakle se datoteke otvaraju i prilažu.
+
 ## Put C: Windows bez virtualizacije (bez WSL2 i Dockera)
+
+Na putovima A i B ovaj odjeljak preskočite i nastavite odjeljkom *PulseView:
+pregled signala*.
 
 Za računala na kojima WSL2 i Docker ne rade jer procesor ne podržava
 virtualizaciju. Najprije provjerite nije li ona samo isključena u BIOS-u/UEFI-ju
 (*Intel VT-x* ili *AMD-V*) — ako se može uključiti, slijedite upute za WSL2.
 Emulatoru QEMU virtualizacija ne treba (čip oponaša programski), pa ovaj put
 pokriva LV1–LV6 i pločicu; LV7 (Buildroot) treba Linux, pa je izvedite na
-računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban je
-64-bitni Windows 10 ili 11.
+računalu s WSL2, Dockerom ili Linuxom. Javite se nastavniku čim odaberete put C
+i dogovorite na kojem ćete računalu izvesti LV7 (13. tjedan): njezinu prvu
+izgradnju (30–60 min) treba pokrenuti prije termina (*Posebnosti pojedinih
+vježbi*, LV7). Potreban je 64-bitni Windows 10 ili 11.
 
 1. **Git for Windows** (<https://git-scm.com/download/win> ili
    `winget install Git.Git`); donosi i `openssl`, koji za certifikate u LV6
@@ -268,6 +443,7 @@ računalu s WSL2, Dockerom ili Linuxom (dogovorite se s nastavnikom). Potreban j
    ```powershell
    python $env:IDF_PATH\tools\idf_tools.py install qemu-riscv32
    ```
+   Je li prečac emulator pronašao, provjerava korak 6.
 4. Klonirajte repozitorij u putanju bez razmaka i dijakritičkih znakova
    (korisnička mapa poput `C:\Users\Ivan Čović` ne odgovara ESP-IDF-u):
    ```powershell
@@ -344,233 +520,48 @@ putu C pokrećete PowerShell inačice istog imena: izostavite `bash`, nastavak
 Naredbu koju priručnik prelama znakom `\` na putu C upišite u jednom retku.
 
 Za brzo isprobavanje radi i ESP-IDF-ova naredba `idf.py qemu monitor` (izgradi,
-pokrene i prikaže ispis; izlaz Ctrl-]).
+pokrene i prikaže ispis; izlaz Ctrl-]). Posebnosti LV6 na putu C opisuje
+odjeljak *Posebnosti pojedinih vježbi*, a pločicu *Programiranje pločice*.
 
-**LV6:** emulator posrednika (`run_broker.ps1`) vidi na `10.0.2.2:8883`, a alati
-na računalu na `127.0.0.1:8883`. Ako Windows upita, dopustite pristup u privatnoj
-mreži. `mosquitto_sub` i `mosquitto_pub` su u `C:\Program Files\mosquitto`, pa se
-naredba iz priručnika LV6, iz `labs\lab6_mqtt\starter`, piše ovako:
-```powershell
-& "C:\Program Files\mosquitto\mosquitto_sub.exe" -h 127.0.0.1 -p 8883 --cafile ../broker/certs/ca.crt -t "vuka/sensors/#" -v
-```
 
-**Pločica:** `idf.py -p COM<n> flash monitor`, port iz Upravitelja uređaja.
+## PulseView: pregled signala
 
-## Provjera: `verify.sh`
+Besplatni program PulseView (projekt sigrok) prikazuje digitalne signale kroz
+vrijeme. U LV1 i LV2 njime otvarate datoteke `build/gpio/gpioN.vcd` iz
+emulatora, a u LV3 i LV4 snimke logičkog analizatora (*Logički analizator*,
+niže). Instalirajte ga prije LV1:
 
-Ovaj i sljedeći odjeljak vrijede za putove A i B; na putu C provjeru i rad na
-vježbama opisuje odjeljak *Put C* (koraci 6 i 7).
+- **Linux (Debian, Ubuntu):** `sudo apt install pulseview`.
+- **macOS:** sa stranice <https://sigrok.org/wiki/Downloads> preuzmite
+  PulseView (`.dmg`) i aplikaciju prevucite u *Applications*. To je inačica za
+  procesore x86-64; na Macu s čipom Apple izvodi se preko Rosette 2, koju macOS
+  ponudi instalirati pri prvom pokretanju. Ako macOS aplikaciju odbije otvoriti,
+  prvi put je otvorite desnim klikom → *Open*.
+- **Windows (i uz WSL2):** sa iste stranice preuzmite 64-bitni instalacijski
+  program PulseViewa. Program nije digitalno potpisan, pa Windows pri
+  pokretanju može prikazati upozorenje SmartScreen: *More info → Run anyway*.
 
-`bash scripts/verify.sh` (iz korijena repozitorija, s aktivnim okruženjem;
-u kontejneru je uvijek aktivno) provjerava `idf.py` i verziju v5.5,
-Espressifov `qemu-system-riscv32`, izgrađuje primjer `hello_world` i pokreće
-ga u emulatoru. Prva izgradnja traje nekoliko minuta. Izgradnja i zapisnici
-nalaze se u repozitoriju: `build/verify-hello_world.log` (izgradnja) i
-`build/verify-hello_world/qemu.log` (emulator). Uspjeh je zadnji redak:
-
-```text
-verify.sh: PASS -- toolchain, build and QEMU all work
-```
-
-## Rad na vježbi
-
-**Terminal s ESP-IDF-om.** Naredbe za izgradnju i emulator pišu se u
-terminalu u kojem je ESP-IDF aktivan. Kako se takav terminal otvara, ovisi o
-putu:
-
-- **put A:** iz korijena repozitorija pokrenite `./scripts/docker-shell.sh`
-  (na Windowsu iz PowerShella `docker-shell.ps1`, vidi *Put A*). Otvara se
-  ljuska u kontejneru, u kojoj je repozitorij pod `/work`; sve sljedeće
-  naredbe pišu se u njoj.
-- **put B:** u svakom novom terminalu najprije izvedite
-  `. ~/esp-idf/export.sh`.
-- **put C:** otvorite prečac **ESP-IDF 5.5 PowerShell**. Skripte kolegija na
-  tom putu imaju istoimenu inačicu `.ps1` (tablica u odjeljku *Put C*), a
-  prvo pokretanje opisuje korak 7 u tom odjeljku.
-
-**Izgradnja i emulator.** Na primjeru LV1, na putovima A i B (za put C vidi
-odjeljak *Put C*):
-
-```sh
-cd labs/lab1_toolchain/starter
-idf.py set-target esp32c3                  # samo prvi put
-idf.py build
-bash ../../common/run_qemu.sh build        # emulator, 30 s
-```
-
-`idf.py set-target esp32c3` odabire ciljni čip i izvodi se samo prvi put, jer
-se odabir pamti u datoteci `sdkconfig`. Pokrenete li ga ponovno, `sdkconfig`
-nastaje iznova i gube se promjene napravljene u `menuconfig`-u. Starteri svih
-vježbi već imaju zadan ciljni čip (u datoteci `sdkconfig.defaults`), pa ovu
-naredbu izvodite samo u LV1, gdje je dio zadatka T1; u LV2–LV6 je ne
-pokrećite. `idf.py build` gradi program u direktorij `build/`.
-
-`run_qemu.sh` iz zadnje izgradnje sastavlja sliku flash memorije
-(`build/flash.bin`) i pokreće je u emulatoru, pa se uvijek izvodi najnoviji
-program. Emulator se sam zaustavlja nakon 30 s; drugim argumentom zadaje se
-drukčije vrijeme (npr. `run_qemu.sh build 60`). Završni redak
-`run_qemu.sh: timeout (30s) reached after output was produced — treating as success`
-znači da je sve u redu. Želite li ga zaustaviti prije, pritisnite **Ctrl-A, a
-zatim X**. Cijeli ispis sprema se i u `build/qemu.log`.
-
-Gradite li isti projekt naizmjence na putu A i na putu B, prije promjene puta
-izvedite `idf.py fullclean`: direktorij `build/` pamti putanju projekta, a ona
-je u kontejneru drukčija (`/work/...`).
-
-| Vježba | Direktorij | Napomena |
-|---|---|---|
-| LV1 | `labs/lab1_toolchain/` | alatni lanac, prva izgradnja |
-| LV2 | `labs/lab2_gpio_irq/` | registri, prekidi, GPTimer; GDB u drugom terminalu |
-| LV3 | `labs/lab3_bme280/` | I2C i BME280; snimke signala u `captures/` |
-| LV4 | `labs/lab4_adc_pwm/` | ADC i PWM |
-| LV5 | `labs/lab5_rtos/` | FreeRTOS |
-| LV6 | `labs/lab6_mqtt/` | MQTT preko TLS-a; emulator s mrežom `run_qemu_net.sh` |
-| LV7 | `labs/lab7_linux_ota/` | Buildroot i OTA; prva izgradnja traje 30–60 min |
-
-Što u vježbi treba dovršiti i kako se to provjerava, opisuje priručnik vježbe.
-
-**GDB iz terminala (LV2).** U VS Codeu debugger se spaja tipkom F5 (odjeljak
-*Debugger: GDB spojen na QEMU*). Bez VS Codea trebaju vam dva terminala, oba
-u direktoriju `labs/lab2_gpio_irq/starter`:
-
-1. **Terminal 1 pokreće QEMU koji čeka debugger:**
-   `bash ../../common/run_qemu_gdb.sh build` (put C:
-   `../../common/run_qemu_gdb.ps1 build`). Skripta ispiše naredbu za spajanje
-   i čeka.
-2. **Terminal 2 pokreće GDB.** Otvorite drugi terminal s aktivnim ESP-IDF-om:
-   na putu A ponovno pokrenite `./scripts/docker-shell.sh`, koji se spaja na
-   isti kontejner; na putu B u novom terminalu izvedite
-   `. ~/esp-idf/export.sh`; na putu C otvorite još jedan prozor prečaca
-   **ESP-IDF 5.5 PowerShell**. Novi terminal ne počinje u direktoriju vježbe,
-   pa u njega prijeđite punom putanjom:
-   ```sh
-   cd /work/labs/lab2_gpio_irq/starter                         # put A (kontejner)
-   cd ~/VUKA-ugradbeni-sustavi/labs/lab2_gpio_irq/starter      # put B
-   cd C:\vuka\VUKA-ugradbeni-sustavi\labs\lab2_gpio_irq\starter  # put C
-   ```
-   Zatim upišite naredbu koju je ispisao terminal 1:
-   `riscv32-esp-elf-gdb build/lab2.elf -ex "target remote :1234"`.
-
-Spajanje je uspjelo kad GDB ispiše:
-
-```text
-Remote debugging using :1234
-0x40000000 in ?? ()
-(gdb)
-```
-
-Procesor stoji na prvoj instrukciji ROM-a (adresa `0x40000000`, za koju GDB
-nema imena funkcije), a program još ne radi i terminal 1 ništa ne ispisuje.
-Naredbe iz priručnika LV2 (`break`, `continue` …) upisujete iza odzivnika
-`(gdb)`; ispis programa pojavljuje se u terminalu 1. Javi li GDB `Connection
-refused`, u terminalu 1 ne čeka `run_qemu_gdb.sh` (možda je pokrenut
-`run_qemu.sh` ili je emulator već završio).
-
-**LV3 i LV4 na pločici.** U emulatoru LV3 umjesto I2C sabirnice čita
-simulirane registre senzora, a LV4 koristi simulirani ADC. Inačica za pločicu gradi se u **zasebnom** direktoriju
-`build-hw`, kako bi izgradnja za QEMU u `build/` ostala netaknuta. Iz
-direktorija `starter` vježbe:
-
-```sh
-idf.py -B build-hw -D SDKCONFIG=build-hw/sdkconfig -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.hw" build
-idf.py -B build-hw -D SDKCONFIG=build-hw/sdkconfig -p <port> flash monitor
-```
-
-Zaseban direktorij potreban je zato što se `sdkconfig.defaults` i
-`sdkconfig.hw` primjenjuju samo kad `sdkconfig` nastaje, a `idf.py` popis tih
-datoteka pamti u direktoriju izgradnje. Izgradite li inačicu za pločicu u
-`build/`, program i dalje koristi simulator, bez ikakve poruke o tome, a ni
-povratak na QEMU više ne radi kako treba.
-
-Uz Docker na macOS-u i Windowsu kontejner ne vidi pločicu: prvu naredbu
-izvedite u kontejneru, a program upišite alatom `esptool` s računala, kako
-opisuje odjeljak *Programiranje pločice*, ali iz direktorija `build-hw`
-(npr. `labs/lab3_bme280/starter/build-hw`), ne iz `build`.
-
-**LV6.** Redoslijed je ovaj:
-
-1. **Na putu A najprije ljuska kontejnera** (`./scripts/docker-shell.sh`),
-   koju ostavite otvorenu dok radite. Posrednik se pokreće tek nakon nje:
-   pokrenut prije nje, zauzme port 8883 na računalu i `docker-shell.sh` se ne
-   može pokrenuti (*Česti problemi*).
-2. **Certifikati**, iz direktorija `labs/lab6_mqtt/starter`, na računalu ili
-   u ljusci kontejnera: `bash ../broker/gen_certs.sh`.
-3. **Posrednik MQTT**, u **terminalu računala** (Linux, macOS, WSL2), ne u
-   ljusci kontejnera, jer skripta sama poziva `docker`. Iz korijena
-   repozitorija: `bash labs/lab6_mqtt/broker/run_broker.sh`. Posrednik radi
-   dok ga ne zaustavite s Ctrl-C, pa za ostale korake otvorite drugi terminal.
-4. **Program**, u terminalu s ESP-IDF-om (na putu A u ljusci iz koraka 1), iz
-   `labs/lab6_mqtt/starter`:
-   `idf.py build`, zatim `bash ../../common/run_qemu_net.sh build`.
-
-Posrednik uvijek radi u Dockeru (službena slika `eclipse-mosquitto`), pa i
-put B za LV6 treba Docker. Ako kontejner kolegija (`vuka-ugradbeni-sustavi`)
-radi, posrednik se priključuje njegovoj mreži: QEMU u kontejneru vidi ga na
-`10.0.2.2:8883`, a alati na računalu na `127.0.0.1:8883`. Bez kontejnera
-kolegija (put B) posrednik prosljeđuje port 8883 izravno na računalo. S
-Dockerom iz PowerShella LV6 nije moguća, jer skripte trebaju `bash`: radite je
-u WSL2 ili na putu C.
-
-**LV7.** Buildroot je najjednostavnije izgraditi u kontejneru kolegija.
-Naredbe niže pišu se u **terminalu računala**, iz korijena repozitorija, a ne
-u ljusci `docker-shell`, jer same pokreću kontejner. U VS Codeu isto radi
-zadatak *LV7: izgradnja Buildroota* (*Terminal → Run Task…*), koji sam bira
-način: u prozoru priključenom na kontejner gradi u njemu (na macOS-u i
-Windowsu na volumenu `lab7_br`, koji `docker-shell` montira na `/br`), a u
-običnom prozoru pokreće kontejner kolegija. Na Linuxu bez slike kolegija gradi
-izravno, uz pakete navedene niže. Na putu C LV7 nije moguća.
-
-**Linux i WSL2** (u WSL2 i kad Docker dolazi iz Docker Desktopa) — istom
-skriptom kao za ostale vježbe. Kontejner tada radi
-pod vašim korisnikom, pa datoteke izgradnje pripadaju vama (izravan
-`docker run` bez `--user` gradio bi kao root, a takve datoteke ne možete
-obrisati bez `sudo`):
-```sh
-./scripts/docker-shell.sh make -C labs/lab7_linux_ota -f Makefile.buildroot all
-```
-
-**macOS** (Docker Desktop) — izgradnja na imenovanom volumenu `lab7_br`:
-```sh
-docker run --rm -v "$PWD:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
-```
-
-**Windows bez Ubuntua u WSL2** (Docker Desktop, PowerShell) — ista naredba, u
-jednom retku:
-```powershell
-docker run --rm -v "${PWD}:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
-```
-
-**Bez Dockera** (samo Linux i WSL2) potrebni su još paketi
-`sudo apt-get install -y make gcc g++ patch cpio unzip rsync bc file wget qemu-system-misc`,
-a izgradnja se zatim pokreće izravno:
-`make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
-
-Izgradnja je uspjela kad ispis, na bilo kojem od ovih načina, završava popisom
-izgrađenih datoteka (veličine i datumi su drukčiji):
-
-```text
-== artifacts ready:
-total ...
-...  Image
-...  fw_jump.bin
-...  rootfs.ext4
-make: Leaving directory '.../labs/lab7_linux_ota'
-```
-
-Datoteke su u direktoriju `labs/lab7_linux_ota/artifacts`. Ako ispis završava
-retkom poput `make: *** […] Error 2`, a retka `== artifacts ready:` nema,
-izgradnja nije uspjela; ponovno pokretanje iste naredbe nastavlja ondje gdje je
-stala.
+**Pinovi iz emulatora (LV1 i LV2).** Skripta `run_qemu.sh` uz opciju
+`--gpio-vcd` (`run_qemu.ps1 -GpioVcd` na putu C) stvara datoteke
+`build/gpio/gpioN.vcd`: razinu svakog GPIO izlaza kroz vrijeme, zapisanu iz
+upisa programa u GPIO registre. U PulseViewu se otvaraju strelicom uz gumb
+*Open* (ikona mape na alatnoj traci) → *Import Value Change Dump data*:
+odaberite datoteku, a u prozoru s opcijama uvoza ostavite zadane vrijednosti i
+potvrdite s *OK*. Za to analizator nije potreban.
 
 ## Rad u VS Codeu
 
 Repozitorij sadrži postavke za VS Code (`.vscode/`): preporučena proširenja,
 zadatke za izgradnju i emulator, konfiguracije debuggera i postavke za
-dovršavanje koda. VS Code mora raditi **ondje gdje je ESP-IDF**, pa se
-repozitorij otvara različito prema putu:
+dovršavanje koda. Repozitorij se otvara različito prema putu:
 
-- **Put A (Docker, svi sustavi).** Alati su samo u kontejneru, pa se VS Code
-  na njega priključuje:
+- **Put A (Docker, svi sustavi).** Za izgradnju i emulator (dovoljno za LV1)
+  otvorite repozitorij na računalu: na Linuxu i macOS-u *File → Open Folder* →
+  korijen repozitorija, u WSL2 kao na putu B u WSL2 (niže), a uz Docker iz
+  PowerShella *File → Open Folder*. Zadatak Ctrl-Shift-B tada sam gradi i
+  pokreće vježbu u kontejneru kolegija. Debugger (LV2) i dovršavanje koda rade
+  samo ondje gdje je ESP-IDF, tj. u kontejneru, pa za njih VS Code priključite
+  na kontejner:
   1. Samo prvi put: u VS Codeu otvorite pregled *Extensions* (Ctrl-Shift-X),
      potražite *Dev Containers* (izdavač Microsoft) i kliknite *Install*. Bez
      tog proširenja naredbe iz koraka 3 nema.
@@ -582,7 +573,8 @@ repozitorij otvara različito prema putu:
   4. U novom prozoru odaberite *File → Open Folder* → `/work`. Dolje lijevo u
      prozoru piše *Container …*.
 
-  Korake 2–4 ponovite na početku svakog rada.
+  Korake 2–4 ponovite na početku svakog rada u kojem trebate debugger ili
+  dovršavanje koda.
 - **Put B, Linux i macOS.** *File → Open Folder* → korijen repozitorija.
 - **Put B, WSL2.** U terminalu Ubuntu, u korijenu repozitorija, upišite
   `code .`. VS Code je instaliran na Windowsu, a proširenje *WSL* spaja ga s
@@ -592,8 +584,9 @@ repozitorij otvara različito prema putu:
 Na pitanje vjerujete li autorima mape odgovorite *Yes, I trust the authors*: u
 ograničenom načinu (*Restricted Mode*) zadaci ne rade. VS Code zatim ponudi
 preporučena proširenja. *C/C++* treba na svim putovima, *WSL* samo za WSL2, a
-*Dev Containers* samo za put A. Ponudu paketa *C/C++ Extension Pack* možete
-odbiti. Na putu A i u WSL2 proširenje *C/C++* mora biti instalirano **u
+*Dev Containers* samo za priključivanje na kontejner (put A). Ponudu paketa
+*C/C++ Extension Pack* možete odbiti. U prozoru priključenom na kontejner i u
+WSL2 proširenje *C/C++* mora biti instalirano **u
 kontejneru** odnosno **u WSL-u**: u pregledu *Extensions* (Ctrl-Shift-X) za
 *C/C++* kliknite *Install in Container…* odnosno *Install in WSL: Ubuntu*.
 Espressifovo proširenje *ESP-IDF* nije potrebno i ne instalirajte ga: ono
@@ -625,7 +618,7 @@ QEMU se i na macOS-u zaustavlja s Ctrl-A, zatim X, a monitor s Ctrl-].
 Svi zadaci su u izborniku *Terminal → Run Task…*. Zadaci bez oznake vježbe u
 imenu zajednički su za LV1–LV6: vježbu birate s popisa koji se pojavi **nakon**
 odabira zadatka. Debugger nije u tom izborniku, nego u pregledu *Run and Debug*
-(odjeljak *Debugger*, niže).
+(odjeljak *Debugger*, u drugom dijelu).
 
 | Zadatak | Što radi |
 |---|---|
@@ -636,9 +629,12 @@ odabira zadatka. Debugger nije u tom izborniku, nego u pregledu *Run and Debug*
 | idf.py reconfigure | nakon novog `Kconfig.projbuild` (LV1, LV4) |
 | idf.py fullclean | kad isti projekt gradite naizmjence s Dockerom i bez njega |
 | QEMU za GDB, čeka debugger | zadnja izgradnja u emulatoru koji čeka GDB (odjeljak *Debugger*) |
-| LV7: izgradnja Buildroota | izgradnja LV7 (odjeljak *Rad na vježbi*, LV7) |
-| LV1, LV2: izgradnja, QEMU i VCD pinova | izgradnja, zatim `run_qemu.sh --gpio-vcd`: uz `qemu.log` i `build/gpio/gpioN.vcd` za PulseView (odjeljak *Logički analizator*) |
+| LV7: izgradnja Buildroota | izgradnja LV7 (odjeljak *Posebnosti pojedinih vježbi*, LV7) |
+| LV1, LV2: izgradnja, QEMU i VCD pinova | izgradnja, zatim `run_qemu.sh --gpio-vcd`: uz `qemu.log` i `build/gpio/gpioN.vcd` za PulseView (odjeljak *PulseView*) |
 | LV1–LV6: izgradnja i QEMU za GDB | izgradnja vježbe, zatim emulator koji čeka GDB; pokreće ih i F5 (odjeljak *Debugger*) |
+
+Na popisu zadataka uz hrvatski naziv iza kose crte stoji i engleski, npr.
+*Izgradnja i QEMU / Build and run in QEMU*.
 
 Zadaci sami nalaze okruženje (skripta `scripts/vscode-task.sh`, na Windowsu
 `.ps1`), i to ovim redom: aktivan ESP-IDF (i u kontejneru), `~/esp-idf`
@@ -658,7 +654,64 @@ radi tek nakon prve izgradnje (do tada *Problems* za neizgrađene vježbe javlja
 *Cannot find … compile_commands.json*). Na putu A putanje su iz kontejnera
 (`/work/...`), pa dovršavanje radi samo u prozoru priključenom na kontejner.
 
-### Debugger: GDB spojen na QEMU
+## Vlastiti repozitorij za predaju
+
+Vježbe predajete poveznicom na vlastiti privatni repozitorij na GitHubu.
+Git pamti povijest datoteka kao niz commitova (*commit*, zapis stanja datoteka), a GitHub je poslužitelj
+na kojem ta povijest stoji i odakle je čita nastavnik. Naredbe ovog odjeljka
+pišete ondje gdje i `git pull` (odjeljak *Ažuriranje repozitorija*): u
+terminalu računala, iz korijena repozitorija kolegija.
+
+**Jednom, prije prve predaje (LV1):**
+
+1. Na <https://github.com> otvorite besplatan račun, ako ga nemate, i stvorite
+   novi **privatni** repozitorij **bez** početnih datoteka (bez README-a,
+   `.gitignore`-a i licence), jer bi git inače odbio prvo slanje.
+2. U tom repozitoriju otvorite *Settings* → *Collaborators* → *Add people* i
+   dodajte nastavnika (njegovo korisničko ime navodi priručnik LV1, odjeljak
+   *Predaja*).
+3. Upišite ime i e-adresu kojima git potpisuje vaše commitove; bez toga prvi
+   `git commit` staje porukom `Please tell me who you are`:
+
+   ```sh
+   git config --global user.name "Ime Prezime"
+   git config --global user.email "vasa@adresa"
+   ```
+
+4. Izvorni udaljeni repozitorij preimenujte u `kolegij`, a svoj dodajte kao
+   `origin` (`<ime>` je vaše korisničko ime na GitHubu, `<repo>` ime novog
+   repozitorija):
+
+   ```sh
+   git remote rename origin kolegij
+   git remote add origin https://github.com/<ime>/<repo>.git
+   ```
+
+**Pri svakoj predaji** (primjer za LV1):
+
+```sh
+git add labs/lab1_toolchain/starter/main
+git commit -m "LV1"
+git push origin main
+```
+
+`git add` odabire promijenjene datoteke koje ulaze u sljedeći commit,
+`git commit` sprema commit s porukom u lokalnu povijest, a
+`git push origin main` šalje novu povijest grane `main` u vaš repozitorij na
+GitHubu. Pri prvom slanju git traži prijavu na GitHub: ovisno o sustavu otvori
+se preglednik ili terminal pita korisničko ime i lozinku. Lozinku računa GitHub
+ondje ne prima; umjesto nje upišite osobni token (na GitHubu *Settings* →
+*Developer settings* → *Personal access tokens*) s pravom pisanja u svoj
+repozitorij. Ne dodajte `-u`: grana tada i dalje prati `kolegij`, pa
+`git pull` i dalje donosi dopune kolegija. Na GitHubu provjerite da su
+datoteke stigle.
+
+## Dio II: kad zatreba
+
+Odjeljci odavde do kraja trebaju tek za pojedine vježbe (tablica u odjeljku
+*Koji put odabrati*, **Redoslijed**).
+
+## Debugger: GDB spojen na QEMU
 
 Debugger čine dva programa koja rade istodobno, a spaja ih mrežni priključak
 (port) **1234**:
@@ -747,8 +800,139 @@ prvi redak funkcije `app_main`. U LV5 `app_main` je u datoteci primjera odabrano
 | program ne staje, a pogreške nema; u *Call Stack* nema ničega | Debugger nije spojen: zadatak *QEMU za GDB* ili *LV*n*: izgradnja i QEMU za GDB* pokrenut iz *Run Task* samo pokreće emulator koji čeka. Spojite debugger: *Run and Debug* → konfiguracija → F5 (korak 4). |
 | `port 1234 is already in use` u kartici zadatka | Stari emulator još čeka: zatvorite njegovu karticu zadatka (ikona koša) ili u njoj pritisnite Ctrl-A, zatim X, pa ponovno F5. |
 
-Bez VS Codea isto se radi iz dva terminala (odjeljak *Rad na vježbi*, *GDB iz
-terminala*).
+Bez VS Codea isto se radi iz dva terminala (odjeljak *Posebnosti pojedinih
+vježbi*, *GDB iz terminala*).
+
+## Posebnosti pojedinih vježbi
+
+**GDB iz terminala (LV2).** U VS Codeu debugger se spaja tipkom F5 (odjeljak
+*Debugger: GDB spojen na QEMU*). Bez VS Codea trebaju vam dva terminala, oba
+u direktoriju `labs/lab2_gpio_irq/starter`:
+
+1. **Terminal 1 pokreće QEMU koji čeka debugger:**
+   `bash ../../common/run_qemu_gdb.sh build` (put C:
+   `../../common/run_qemu_gdb.ps1 build`). Skripta ispiše naredbu za spajanje
+   i čeka.
+2. **Terminal 2 pokreće GDB.** Otvorite drugi terminal s aktivnim ESP-IDF-om:
+   na putu A ponovno pokrenite `./scripts/docker-shell.sh`, koji se spaja na
+   isti kontejner; na putu B u novom terminalu izvedite
+   `. ~/esp-idf/export.sh`; na putu C otvorite još jedan prozor prečaca
+   **ESP-IDF 5.5 PowerShell**. Novi terminal ne počinje u direktoriju vježbe,
+   pa u njega prijeđite punom putanjom:
+   ```sh
+   cd /work/labs/lab2_gpio_irq/starter                         # put A (kontejner)
+   cd ~/VUKA-ugradbeni-sustavi/labs/lab2_gpio_irq/starter      # put B
+   cd C:\vuka\VUKA-ugradbeni-sustavi\labs\lab2_gpio_irq\starter  # put C
+   ```
+   Zatim upišite naredbu koju je ispisao terminal 1:
+   `riscv32-esp-elf-gdb build/lab2.elf -ex "target remote :1234"`.
+
+Spajanje je uspjelo kad GDB ispiše:
+
+```text
+Remote debugging using :1234
+0x40000000 in ?? ()
+(gdb)
+```
+
+Procesor stoji na prvoj instrukciji ROM-a (adresa `0x40000000`, za koju GDB
+nema imena funkcije), a program još ne radi i terminal 1 ništa ne ispisuje.
+Naredbe iz priručnika LV2 (`break`, `continue` …) upisujete iza odzivnika
+`(gdb)`; ispis programa pojavljuje se u terminalu 1. Javi li GDB `Connection
+refused`, u terminalu 1 ne čeka `run_qemu_gdb.sh` (možda je pokrenut
+`run_qemu.sh` ili je emulator već završio).
+
+**LV6.** Na putovima A i B alate `mosquitto_sub` i `mosquitto_pub` pokrećete u
+terminalu računala (kontejner kolegija ih nema), pa ih jednom, prije LV6,
+instalirajte: na Linuxu (Debian, Ubuntu) i u WSL2
+`sudo apt-get install -y mosquitto-clients`, a na macOS-u `brew install mosquitto`
+([Homebrew](https://brew.sh), ako ga još nemate). Naredba `mosquitto_sub --help`
+tada ispisuje `mosquitto_sub is a simple mqtt client …`. Na putu C alati dolaze
+s Mosquittom za Windows (*Put C*). Redoslijed rada je ovaj:
+
+1. **Na putu A najprije ljuska kontejnera** (`./scripts/docker-shell.sh`),
+   koju ostavite otvorenu dok radite. Posrednik se pokreće tek nakon nje:
+   pokrenut prije nje, zauzme port 8883 na računalu i `docker-shell.sh` se ne
+   može pokrenuti (*Česti problemi*).
+2. **Certifikati**, iz direktorija `labs/lab6_mqtt/starter`, na računalu ili
+   u ljusci kontejnera: `bash ../broker/gen_certs.sh`.
+3. **Posrednik MQTT**, u **terminalu računala** (Linux, macOS, WSL2), ne u
+   ljusci kontejnera, jer skripta sama poziva `docker`. Iz korijena
+   repozitorija: `bash labs/lab6_mqtt/broker/run_broker.sh`. Posrednik radi
+   dok ga ne zaustavite s Ctrl-C, pa za ostale korake otvorite drugi terminal.
+4. **Program**, u terminalu s ESP-IDF-om (na putu A u ljusci iz koraka 1), iz
+   `labs/lab6_mqtt/starter`:
+   `idf.py build`, zatim `bash ../../common/run_qemu_net.sh build`.
+
+Posrednik uvijek radi u Dockeru (službena slika `eclipse-mosquitto`), pa i
+put B za LV6 treba Docker. Ako kontejner kolegija (`vuka-ugradbeni-sustavi`)
+radi, posrednik se priključuje njegovoj mreži: QEMU u kontejneru vidi ga na
+`10.0.2.2:8883`, a alati na računalu na `127.0.0.1:8883`. Bez kontejnera
+kolegija (put B) posrednik prosljeđuje port 8883 izravno na računalo. S
+Dockerom iz PowerShella LV6 nije moguća, jer skripte trebaju `bash`: radite je
+u WSL2 ili na putu C.
+
+**LV7.** Buildroot je najjednostavnije izgraditi u kontejneru kolegija.
+Naredbe niže pišu se u **terminalu računala**, iz korijena repozitorija, a ne
+u ljusci `docker-shell`, jer same pokreću kontejner. U VS Codeu isto radi
+zadatak *LV7: izgradnja Buildroota* (*Terminal → Run Task…*), koji sam bira
+način: u prozoru priključenom na kontejner gradi u njemu (na macOS-u i
+Windowsu na volumenu `lab7_br`, koji `docker-shell` montira na `/br`), a u
+običnom prozoru pokreće kontejner kolegija. Na Linuxu bez slike kolegija gradi
+izravno, uz pakete navedene niže. Na putu C LV7 nije moguća; na kojem ćete je
+računalu izvesti, dogovorite s nastavnikom (*Put C*).
+
+**Linux i WSL2** (u WSL2 i kad Docker dolazi iz Docker Desktopa) — istom
+skriptom kao za ostale vježbe. Kontejner tada radi
+pod vašim korisnikom, pa datoteke izgradnje pripadaju vama (izravan
+`docker run` bez `--user` gradio bi kao root, a takve datoteke ne možete
+obrisati bez `sudo`):
+```sh
+./scripts/docker-shell.sh make -C labs/lab7_linux_ota -f Makefile.buildroot all
+```
+
+**macOS** (Docker Desktop) — izgradnja na imenovanom volumenu `lab7_br`:
+```sh
+docker run --rm -v "$PWD:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
+```
+
+**Windows bez Ubuntua u WSL2** (Docker Desktop, PowerShell) — ista naredba, u
+jednom retku:
+```powershell
+docker run --rm -v "${PWD}:/work" -w /work -v lab7_br:/br embedded-course bash -lc 'make -C labs/lab7_linux_ota -f Makefile.buildroot all BR_DIR=/br'
+```
+
+**Bez Dockera** (samo Linux i WSL2) potrebni su još paketi
+`sudo apt-get install -y make gcc g++ patch cpio unzip rsync bc file wget qemu-system-misc`,
+a izgradnja se zatim pokreće izravno:
+`make -C labs/lab7_linux_ota -f Makefile.buildroot all`.
+
+Izgradnja je uspjela kad ispis, na bilo kojem od ovih načina, završava popisom
+izgrađenih datoteka (veličine i datumi su drukčiji):
+
+```text
+== artifacts ready:
+total ...
+...  Image
+...  fw_jump.bin
+...  rootfs.ext4
+make: Leaving directory '.../labs/lab7_linux_ota'
+```
+
+Datoteke su u direktoriju `labs/lab7_linux_ota/artifacts`. Ako ispis završava
+retkom poput `make: *** […] Error 2`, a retka `== artifacts ready:` nema,
+izgradnja nije uspjela; ponovno pokretanje iste naredbe nastavlja ondje gdje je
+stala.
+
+**LV6 na putu C.** Certifikate izrađuje `../broker/gen_certs.ps1`, a posrednik
+`../broker/run_broker.ps1`, u zasebnom prozoru prečaca (tablica naredbi u
+odjeljku *Put C*). Posrednik emulator vidi na `10.0.2.2:8883`, a alati
+na računalu na `127.0.0.1:8883`. Ako Windows upita, dopustite pristup u privatnoj
+mreži. `mosquitto_sub` i `mosquitto_pub` su u `C:\Program Files\mosquitto`, pa se
+naredba iz priručnika LV6, iz `labs\lab6_mqtt\starter`, piše ovako:
+```powershell
+& "C:\Program Files\mosquitto\mosquitto_sub.exe" -h 127.0.0.1 -p 8883 --cafile ../broker/certs/ca.crt -t "vuka/sensors/#" -v
+```
 
 ## Ažuriranje repozitorija
 
@@ -761,9 +945,10 @@ prečacu ESP-IDF 5.5 PowerShell):
 git pull
 ```
 
-`git pull` dohvaća s udaljenog repozitorija koji grana prati. Za repozitorij
-kolegija to vrijedi i nakon LV1, u kojoj izvorni udaljeni repozitorij
-preimenujete u `kolegij`, a svoj dodate kao `origin`: grana i dalje prati
+Ako novoga stanja nema, git ispisuje `Already up to date.` `git pull` dohvaća
+s udaljenog repozitorija koji grana prati. Za repozitorij kolegija to vrijedi i nakon što ste izvorni udaljeni repozitorij preimenovali
+u `kolegij`, a svoj dodali kao `origin` (odjeljak *Vlastiti repozitorij za
+predaju*): grana i dalje prati
 `kolegij`, a svoj rad šaljete naredbom `git push origin main`. Naredbom
 `git remote -v` vidite koji je koji.
 
@@ -805,7 +990,7 @@ idf.py -p <port> flash monitor      # izlaz iz monitora: Ctrl-]
 | Linux, Docker | `/dev/ttyACM0` | `URS_PORT=/dev/ttyACM0 ./scripts/docker-shell.sh` (novi kontejner: prethodni najprije zatvorite), pa u njemu `idf.py -p /dev/ttyACM0 flash monitor` |
 | WSL2 | `/dev/ttyACM0` | instalacija bez Dockera u WSL2, pločica proslijeđena alatom `usbipd` (niže) i grupa `dialout` |
 | macOS | `/dev/cu.usbmodem*` | `esptool` (niže) ili instalacija bez Dockera |
-| Windows, put C | `COM<n>` | Upravitelj uređaja → *USB Serial Device (COMn)* |
+| Windows, put C | `COM<n>` | u prečacu *ESP-IDF 5.5 PowerShell*, iz direktorija projekta, `idf.py -p COM<n> flash monitor`; port iz Upravitelja uređaja → *USB Serial Device (COMn)*; pločica se vidi izravno |
 | Windows, Docker iz PowerShella | `COM<n>` | `esptool` iz Windowsa (niže) |
 | Docker Desktop (macOS, Windows) | — | USB uređaji ne prosljeđuju se u kontejner |
 
@@ -850,15 +1035,38 @@ Zatim u direktoriju izgradnje projekta (npr. `labs/lab1_toolchain/starter/build`
 
 Ime porta pokazuje `ls /dev/cu.usbmodem*`.
 
+### LV3 i LV4 na pločici
+
+U emulatoru LV3 umjesto I2C sabirnice čita
+simulirane registre senzora, a LV4 koristi simulirani ADC. Inačica za pločicu gradi se u **zasebnom** direktoriju
+`build-hw`, kako bi izgradnja za QEMU u `build/` ostala netaknuta. Iz
+direktorija `starter` vježbe:
+
+```sh
+idf.py -B build-hw -D SDKCONFIG=build-hw/sdkconfig -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.hw" build
+idf.py -B build-hw -D SDKCONFIG=build-hw/sdkconfig -p <port> flash monitor
+```
+
+Zaseban direktorij potreban je zato što se `sdkconfig.defaults` i
+`sdkconfig.hw` primjenjuju samo kad `sdkconfig` nastaje, a `idf.py` popis tih
+datoteka pamti u direktoriju izgradnje. Izgradite li inačicu za pločicu u
+`build/`, program i dalje koristi simulator, bez ikakve poruke o tome, a ni
+povratak na QEMU više ne radi kako treba.
+
+Uz Docker na macOS-u i Windowsu kontejner ne vidi pločicu: prvu naredbu
+izvedite u kontejneru, a program upišite alatom `esptool` s računala, kako je
+opisano gore, ali iz direktorija `build-hw`
+(npr. `labs/lab3_bme280/starter/build-hw`), ne iz `build`.
+
 ### Logički analizator (LV3 i LV4)
 
 Na klupi su logički analizatori s čipom Cypress FX2 (osam kanala, do 24 MHz),
-a koriste se s besplatnim programom PulseView projekta sigrok. U emulatoru vam
-ne trebaju: snimke za LV3 dane su u `labs/lab3_bme280/captures`.
+a koriste se s programom PulseView (*PulseView: pregled signala*). U emulatoru
+vam ne trebaju: snimke za LV3 dane su u `labs/lab3_bme280/captures`.
 
-**Instalacija.**
+**Instalacija.** Uz PulseView analizator treba još:
 
-- **Linux (Debian, Ubuntu):** `sudo apt install pulseview sigrok-firmware-fx2lafw`,
+- **Linux (Debian, Ubuntu):** `sudo apt install sigrok-firmware-fx2lafw`,
   zatim analizator iskopčajte i ponovno priključite. Ako ga PulseView ne nađe
   ili javlja da nema pristup, nedostaju pravila udev. To su datoteke
   `contrib/60-libsigrok.rules` i `contrib/61-libsigrok-uaccess.rules` iz
@@ -874,10 +1082,8 @@ ne trebaju: snimke za LV3 dane su u `labs/lab3_bme280/captures`.
   sudo udevadm control --reload-rules
   sudo udevadm trigger
   ```
-- **Windows:** sa stranice <https://sigrok.org/wiki/Downloads> preuzmite
-  64-bitni instalacijski program PulseViewa. Program nije digitalno potpisan,
-  pa Windows pri pokretanju može prikazati upozorenje SmartScreen: *More info
-  → Run anyway*. Analizatoru treba upravljački program WinUSB, koji se
+- **macOS:** ništa dodatno.
+- **Windows:** analizatoru treba upravljački program WinUSB, koji se
   postavlja alatom Zadig (instalira se uz PulseView; u izborniku Start je
   *Zadig (PulseView)*): s priključenim analizatorom u Zadigu odaberite
   *Options → List All Devices*, s popisa odaberite analizator, desno *WinUSB* i
@@ -885,11 +1091,6 @@ ne trebaju: snimke za LV3 dane su u `labs/lab3_bme280/captures`.
   WinUSB uklanja port COM (vidi gore). Kod analizatora FX2 to ponekad treba
   ponoviti, jer se nakon što PulseView u njega upiše firmware javlja kao drugi
   uređaj. Postavka vrijedi samo za USB priključak u kojem je napravljena.
-- **macOS:** sa iste stranice preuzmite PulseView (`.dmg`) i aplikaciju
-  prevucite u *Applications*. To je inačica za procesore x86-64; na Macu s
-  čipom Apple izvodi se preko Rosette 2, koju macOS ponudi instalirati pri
-  prvom pokretanju. Ako macOS aplikaciju odbije otvoriti, prvi put je otvorite
-  desnim klikom → *Open*.
 
 **Spajanje.** Analizator samo sluša. Najprije spojite njegov GND s GND-om
 pločice, jer bez zajedničke mase snimka nema smisla. Zatim za LV3 (I2C)
@@ -922,14 +1123,6 @@ i faktor ispune svakog impulsa; iste vrijednosti možete očitati i pokazivačim
 (*cursors*). Za predaju priložite snimku zaslona ili spremljenu snimku
 (*File → Save*, datoteka `.sr`).
 
-**Pinovi iz emulatora (LV1 i LV2).** PulseView otvara i datoteke
-`build/gpio/gpioN.vcd` koje skripta `run_qemu.sh` stvara uz opciju
-`--gpio-vcd` (`run_qemu.ps1 -GpioVcd` na putu C): razinu svakog GPIO izlaza
-kroz vrijeme, zapisanu iz upisa programa u GPIO registre. Otvaraju se strelicom
-uz gumb *Open* (ikona mape na alatnoj traci) → *Import Value Change Dump data*:
-odaberite datoteku, a u prozoru s opcijama uvoza ostavite zadane vrijednosti i
-potvrdite s *OK*. Za to analizator nije potreban.
-
 ## Česti problemi
 
 - **`idf.py: command not found`** — na putu A naredba je upisana u terminal
@@ -941,6 +1134,19 @@ potvrdite s *OK*. Za to analizator nije potreban.
 - **`qemu-system-riscv32 not on PATH`** — na putu A kao u prethodnoj stavci:
   naredbu upišite u ljusku kontejnera. Na putu B nakon instalacije QEMU-a
   treba ponovno izvesti `. ~/esp-idf/export.sh`.
+- **`verify.sh: FAIL -- expected ESP-IDF v5.5, got: …`** (na putu C
+  `verify.ps1`) — aktivan je ESP-IDF druge inačice. Na putu B ESP-IDF nije
+  kloniran s `-b v5.5`: obrišite `~/esp-idf` i ponovite put B od kloniranja
+  ESP-IDF-a. Na putu C instalirajte *ESP-IDF Tools Installer* inačice v5.5
+  (korak 2).
+- **`verify.sh: FAIL -- this qemu-system-riscv32 has no esp32c3 machine`** — na
+  `PATH`-u je QEMU iz paketa sustava, a ne Espressifov: instalirajte Espressifov
+  (put B, korak 4) i ponovno aktivirajte okruženje.
+- **`verify.sh: FAIL -- build failed`, `QEMU run failed` ili `'Hello world!'
+  not found`** — poruka navodi zapisnik: `build/verify-hello_world.log` za
+  izgradnju (njegovih zadnjih 20 redaka skripta ispisuje i sama), odnosno
+  `build/verify-hello_world/qemu.log` za emulator. Pogledajte zadnje retke
+  zapisnika i s njima se javite nastavniku.
 - **`port is already allocated` pri pokretanju `docker-shell`** — port 8883
   zauzima posrednik LV6 pokrenut prije ljuske kontejnera. Zaustavite ga
   (Ctrl-C u njegovu terminalu), otvorite ljusku, pa posrednik pokrenite
